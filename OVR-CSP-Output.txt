@@ -8,7 +8,7 @@ conda activate bd
 
 
 (bd) tomato@tomatoPC:~/A-Brain-Computer-Interface-Control-System-Design-Based-on-Deep-Learning/CTNet$ python scripts/preprocessing_pipeline.py
-注释：执行预处理流水线，完成带通滤波、ICA 去伪迹、epoch 切片并保存结果
+注释：执行预处理流水线，完成带通滤波、ICA 去伪迹、epoch 切片(Slice)并保存结果
 Loaded recording: /home/tomato/A-Brain-Computer-Interface-Control-System-Design-Based-on-Deep-Learning/CTNet/BCICIV_2a_gdf/A01T.gdf
 Channels: 25 | sfreq: 250.0 Hz
 Duration: 2690.1 s
