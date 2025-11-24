@@ -50,6 +50,11 @@ scores_EOG-left: /home/tomato/A-Brain-Computer-Interface-Control-System-Design-B
 scores_EOG-central: /home/tomato/A-Brain-Computer-Interface-Control-System-Design-Based-on-Deep-Learning/CTNet/outputs/preprocessing/A01T/plots/ica_scores_EOG-central.png
 scores_EOG-right: /home/tomato/A-Brain-Computer-Interface-Control-System-Design-Based-on-Deep-Learning/CTNet/outputs/preprocessing/A01T/plots/ica_scores_EOG-right.png
 注释：预处理完整结束，以上文件用于复查 ICA 效果并为后续特征提取提供输入
+
+
+
+
+
 (bd) tomato@tomatoPC:~/A-Brain-Computer-Interface-Control-System-Design-Based-on-Deep-Learning/CTNet$ python scripts/ovr_csp_demo.py --subject A01T --components 6 --splits 5
 注释：执行 OVR-CSP + LDA 基线评估，输出交叉验证指标并保存 CSP 相关文件
 Loaded epochs from: /home/tomato/A-Brain-Computer-Interface-Control-System-Design-Based-on-Deep-Learning/CTNet/outputs/preprocessing/A01T/A01T_epochs-epo.fif
