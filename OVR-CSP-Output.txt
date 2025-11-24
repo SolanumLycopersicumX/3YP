@@ -56,7 +56,7 @@ scores_EOG-right: /home/tomato/A-Brain-Computer-Interface-Control-System-Design-
 
 
 (bd) tomato@tomatoPC:~/A-Brain-Computer-Interface-Control-System-Design-Based-on-Deep-Learning/CTNet$ python scripts/ovr_csp_demo.py --subject A01T --components 6 --splits 5
-注释：执行 OVR-CSP + LDA 基线评估(Assessment)，输出交叉验证指标并保存 CSP 相关文件
+注释：执行 OVR-CSP + LDA 基线评估(Assessment)，输出交叉验证指标(Matics)并保存 CSP 相关文件
 Loaded epochs from: /home/tomato/A-Brain-Computer-Interface-Control-System-Design-Based-on-Deep-Learning/CTNet/outputs/preprocessing/A01T/A01T_epochs-epo.fif
 Data shape: (288, 22, 1001) (trials, channels, samples)
 Event ID mapping: {'left_hand': 7, 'right_hand': 8, 'foot': 9, 'tongue': 10}
