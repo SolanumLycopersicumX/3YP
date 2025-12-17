@@ -1,0 +1,21 @@
+{
+  "timestamp": "2025-12-16 01:45:24",
+  "port": "/dev/ttyACM2",
+  "baud": 1000000,
+  "mids": {
+    "1": 2031,
+    "2": 2042,
+    "3": 2000,
+    "4": 2059,
+    "5": 2036,
+    "6": 1931
+  },
+  "names": {
+    "1": "shoulder_pan",
+    "2": "shoulder_lift",
+    "3": "elbow_flex",
+    "4": "wrist_flex",
+    "5": "wrist_roll",
+    "6": "gripper"
+  }
+}

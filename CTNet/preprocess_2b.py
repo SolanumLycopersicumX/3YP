@@ -52,7 +52,7 @@ for nSub in range(1, 10):
     # Output the shape of data_sub and labels_sub to ensure that it is consistent with the data in the mat file required by conformer.py
     print('B0%dT:'%nSub,data_sub.shape, labels_sub.shape)    
     # Save the data and labels to a .mat file
-    savemat('./mymat_withoutFilter/B0%dT.mat' % nSub, {'data': data_sub, 'label': labels_sub})
+    savemat('./mymat_raw/B0%dT.mat' % nSub, {'data': data_sub, 'label': labels_sub})
 
 
 # Read the test set and the corresponding labels into a mat file
@@ -84,4 +84,4 @@ for nSub in range(1, 10):
     
     print('B0%dE:'%nSub,data_sub.shape, labels_sub.shape)
     # Save the data and labels to a .mat file
-    savemat('./mymat_withoutFilter/B0%dE.mat' % nSub, {'data': data_sub, 'label': labels_sub})  
+    savemat('./mymat_raw/B0%dE.mat' % nSub, {'data': data_sub, 'label': labels_sub})  
