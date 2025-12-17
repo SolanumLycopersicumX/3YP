@@ -1,0 +1,269 @@
+\documentclass[twocolumn]{article}
+\usepackage{graphicx}
+\usepackage{amsmath, amssymb, amsfonts}
+\usepackage{geometry}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric, calc}
+\usepackage{caption}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{multirow}
+
+\geometry{a4paper, left=20mm, right=20mm, top=25mm, bottom=25mm}
+
+\title{\textbf{Draft Report: Integrating Brain-Computer Interfaces with Adaptive AI}}
+\author{Student ID: 11314389}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+
+Research in motor imagery Brain--Computer Interfaces (BCIs) has delivered impressive offline classification accuracies, yet two structural barriers block real-world deployment. First, electroencephalogram (EEG) signals are notoriously non-stationary. Any static decoder---whether handcrafted CSP+LDA or deep convolutional networks---tends to overfit the calibration session; as soon as the neural state drifts, accuracy collapses. Second, even when classification works, the pipeline remains open-loop: the predicted label is mapped directly to a rigid command, making it difficult to generate smooth, corrective actions for robotic end-effectors.
+
+Classical pipelines rely on OVR-CSP to maximise class variance ratios, followed by linear classifiers that assume a stationary feature manifold. Deep neural nets improve representation learning but still operate as one-shot recognisers, lacking the feedback needed to adapt to drift or to arbitrate between task goals and noisy sensory evidence. As a result, conventional decoders struggle to produce continuous, stable trajectories suitable for robot control.
+
+This project explores a new hypothesis: by reframing BCI decoding as a sequential decision-making problem, we can leverage reinforcement learning (RL) to close the loop. Specifically, we posit that (i) OVR-CSP features retain interpreable neurophysiology while serving as compact state descriptors; (ii) a hybrid 1D-CNN+LSTM Q-network can model temporal dependencies beyond single epochs; and (iii) policy optimisation enables the agent to react to feedback, compensating for signal drift and producing smoother control signals. Figure~\ref{fig:system_overview} sketches the resulting pipeline.
+
+\section{Methodology}
+
+This chapter documents the end-to-end system devised to translate raw EEG into robotic control commands. The current implementation contains three fully operational phases---data processing, feature engineering, and reinforcement-learning training---plus a planned execution phase for simulation and robot deployment.
+
+\subsection{Phase 1: Data Acquisition \& Preprocessing}
+
+\subsubsection{Dataset and Neurophysics}
+We adopt the BCI Competition IV-2a dataset \cite{jeong2020multimodal}. Motor imagery (MI) elicits event-related desynchronisation/synchronisation (ERD/ERS) in the Mu (8--13\,Hz) and Beta (13--30\,Hz) bands over the contralateral sensorimotor cortex \cite{hameed2025enhancing}. These modulations provide the electrophysiological signatures exploited downstream.
+
+\subsubsection{Spectral Filtering Strategy}
+MNE-Python implements a zero-phase FIR bandpass to retain the informative band:
+\begin{align}
+    x_{\text{band}}(t) &= \mathcal{F}^{-1}\{H(\omega)\mathcal{F}[x(t)]\}, \\
+    H(\omega) &=
+    \begin{cases}
+        1, & \omega\in[8,30]\text{ Hz},\\
+        0, & \text{otherwise.}
+    \end{cases}
+\end{align}
+The passband suppresses EOG-dominated low frequencies and EMG-rich high frequencies while retaining ERD/ERS dynamics.
+
+\subsubsection{Artifact Removal via ICA}
+Independent component analysis isolates ocular artefacts:
+\begin{equation}
+    X = AS,\qquad \hat{S}=WX.
+\end{equation}
+Components strongly correlated with dedicated EOG channels form the rejection set $\mathcal{I}_{\text{bad}}$, yielding cleaned signals
+\begin{equation}
+    \tilde{X}=A\tilde{S},\qquad \tilde{S}_{i}=0\ \text{if}\ i\in\mathcal{I}_{\text{bad}}.
+\end{equation}
+
+\subsubsection{Epoching and Output Artifacts}
+Cue-locked windowing produces tensors $X\in\mathbb{R}^{N\times C\times T}$. Each subject’s cleaned raw, ICA report, and epoch data are persisted in \texttt{.fif} format. Amplitudes remain on the physical scale; optional normalisation is reserved for future experiments.
+
+\begin{figure*}[t]
+    \centering
+\resizebox{0.7\textwidth}{!}{%
+    \begin{tikzpicture}[
+      node distance=11mm and 14mm,
+      block/.style={rectangle, rounded corners, draw, very thick,
+                    minimum width=36mm, minimum height=12mm,
+                    align=center, fill=gray!10, font=\Large},
+      arrow/.style={-Latex, thick},
+      every node/.style={font=\Large}
+    ]
+        \node[block] (raw) {EEG Raw};
+        \node[block, right=of raw] (prep) {Preprocessing\\(Filter + ICA + Epoch)};
+        \node[block, right=of prep] (csp) {CSP / LDA\\Features};
+        \node[block, below=of csp] (dqn) {RL Agent\\(DQN)};
+        \node[block, right=of dqn] (ctrl) {Control\\Commands};
+        \draw[arrow] (raw) -- (prep);
+        \draw[arrow] (prep) -- (csp);
+        \draw[arrow] (csp) -- (dqn);
+        \draw[arrow] (dqn) -- (ctrl);
+    \end{tikzpicture}}
+    \caption{Preprocessing-to-control flow used in the proposed system.}
+    \label{fig:pipeline_flow}
+\end{figure*}
+
+\begin{figure*}[t]
+    \centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}[
+      node distance=15mm and 18mm,
+      block/.style={rectangle, rounded corners, draw, very thick, fill=gray!10,
+                    minimum width=48mm, minimum height=14mm, align=center, font=\Large},
+      annot/.style={rectangle, draw, very thick, fill=yellow!20,
+                    inner sep=4mm, font=\Large, align=left},
+      arrow/.style={-Latex, thick},
+      every node/.style={font=\Large}
+    ]
+    \node[block] (input) {CSP Feature Stack\\$(B,L,N_{\text{CSP}})$};
+    \node[block, right=of input] (transpose1) {Transpose\\$(B,N_{\text{CSP}},L)$};
+    \node[block, right=of transpose1] (conv1) {Conv1D\\$N_{\text{CSP}}\rightarrow64$, $k{=}3$, ReLU};
+    \node[block, right=of conv1, xshift=-8mm] (conv2) {Conv1D\\$64\rightarrow64$, $k{=}3$, ReLU};
+    \node[block, below=of conv2, yshift=-3mm] (transpose2) {Transpose\\$(B,L,64)$};
+    \node[block, right=of transpose2, minimum width=40mm] (lstm) {LSTM (hidden=128)};
+    \node[block, right=of lstm] (select) {Last Hidden\\$(B,128)$};
+    \node[block, right=of select] (fc1) {FC $128\rightarrow128$\\ReLU};
+    \node[block, right=of fc1] (fc2) {Linear $128\rightarrow|\mathcal{A}|$};
+    \node[block, right=of fc2] (output) {Q-values\\(Action Policy)};
+
+    \draw[arrow] (input) -- node[above=6mm]{\Large OVR-CSP features} (transpose1);
+    \draw[arrow] (transpose1) -- node[above=6mm]{\Large Causal Conv} (conv1);
+    \draw[arrow] (conv1) -- node[above=6mm]{\Large Local Temporal Filters} (conv2);
+    \draw[arrow] (conv2) -- (transpose2);
+    \draw[arrow] (transpose2) -- (lstm);
+    \draw[arrow] (lstm) -- (select);
+    \draw[arrow] (select) -- (fc1);
+    \draw[arrow] (fc1) -- (fc2);
+    \draw[arrow] (fc2) -- node[above=6mm]{\Large Discrete Actions} (output);
+
+    \coordinate (tmA) at ($(lstm.south)+(0,-12mm)$);
+    \coordinate (tmB) at ($(tmA)+(-290mm,0)$);
+    \coordinate (tmC) at (tmB |- input.west);
+    \draw[<->, dashed] (lstm.south) -- (tmA) -- (tmB)
+        node[above, pos=0.5]{\Large temporal memory}
+        -- (tmC) -- (input.west);
+
+    \node[annot, above=9mm of input] (anno1) {Reuse interpretable\\CSP features as RL state};
+    \node[annot, below=12mm of input] (anno2) {1D Conv stack captures\\short-range sensorimotor dynamics};
+    \node[annot, above=11mm of lstm] (anno3) {LSTM retains temporal\\context $\Rightarrow$ mitigates EEG drift};
+    \node[annot, above=10mm of output] (anno4) {Policy head outputs\\robot control commands};
+    \node[annot, below=12mm of select, minimum width=56mm] (anno5) {Training loop with Replay Buffer\\and Target Network stabilises Q-learning};
+
+    \draw[arrow] (anno1.south) -- (input.north);
+    \draw[arrow] (anno2.north) -- (input.south);
+    \draw[arrow] (anno3.south) -- (lstm.north);
+    \draw[arrow] (anno4.south) -- (output.north);
+    \draw[arrow, dashed] (anno5.north) -- (select.south);
+    \end{tikzpicture}}
+    \caption{Overview of the proposed BCI control pipeline.}
+    \label{fig:system_overview}
+\end{figure*}
+
+\subsection{Phase 2: Feature Engineering \& Baseline}
+
+\subsubsection{One-vs-Rest CSP}
+For each class $k$, common spatial patterns solve
+\begin{equation}
+    \Sigma_k w=\lambda(\Sigma_k+\Sigma_{\neg k})w,\qquad
+    J(w) = \frac{w^\top \Sigma_k w}{w^\top \Sigma_{\neg k} w},
+\end{equation}
+producing filters $W$ and log-variance features $f_i$. The inverse matrix $P = W^{-1}$ supports topographic verification.
+
+\subsubsection{Baseline Hypothesis with LDA}
+CSP features feed an LDA classifier evaluated via stratified K-fold cross-validation. The resulting metrics, filters, and transformed features are exported (\texttt{csp\_features.npz}, \texttt{csp\_filters.npy}, \texttt{csp\_patterns.npy}, \texttt{csp\_metrics.json}), ensuring the RL module consumes identical representations.
+
+\subsection{Phase 3: RL Framework Definition}
+
+We reformulate control as an MDP \cite{nallani2024rleegnet}; Table~\ref{tab:mdp_spec} summarises the specification.
+
+\begin{table}[t]
+    \centering
+    \caption{\textbf{Specification of the MDP used for BCI control.}}
+    \label{tab:mdp_spec}
+    \renewcommand{\arraystretch}{1.18}
+    \begin{tabular}{@{}p{0.26\columnwidth} p{0.68\columnwidth}@{}}
+        \toprule
+        Component & Definition / Description \\
+        \midrule
+        State $s_t$ & Stack of the latest $L$ CSP feature vectors ($s_t \in \mathbb{R}^{L\times N_{\text{CSP}}}$), aligned with the replay buffer tensors. \\
+        Action $a_t$ & Discrete end-effector commands $\{\text{Left, Right, Up, Down}\}$. \\
+        Reward $r_t$ & Label-aligned signal $r_t \in \{+1,-\lambda\}$ used for current offline training; environment rewards will replace this during closed-loop deployment. \\
+        Transition $\mathcal{P}$ & Offline updates sample $(s_{t+1})$ from stored transitions; simulators/hardware will provide $s_{t+1}\sim\mathcal{P}(\cdot|s_t,a_t)$. \\
+        Discount $\gamma$ & Default $\gamma = 0.99$ balances short- and long-term objectives. \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsubsection{Function Approximation}
+The Q-function $Q(s,a;\theta)$ is implemented using the network detailed in Table~\ref{tab:net_arch}.
+
+% \begin{figure}[t]
+%     \centering
+%     \fbox{\begin{minipage}{0.95\columnwidth}
+%         \centering
+%         \vspace{1.0cm}\textbf{[Insert Compact Network Diagram Here]}\\
+%         \textit{1D-CNN + LSTM Q-network.}
+%         \vspace{1.0cm}
+%     \end{minipage}}
+%     \caption{Column-width illustration of the policy network.}
+%     \label{fig:network}
+% \end{figure}
+
+\begin{table}[t]
+    \centering
+    \caption{\textbf{Architecture details of the 1D-CNN+LSTM Q-network.}}
+    \label{tab:net_arch}
+    \setlength{\tabcolsep}{5pt}
+    \renewcommand{\arraystretch}{1.12}
+    \begin{tabular}{@{}p{0.22\columnwidth} p{0.48\columnwidth} p{0.25\columnwidth}@{}}
+        \toprule
+        Layer & Parameters & Output Shape \\
+        \midrule
+        Input & CSP feature stack & $(B, L, N_{\text{CSP}})$ \\
+        Conv1 & $N_{\text{CSP}}\!\rightarrow\!64$, $k=3$, $p=1$, ReLU & $(B, L, 64)$ \\
+        Conv2 & $64\!\rightarrow\!64$, $k=3$, $p=1$, ReLU & $(B, L, 64)$ \\
+        LSTM & hidden=128, layers=1 & $(B, L, 128)$ \\
+        FC & $128\rightarrow128$, ReLU & $(B, 128)$ \\
+        Output & $128\rightarrow|\mathcal{A}|$, Linear & $(B, 4)$ \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsubsection{Training Mechanism}
+Experience replay, a softly updated target network, and Huber loss
+\begin{equation}
+    L_\delta(y,Q) =
+    \begin{cases}
+        \tfrac{1}{2}(y-Q)^2, & |y-Q| \le \delta \\
+        \delta(|y-Q| - \tfrac{1}{2}\delta), & \text{otherwise}
+    \end{cases}
+\end{equation}
+stabilise training, with $y = r_t + \gamma \max_{a'} Q_{\text{target}}(s_{t+1},a';\theta^-)$.
+
+\subsection{Phase 4: Execution \& Evaluation (Planned)}
+
+Current outputs include classification accuracy, confusion matrices, and performance-gap visualisations against a CTNet baseline. Deployment to PyBullet/Gym and hardware is planned; Table~\ref{tab:eval_tiers} lists the intended robustness tiers.
+
+\begin{table}[t]
+    \centering
+    \caption{\textbf{Robustness evaluation scenarios (planned).}}
+    \label{tab:eval_tiers}
+    \renewcommand{\arraystretch}{1.12}
+    \begin{tabular}{@{}p{0.28\columnwidth} p{0.64\columnwidth}@{}}
+        \toprule
+        Tier & Evaluation Goal \\
+        \midrule
+        Baseline & Clean IV-2a data (current): establish performance ceiling and policy convergence. \\
+        Noisy & Additive white Gaussian noise, $\text{SNR}\in[5,15]$\,dB (planned): stress-test stability under degraded channels. \\
+        Artifact & Simulated eye-blink artefacts (planned): verify robustness of ICA preprocessing and the learned policy. \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+Control smoothness $S = \tfrac{1}{T-1}\sum_{t=2}^{T}\|a_t - a_{t-1}\|_2$, task success rate, and end-effector error will guide future reward shaping. Should $S$ remain high, an additional penalty $-\beta\|a_t - a_{t-1}\|_2$ will be integrated in the RL objective.
+
+\section*{Acknowledgements}
+
+This draft consolidates the current codebase and planned extensions for integrating BCI signal processing with reinforcement learning control.
+
+\begin{thebibliography}{9}
+\bibitem{hameed2025enhancing}
+I.~Hameed \emph{et al.}, ``Enhancing motor imagery EEG signal decoding through machine learning,'' \textit{Computers in Biology and Medicine}, 2025.
+
+\bibitem{prev_student2024}
+W.~Zhao \emph{et al.}, ``A Brain-Computer Interface Control System Design Based on Deep Learning,'' University of Manchester, 2024.
+
+\bibitem{nallani2024rleegnet}
+S.~Nallani and G.~Ramachandran, ``RLEEGNet: Integrating Brain-Computer Interfaces with Adaptive AI,'' \textit{arXiv:2402.09465}, 2024.
+
+\bibitem{shin2024mars}
+D.-H.~Shin \emph{et al.}, ``MARS: Multiagent reinforcement learning for spatial-spectral and temporal feature selection,'' \textit{IEEE Transactions on Systems, Man, and Cybernetics: Systems}, 2024.
+
+\bibitem{jeong2020multimodal}
+J.-H.~Jeong \emph{et al.}, ``Multimodal signal dataset for 11 intuitive movement tasks,'' \textit{GigaScience}, 2020.
+\end{thebibliography}
+
+\end{document}
