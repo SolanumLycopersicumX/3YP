@@ -1,0 +1,44 @@
+# CTNet 项目依赖包
+# Python 3.10
+
+# 深度学习框架
+torch>=1.13.1
+torchvision
+torchaudio
+
+# 数据处理
+numpy>=1.21.0
+pandas>=1.3.0
+scipy>=1.7.0
+
+# 张量操作
+einops>=0.6.0
+
+# 计算机视觉
+opencv-python>=4.5.0
+
+# 机器学习工具
+scikit-learn>=1.0.0
+
+# EEG 数据处理
+mne>=1.5.1
+
+# 模型可视化（可选）
+torchsummary>=1.5.1
+
+# Excel 文件处理（pandas 已包含，但确保版本）
+openpyxl>=3.0.0
+xlrd>=2.0.0
+
+# 可视化
+matplotlib>=3.5.0
+seaborn>=0.11.0
+
+# 强化学习环境（Gym 可视化演示）
+gymnasium>=1.0.0
+
+# 动画/GIF 保存（Matplotlib PillowWriter 依赖）
+pillow>=9.0.0
+
+# 3D 物理仿真（PyBullet）
+pybullet>=3.2.6

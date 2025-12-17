@@ -1,0 +1,47 @@
+# Python environments
+bd/
+bd_*/
+Braindecoder/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Data files (too large for GitHub)
+BCICIV_2a_gdf/
+BCICIV_2b_gdf/
+mymat_raw/*.mat
+true_labels/
+ica_comparison/
+
+# Model weights and outputs
+*.pth
+models/
+outputs/
+A_heads_*/
+B_heads_*/
+CTNet_*/
+archive/
+
+# IDE and system files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Distribution files
+dist/
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# Temporary files
+*.tmp
+temp.txt
+
+# Drivers cache
+drivers/__pycache__/
+torchsummary/__pycache__/
+scripts/__pycache__/
+

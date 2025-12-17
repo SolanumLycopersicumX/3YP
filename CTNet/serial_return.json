@@ -1,0 +1,24 @@
+{
+  "label": "return",
+  "timestamp": "2025-12-16 02:07:19",
+  "port": "/dev/ttyACM2",
+  "baud": 1000000,
+  "mids": {
+    "1": 2037,
+    "2": 832,
+    "3": 3080,
+    "4": 2894,
+    "5": 2033,
+    "6": 1424
+  },
+  "names": {
+    "1": "shoulder_pan",
+    "2": "shoulder_lift",
+    "3": "elbow_flex",
+    "4": "wrist_flex",
+    "5": "wrist_roll",
+    "6": "gripper"
+  },
+  "gripper_id": 6,
+  "gripper_closed_ticks": 1424
+}

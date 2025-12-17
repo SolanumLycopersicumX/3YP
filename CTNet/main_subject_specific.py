@@ -28,8 +28,15 @@ from utils import numberClassChannel
 import math
 import warnings
 warnings.filterwarnings("ignore")
-cudnn.benchmark = False
-cudnn.deterministic = True
+def _env_flag(name: str, default: bool) -> bool:
+    value = os.environ.get(name)
+    if value is None:
+        return default
+    return value.lower() in ("1", "true", "yes", "on")
+
+
+cudnn.benchmark = _env_flag('CTNET_CUDNN_BENCHMARK', False)
+cudnn.deterministic = _env_flag('CTNET_CUDNN_DETERMINISTIC', True)
 
 
 
@@ -312,9 +319,25 @@ class ExP():
         self.evaluate_mode = evaluate_mode
         self.validate_ratio = validate_ratio
 
-        self.Tensor = torch.cuda.FloatTensor
-        self.LongTensor = torch.cuda.LongTensor
-        self.criterion_cls = torch.nn.CrossEntropyLoss().cuda()
+        cpu_count = os.cpu_count() or 1
+        default_workers = max(1, min(4, cpu_count // 2)) if cpu_count > 1 else 0
+        self.num_workers = int(os.environ.get('CTNET_NUM_WORKERS', default_workers))
+        if self.num_workers < 0:
+            self.num_workers = 0
+        self.pin_memory = _env_flag('CTNET_PIN_MEMORY', True)
+        prefetch_factor_env = os.environ.get('CTNET_PREFETCH_FACTOR')
+        self.prefetch_factor = None
+        if prefetch_factor_env is not None:
+            try:
+                self.prefetch_factor = max(2, int(prefetch_factor_env))
+            except ValueError:
+                self.prefetch_factor = None
+
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+        self.Tensor = torch.cuda.FloatTensor if self.device.type == "cuda" else torch.FloatTensor
+        self.LongTensor = torch.cuda.LongTensor if self.device.type == "cuda" else torch.LongTensor
+        self.criterion_cls = torch.nn.CrossEntropyLoss().to(self.device)
 
         self.number_class, self.number_channel = numberClassChannel(self.dataset_type)
         self.model = EEGTransformer(
@@ -361,11 +384,26 @@ class ExP():
         aug_data = aug_data[aug_shuffle, :, :]
         aug_label = aug_label[aug_shuffle]
 
-        aug_data = torch.from_numpy(aug_data).cuda()
-        aug_data = aug_data.float()
-        aug_label = torch.from_numpy(aug_label-1).cuda()
-        aug_label = aug_label.long()
+        aug_data = torch.from_numpy(aug_data).to(device=self.device, dtype=torch.float32, non_blocking=self.pin_memory)
+        aug_label = torch.from_numpy(aug_label-1).to(device=self.device, dtype=torch.long, non_blocking=self.pin_memory)
         return aug_data, aug_label
+
+
+    def _make_dataloader(self, dataset, shuffle=False, batch_size=None):
+        if batch_size is None:
+            batch_size = self.batch_size
+        loader_kwargs = {
+            "dataset": dataset,
+            "batch_size": batch_size,
+            "shuffle": shuffle,
+            "num_workers": self.num_workers,
+            "pin_memory": self.pin_memory and self.device.type == "cuda",
+        }
+        if self.num_workers > 0:
+            loader_kwargs["persistent_workers"] = True
+            if self.prefetch_factor is not None:
+                loader_kwargs["prefetch_factor"] = self.prefetch_factor
+        return torch.utils.data.DataLoader(**loader_kwargs)
 
 
 
@@ -421,29 +459,27 @@ class ExP():
         # print("label size:", label.shape)
         # print("label size:", label)
         
-        img = torch.from_numpy(img)
-        label = torch.from_numpy(label - 1)
+        img = torch.from_numpy(img).float()
+        label = torch.from_numpy(label - 1).long()
         dataset = torch.utils.data.TensorDataset(img, label)
         
 
-        test_data = torch.from_numpy(test_data)
-        test_label = torch.from_numpy(test_label - 1)
+        test_data = torch.from_numpy(test_data).float()
+        test_label = torch.from_numpy(test_label - 1).long()
         test_dataset = torch.utils.data.TensorDataset(test_data, test_label)
-        self.test_dataloader = torch.utils.data.DataLoader(dataset=test_dataset, batch_size=self.batch_size, shuffle=False)
+        self.test_dataloader = self._make_dataloader(test_dataset, shuffle=False)
 
         # Optimizers
         self.optimizer = torch.optim.Adam(self.model.parameters(), lr=self.lr, betas=(self.b1, self.b2))
 
-        test_data = Variable(test_data.type(self.Tensor))
-        test_label = Variable(test_label.type(self.LongTensor))
         best_epoch = 0
         num = 0
         min_loss = 100
         # recording train_acc, train_loss, test_acc, test_loss
         result_process = []
+        self.dataloader = self._make_dataloader(dataset, shuffle=True)
         # Train the cnn model
         for e in range(self.n_epochs):
-            self.dataloader = torch.utils.data.DataLoader(dataset=dataset, batch_size=self.batch_size, shuffle=True)
             epoch_process = {}
             epoch_process['epoch'] = e
             # in_epoch = time.time()
@@ -461,12 +497,12 @@ class ExP():
                 train_data = img[:-number_validate]
                 train_label = label[:-number_validate]
                 
-                val_data_list.append(img[-number_validate:])       # correct 20250417
-                val_label_list.append(label[-number_validate:])    # correct 20250417
+                val_data_list.append(img[-number_validate:].clone())       # correct 20250417
+                val_label_list.append(label[-number_validate:].clone())    # correct 20250417
                 
                 # real train dataset
-                img = Variable(train_data.type(self.Tensor))
-                label = Variable(train_label.type(self.LongTensor))
+                img = Variable(train_data.to(self.device, dtype=torch.float32, non_blocking=self.pin_memory))
+                label = Variable(train_label.to(self.device, dtype=torch.long, non_blocking=self.pin_memory))
                 
                 # data augmentation
                 aug_data, aug_label = self.interaug(self.allData, self.allLabel)
@@ -492,18 +528,14 @@ class ExP():
             if (e + 1) % 1 == 0:
                 self.model.eval()
                 # validate model
-                val_data = torch.cat(val_data_list).cuda()
-                val_label = torch.cat(val_label_list).cuda()
-                val_data = val_data.type(self.Tensor)
-                val_label = val_label.type(self.LongTensor)            
-                
+                val_data = torch.cat(val_data_list)
+                val_label = torch.cat(val_label_list)
                 val_dataset = torch.utils.data.TensorDataset(val_data, val_label)
-                self.val_dataloader = torch.utils.data.DataLoader(dataset=val_dataset, batch_size=self.batch_size, shuffle=False)
+                self.val_dataloader = self._make_dataloader(val_dataset, shuffle=False)
                 outputs_list = []
                 with torch.no_grad():
                     for i, (img, _) in enumerate(self.val_dataloader):
-                        # val model
-                        img = img.type(self.Tensor).cuda()
+                        img = img.to(self.device, dtype=torch.float32, non_blocking=self.pin_memory)
                         _, Cls = self.model(img)
                         outputs_list.append(Cls)
                         del img, Cls
@@ -511,26 +543,29 @@ class ExP():
                     
                 Cls = torch.cat(outputs_list)
                 
-                val_loss = self.criterion_cls(Cls, val_label)
+                val_label_gpu = val_label.to(self.device, dtype=torch.long, non_blocking=self.pin_memory)
+                val_loss = self.criterion_cls(Cls, val_label_gpu)
                 val_pred = torch.max(Cls, 1)[1]
-                val_acc = float((val_pred == val_label).cpu().numpy().astype(int).sum()) / float(val_label.size(0))
+                val_acc = (val_pred == val_label_gpu).float().mean().item()
                 
                 epoch_process['val_acc'] = val_acc                
-                epoch_process['val_loss'] = val_loss.detach().cpu().numpy()  
+                epoch_process['val_loss'] = val_loss.detach().cpu().item()  
                 
                 train_pred = torch.max(outputs, 1)[1]
-                train_acc = float((train_pred == label).cpu().numpy().astype(int).sum()) / float(label.size(0))
+                train_acc = (train_pred == label).float().mean().item()
                 epoch_process['train_acc'] = train_acc
-                epoch_process['train_loss'] = loss.detach().cpu().numpy()
+                epoch_process['train_loss'] = loss.detach().cpu().item()
 
                 num = num + 1
 
                 # if min_loss>val_loss:                
-                if min_loss>val_loss:
-                    min_loss = val_loss
+                current_val_loss = epoch_process['val_loss']
+                if min_loss > current_val_loss:
+                    min_loss = current_val_loss
                     best_epoch = e
                     epoch_process['epoch'] = e
-                    torch.save(self.model, self.model_filename)
+                    # Save pure state_dict to avoid pickle class-path issues
+                    torch.save(self.model.state_dict(), self.model_filename)
                     print("{}_{} train_acc: {:.4f} train_loss: {:.6f}\tval_acc: {:.6f} val_loss: {:.7f}".format(self.nSub,
                                                                                            epoch_process['epoch'],
                                                                                            epoch_process['train_acc'],
@@ -543,34 +578,47 @@ class ExP():
             result_process.append(epoch_process)  
 
         
-            del label, val_data, val_label
+            del label
+            del val_data, val_label, val_label_gpu
+            val_data_list = []
+            val_label_list = []
             torch.cuda.empty_cache()
         
         # load model for test
         self.model.eval()
-        self.model = torch.load(self.model_filename).cuda()
+        # Load state_dict for evaluation
+        _ckpt = torch.load(self.model_filename, map_location=self.device)
+        if hasattr(_ckpt, 'state_dict') and callable(getattr(_ckpt, 'state_dict', None)):
+            _ckpt = _ckpt.state_dict()
+        self.model.load_state_dict(_ckpt)
+        self.model = self.model.to(self.device)
         outputs_list = []
+        test_targets_gpu = []
+        test_targets_cpu = []
         with torch.no_grad():
-            for i, (img, label) in enumerate(self.test_dataloader):
-                img_test = Variable(img.type(self.Tensor)).cuda()
-                # label_test = Variable(label.type(self.LongTensor))
+            for img, label in self.test_dataloader:
+                test_targets_cpu.append(label.clone())
+                label_gpu = label.to(self.device, dtype=torch.long, non_blocking=self.pin_memory)
+                img_test = img.to(self.device, dtype=torch.float32, non_blocking=self.pin_memory)
 
-                # test model
-                features, outputs = self.model(img_test)
-                val_pred = torch.max(outputs, 1)[1]
+                _, outputs = self.model(img_test)
                 outputs_list.append(outputs)
-        outputs = torch.cat(outputs_list) 
+                test_targets_gpu.append(label_gpu)
+
+        outputs = torch.cat(outputs_list)
+        test_targets_gpu = torch.cat(test_targets_gpu)
         y_pred = torch.max(outputs, 1)[1]
-        
-        
-        test_acc = float((y_pred == test_label).cpu().numpy().astype(int).sum()) / float(test_label.size(0))
+        test_acc = (y_pred == test_targets_gpu).float().mean().item()
+
+        test_label = torch.cat(test_targets_cpu)
+        y_pred_cpu = y_pred.cpu()
         
         print("epoch: ", best_epoch, '\tThe test accuracy is:', test_acc)
 
 
         df_process = pd.DataFrame(result_process)
 
-        return test_acc, test_label, y_pred, df_process, best_epoch
+        return test_acc, test_label, y_pred_cpu, df_process, best_epoch
         # writer.close()
         
 
@@ -609,7 +657,7 @@ def main(dirs,
     subjects_result = []
     best_epochs = []
     
-    for i in range(N_SUBJECT):      
+    for i in range(START_SUBJECT, END_SUBJECT):
         
         starttime = datetime.datetime.now()
         seed_n = np.random.randint(2024)
@@ -697,19 +745,24 @@ def main(dirs,
 
 if __name__ == "__main__":
     #----------------------------------------
-    DATA_DIR = r'../mymat_raw/'
-    EVALUATE_MODE = 'LOSO-No' # leaving one subject out subject-dependent  subject-indenpedent
+    DATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'mymat_raw') + os.sep
+    EVALUATE_MODE = os.environ.get('CTNET_EVALUATE_MODE', 'LOSO-No') # leaving one subject out subject-dependent  subject-indenpedent
 
-    N_SUBJECT = 9       # BCI 
-    N_AUG = 3           # data augmentation times for generating artificial training data set
-    N_SEG = 8           # segmentation times for S&R
+    N_SUBJECT = int(os.environ.get('CTNET_N_SUBJECT', 9))       # BCI 
+    N_AUG = int(os.environ.get('CTNET_N_AUG', 3))           # data augmentation times for generating artificial training data set
+    N_SEG = int(os.environ.get('CTNET_N_SEG', 8))           # segmentation times for S&R
 
-    EPOCHS = 1000
-    EMB_DIM = 16
-    HEADS = 2
-    DEPTH = 6
-    TYPE = 'A'
-    validate_ratio = 0.3 # split raw train dataset into real train dataset and validate dataset
+    EPOCHS = int(os.environ.get('CTNET_EPOCHS', 1000))
+    EMB_DIM = int(os.environ.get('CTNET_EMB_DIM', 16))
+    HEADS = int(os.environ.get('CTNET_HEADS', 2))
+    DEPTH = int(os.environ.get('CTNET_DEPTH', 6))
+    TYPE = os.environ.get('CTNET_TYPE', 'A')
+    validate_ratio = float(os.environ.get('CTNET_VALIDATE_RATIO', 0.3)) # split raw train dataset into real train dataset and validate dataset
+
+    START_SUBJECT = int(os.environ.get('CTNET_START_SUBJECT', 0))
+    END_SUBJECT = int(os.environ.get('CTNET_END_SUBJECT', N_SUBJECT))
+    START_SUBJECT = max(0, min(N_SUBJECT - 1, START_SUBJECT))
+    END_SUBJECT = max(START_SUBJECT + 1, min(N_SUBJECT, END_SUBJECT))
 
     EEGNet1_F1 = 8
     EEGNet1_KERNEL_SIZE=64
@@ -726,6 +779,9 @@ if __name__ == "__main__":
 
     number_class, number_channel = numberClassChannel(TYPE)
     RESULT_NAME = "{}_heads_{}_depth_{}".format(TYPE, HEADS, DEPTH)
+    run_tag = os.environ.get('CTNET_RUN_TAG', '').strip()
+    if run_tag:
+        RESULT_NAME = "{}_{}".format(RESULT_NAME, run_tag)
 
     sModel = EEGTransformer(
         heads=HEADS, 
