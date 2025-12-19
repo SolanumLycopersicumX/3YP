@@ -36,13 +36,43 @@ This chapter documents the end-to-end system devised to translate raw EEG into r
 \subsection{Phase 1: Data Acquisition \& Preprocessing}
 
 \subsubsection{Dataset Selection and Comparative Rationale}
-This project employs two complementary datasets from the BCI Competition IV suite to validate generalisation and robustness:
+This project employs two complementary datasets from the BCI Competition IV suite to validate generalisation and robustness. Table~\ref{tab:dataset_comparison} summarises their characteristics.
 
-\textbf{Dataset IV-2a} comprises 22-channel EEG from 9 subjects performing four-class motor imagery (left hand, right hand, feet, tongue). It serves as the primary benchmark due to its widespread adoption in MI-BCI literature, enabling direct comparison with state-of-the-art methods.
+\textbf{BCI Competition IV Dataset 2a (IV-2a)} comprises 22-channel EEG recorded at 250\,Hz from 9 subjects performing four-class motor imagery: left hand ($c_1$), right hand ($c_2$), both feet ($c_3$), and tongue ($c_4$). Each subject completed two sessions (training and evaluation) with 288 trials per session. The high-density electrode montage following the international 10-20 system provides rich spatial information, making it the \emph{de facto} benchmark for MI-BCI research.
 
-\textbf{Dataset IV-2b} provides 3-channel EEG (C3, Cz, C4) from 9 subjects performing binary left/right hand imagery across five sessions. Its reduced channel count and multi-session structure allow us to (i) evaluate robustness under limited spatial resolution, and (ii) assess cross-session generalisation---a critical requirement for practical deployment.
+\textbf{BCI Competition IV Dataset 2b (IV-2b)} provides 3-channel EEG (C3, Cz, C4) recorded at 250\,Hz from 9 subjects performing binary left/right hand imagery. Crucially, data spans five sessions per subject collected over different days, yielding substantial inter-session variability. The minimal electrode configuration ($C=3$ vs.\ $C=22$) tests whether the pipeline degrades gracefully under limited spatial resolution.
 
-By training and evaluating on both datasets, we test whether the proposed pipeline generalises across different electrode montages, class counts, and inter-session variability, rather than overfitting to a single experimental paradigm.
+\begin{table}[t]
+    \centering
+    \caption{\textbf{Comparison of the two benchmark datasets.}}
+    \label{tab:dataset_comparison}
+    \renewcommand{\arraystretch}{1.15}
+    \setlength{\tabcolsep}{4pt}
+    \begin{tabular}{@{}p{0.24\columnwidth} p{0.34\columnwidth} p{0.34\columnwidth}@{}}
+        \toprule
+        Property & IV-2a & IV-2b \\
+        \midrule
+        Channels $C$ & 22 (10-20 full) & 3 (C3, Cz, C4) \\
+        Classes $K$ & 4 (LH, RH, Feet, Tongue) & 2 (LH, RH) \\
+        Subjects & 9 & 9 \\
+        Sessions/subject & 2 & 5 \\
+        Trials/session & 288 & 120 \\
+        Sampling rate & 250\,Hz & 250\,Hz \\
+        EOG channels & 3 & 3 \\
+        \midrule
+        \textbf{Strengths} & Rich spatial info; 4-class control & Multi-session; minimal hardware \\
+        \textbf{Challenges} & High dimensionality & Limited spatial resolution \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\noindent\textbf{Rationale for Dual-Dataset Evaluation.}
+By training and evaluating on both datasets, we address three key questions:
+\begin{enumerate}
+    \item \textit{Spatial Generalisation}: Does the pipeline exploit high-density spatial patterns (IV-2a) yet remain functional with minimal electrodes (IV-2b)?
+    \item \textit{Class Scalability}: Can the RL policy scale from binary ($K=2$) to multi-class ($K=4$) control without architectural changes?
+    \item \textit{Temporal Robustness}: Does the model maintain accuracy across sessions recorded on different days (IV-2b), simulating real-world deployment drift?
+\end{enumerate}
 
 \subsubsection{Neurophysiological Basis}
 Motor imagery (MI) elicits event-related desynchronisation/synchronisation (ERD/ERS) in the Mu (8--13\,Hz) and Beta (13--30\,Hz) bands over the contralateral sensorimotor cortex \cite{hameed2025enhancing}. These modulations provide the electrophysiological signatures exploited downstream.
@@ -180,7 +210,43 @@ The resulting metrics, filters, and transformed features are exported (\texttt{c
 
 \subsection{Phase 3: RL Framework Definition}
 
-We reformulate control as an MDP \cite{nallani2024rleegnet}; Table~\ref{tab:mdp_spec} summarises the specification.
+\subsubsection{Motivation: Why Reinforcement Learning over Supervised CNNs?}
+Conventional BCI decoders---including the CTNet baseline---treat motor imagery classification as a \emph{one-shot supervised learning} problem: given epoch $x_t$, predict label $\hat{y}_t = f_\theta(x_t)$. While achieving high offline accuracy, this paradigm has fundamental limitations for closed-loop control:
+
+\begin{enumerate}
+    \item \textbf{No Temporal Context}: CNNs process each epoch independently, ignoring the sequential nature of control. In contrast, RL maintains a policy $\pi(a|s)$ conditioned on state histories, enabling the agent to ``remember'' recent predictions and smooth erratic outputs.
+    
+    \item \textbf{No Error Correction}: Supervised classifiers produce point estimates with no mechanism for feedback. RL agents receive rewards $r_t$ from the environment, allowing them to adapt behaviour based on task success/failure signals.
+    
+    \item \textbf{Non-Stationarity Handling}: EEG signals drift over time due to fatigue, electrode impedance changes, and cognitive load. While CNNs overfit to the calibration distribution, RL's exploration-exploitation framework ($\varepsilon$-greedy) and continual learning capabilities offer natural robustness to distribution shift \cite{nallani2024rleegnet}.
+    
+    \item \textbf{Reward Shaping Flexibility}: The RL objective $\max_\pi \mathbb{E}[\sum_t \gamma^t r_t]$ can incorporate arbitrary task-specific rewards (e.g., smoothness penalties, target proximity bonuses), whereas supervised loss functions are limited to label matching.
+\end{enumerate}
+
+Table~\ref{tab:cnn_vs_rl} summarises the key differences. We hypothesise that the RL formulation will yield smoother control trajectories and better generalisation to noisy/drifted signals, even if single-epoch classification accuracy is comparable.
+
+\begin{table}[t]
+    \centering
+    \caption{\textbf{Comparison of CNN-based classification vs.\ RL-based control.}}
+    \label{tab:cnn_vs_rl}
+    \renewcommand{\arraystretch}{1.12}
+    \setlength{\tabcolsep}{4pt}
+    \begin{tabular}{@{}p{0.28\columnwidth} p{0.32\columnwidth} p{0.32\columnwidth}@{}}
+        \toprule
+        Aspect & CNN (CTNet) & RL (DQN) \\
+        \midrule
+        Paradigm & Supervised & Sequential decision \\
+        Input & Single epoch $x_t$ & State history $s_t$ \\
+        Output & Class $\hat{y}_t$ & Action $a_t$ \\
+        Feedback & None (open-loop) & Reward $r_t$ (closed-loop) \\
+        Temporal modelling & None & LSTM memory \\
+        Adaptability & Static after training & Online adaptation possible \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsubsection{MDP Formulation}
+We reformulate BCI control as a Markov Decision Process (MDP) \cite{nallani2024rleegnet}; Table~\ref{tab:mdp_spec} summarises the specification.
 
 \begin{table}[t]
     \centering
@@ -236,7 +302,21 @@ The Q-function $Q(s,a;\theta)$ is implemented using the network detailed in Tabl
 \end{table}
 
 \subsubsection{Training Mechanism}
-Experience replay, a softly updated target network, and Huber loss
+Training stability is ensured through three mechanisms:
+
+\textbf{Experience Replay.} Transitions $(s_t, a_t, r_t, s_{t+1})$ are stored in a circular buffer $\mathcal{D}$ of capacity $|\mathcal{D}| = 10^5$. Mini-batches of size $B=64$ are sampled uniformly:
+\begin{equation}
+    \{(s_i, a_i, r_i, s_{i+1})\}_{i=1}^B \sim \text{Uniform}(\mathcal{D})
+\end{equation}
+This breaks temporal correlations and improves sample efficiency.
+
+\textbf{Target Network.} A separate target network $Q_{\text{target}}(s,a;\theta^-)$ is updated via soft synchronisation:
+\begin{equation}
+    \theta^- \leftarrow \tau\theta + (1-\tau)\theta^-, \quad \tau = 0.005
+\end{equation}
+This prevents oscillatory divergence caused by the moving target problem.
+
+\textbf{Huber Loss.} The robust Huber loss function with threshold $\delta=1.0$ clips large gradients:
 \begin{equation}
     L_\delta(y,Q) =
     \begin{cases}
@@ -244,7 +324,13 @@ Experience replay, a softly updated target network, and Huber loss
         \delta(|y-Q| - \tfrac{1}{2}\delta), & \text{otherwise}
     \end{cases}
 \end{equation}
-stabilise training, with $y = r_t + \gamma \max_{a'} Q_{\text{target}}(s_{t+1},a';\theta^-)$.
+where the TD target is $y = r_t + \gamma \max_{a'} Q_{\text{target}}(s_{t+1},a';\theta^-)$ with discount $\gamma=0.99$.
+
+\textbf{Exploration Schedule.} The $\varepsilon$-greedy policy decays exponentially:
+\begin{equation}
+    \varepsilon_t = \varepsilon_{\text{end}} + (\varepsilon_{\text{start}} - \varepsilon_{\text{end}}) \cdot e^{-t/\tau_\varepsilon}
+\end{equation}
+with $\varepsilon_{\text{start}}=1.0$, $\varepsilon_{\text{end}}=0.01$, and decay constant $\tau_\varepsilon = 1000$ steps.
 
 \subsubsection{RL Evaluation Protocol}
 To prevent overfitting and ensure fair comparison, the RL agent follows a trial-based data split:
@@ -259,31 +345,76 @@ This split mirrors the baseline classifier protocol, enabling direct accuracy co
 This phase bridges the trained RL policy to physical/simulated robotic systems and establishes a comprehensive evaluation framework.
 
 \subsubsection{Robot Interface Architecture}
-The discrete actions output by the Q-network are translated into velocity commands for robotic control via a modular interface layer:
+The interface layer $\Phi$ transforms the discrete policy output $a_t \in \mathcal{A}$ into continuous actuator commands $u_t \in \mathcal{C}$. We define the directional mapping vector $\mathbf{v}: \mathcal{A} \rightarrow \mathbb{R}^2$ as:
+\begin{equation}
+    \mathbf{v}(a_t) = \begin{cases}
+        [-1, 0]^\top & \text{if } a_t = 0\ (\text{Left}) \\
+        [+1, 0]^\top & \text{if } a_t = 1\ (\text{Right}) \\
+        [0, +1]^\top & \text{if } a_t = 2\ (\text{Up}) \\
+        [0, -1]^\top & \text{if } a_t = 3\ (\text{Down})
+    \end{cases}
+\end{equation}
 
-\begin{itemize}
-    \item \textbf{Simulation (PyBullet/Gym)}: Actions are mapped to end-effector velocity vectors and sent directly to the PyBullet physics engine API. The environment returns updated joint states and task-relevant observations.
-    \item \textbf{Hardware (SO-101 Arm)}: A serial communication driver (\texttt{so101\_serial.py}) transmits action commands over USB at 115200 baud. Each discrete action $\{$Left, Right, Up, Down$\}$ is converted to a target joint configuration, interpolated over 50\,ms to ensure smooth motion.
-\end{itemize}
+\noindent\textbf{Simulation Backend (PyBullet).}
+The simulation environment (implemented in \texttt{gym\_control.py}) operates in the Cartesian task space. The target end-effector position $\mathbf{p}_{t+1} \in \mathbb{R}^3$ is updated via a zero-order hold mechanism:
+\begin{equation}
+    \mathbf{p}_{t+1} = \mathbf{p}_t + \delta \cdot \begin{bmatrix} 0 \\ \mathbf{v}(a_t) \end{bmatrix}, \quad \text{s.t. } \mathbf{p}_{t+1} \in \Omega_{\text{work}}
+\end{equation}
+where $\delta = 0.03$\,m is the step size. The physics engine computes the joint configuration $\mathbf{q}$ via numerical inverse kinematics (IK):
+\begin{equation}
+    \mathbf{q}_{t+1} = \text{argmin}_{\mathbf{q}} \| \text{FK}(\mathbf{q}) - \mathbf{p}_{t+1} \|^2 + \lambda \|\mathbf{q} - \mathbf{q}_{\text{rest}}\|^2
+\end{equation}
+simulating actuator dynamics at 240\,Hz.
+
+\noindent\textbf{Hardware Backend (SO-101 Arm).}
+The physical interface (implemented in \texttt{phy\_control.py}) bypasses IK solvers to minimise latency, operating directly in the joint space $\mathcal{Q} \subset \mathbb{R}^6$. We map task-space actions to specific orthogonal joints---shoulder pan ($\theta_1$) and elbow flex ($\theta_3$):
+\begin{align}
+    \theta_{1}[t+1] &= \theta_{1}[t] + \Delta\theta \cdot v_x(a_t) \\
+    \theta_{3}[t+1] &= \theta_{3}[t] + \Delta\theta \cdot v_y(a_t)
+\end{align}
+where $\Delta\theta \approx 0.05$\,rad. Commands are transmitted via a high-speed serial bus (1\,Mbps) using the Dynamixel protocol. To ensure smooth motion on the hardware, the driver implements a temporal interpolation function $G(t)$, generating a trapezoidal velocity profile over a window $w=300$\,ms to bridge discrete updates $\theta[t] \to \theta[t+1]$, thereby preventing mechanical jerk.
 
 Figure~\ref{fig:pipeline_flow} illustrates the complete preprocessing-to-control flow, with the RL Agent outputting commands consumed by either simulation or hardware backends.
+
+\subsubsection{Reward Function Design}
+For offline policy learning, the reward signal is derived from label matching. Given ground-truth label $y_t$ and predicted action $a_t$, the reward is:
+\begin{equation}
+    r_t = \begin{cases}
+        +1 & \text{if } a_t = y_t \\
+        -\lambda & \text{otherwise}
+    \end{cases}, \quad \lambda = 0.1
+\end{equation}
+
+For closed-loop control with environment feedback, a more sophisticated reward function incorporates task progress and smoothness:
+\begin{equation}
+    r_t = \alpha \cdot \underbrace{(\|\mathbf{p}_t - \mathbf{g}\|_2 - \|\mathbf{p}_{t+1} - \mathbf{g}\|_2)}_{\text{distance reduction}} - \beta \cdot \underbrace{\|a_t - a_{t-1}\|_2}_{\text{jitter penalty}} + \gamma \cdot \underbrace{\mathbb{1}[\mathbf{p}_{t+1} \in \Omega_{\text{goal}}]}_{\text{goal bonus}}
+\end{equation}
+where $\mathbf{g}$ is the goal position, $\Omega_{\text{goal}}$ is the goal region, and $(\alpha, \beta, \gamma) = (1.0, 0.1, 10.0)$ are reward shaping coefficients.
 
 \subsubsection{Evaluation Metrics: Classification vs.\ Control}
 We distinguish two orthogonal performance dimensions:
 
 \textbf{(A) Intent Classification Accuracy} measures how well the system recognises the user's motor imagery intention:
 \begin{itemize}
-    \item Per-class accuracy, macro-averaged precision/recall
-    \item Confusion matrix (aggregated across subjects)
-    \item Cohen's Kappa coefficient for chance-corrected agreement
+    \item \textit{Per-class accuracy}: $\text{Acc}_k = \text{TP}_k / (\text{TP}_k + \text{FN}_k)$
+    \item \textit{Macro-averaged F1}: $\bar{F}_1 = \frac{1}{K}\sum_{k=1}^K \frac{2 \cdot P_k \cdot R_k}{P_k + R_k}$
+    \item \textit{Confusion matrix}: $C_{ij} = |\{n : \hat{y}_n = i \land y_n = j\}|$
+    \item \textit{Cohen's Kappa}: Chance-corrected agreement coefficient:
+    \begin{equation}
+        \kappa = \frac{p_o - p_e}{1 - p_e}, \quad p_o = \frac{\sum_i C_{ii}}{N}, \quad p_e = \sum_k \frac{n_{k\cdot} \cdot n_{\cdot k}}{N^2}
+    \end{equation}
 \end{itemize}
 
 \textbf{(B) Control Performance} measures how effectively recognised intentions translate to successful task execution:
 \begin{itemize}
-    \item \textit{Task Success Rate}: Percentage of trials where the end-effector reaches the target zone within the time limit.
-    \item \textit{Control Smoothness}: $S = \tfrac{1}{T-1}\sum_{t=2}^{T}\|a_t - a_{t-1}\|_2$; lower values indicate fewer abrupt direction changes.
-    \item \textit{End-Effector Error}: Euclidean distance between final position and target at trial termination.
-    \item \textit{Path Efficiency}: Ratio of optimal path length to actual trajectory length.
+    \item \textit{Task Success Rate}: $\text{TSR} = \frac{|\{n : \mathbf{p}_T^{(n)} \in \Omega_{\text{goal}}\}|}{N_{\text{trials}}}$
+    \item \textit{Control Smoothness}: Measures action consistency:
+    \begin{equation}
+        S = \frac{1}{T-1}\sum_{t=2}^{T}\|a_t - a_{t-1}\|_2
+    \end{equation}
+    Lower values indicate fewer abrupt direction changes.
+    \item \textit{End-Effector Error}: $e_{\text{ee}} = \|\mathbf{p}_T - \mathbf{g}\|_2$ at trial termination.
+    \item \textit{Path Efficiency}: $\eta = \frac{\|\mathbf{p}_0 - \mathbf{g}\|_2}{\sum_{t=0}^{T-1} \|\mathbf{p}_{t+1} - \mathbf{p}_t\|_2}$; values close to 1.0 indicate near-optimal trajectories.
 \end{itemize}
 
 \subsubsection{Robustness Tiers}
