@@ -240,7 +240,7 @@ def run_rl_control_episode(
     
     total_reward = 0
     steps = 0
-    positions = [env.position.copy()]
+    positions = [np.array([env._y, env._z])]  # 使用内部属性
     actions = []
     
     # 随机选择一个 EEG 预测作为当前意图
@@ -260,7 +260,7 @@ def run_rl_control_episode(
         
         total_reward += reward
         steps += 1
-        positions.append(env.position.copy())
+        positions.append(np.array([env._y, env._z]))
         actions.append(action)
         
         state = next_state

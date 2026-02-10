@@ -119,6 +119,10 @@ class ReplayBuffer:
             self.dones[idxs_t],
         )
         return batch
+    
+    def __len__(self) -> int:
+        """返回当前缓冲区中的样本数量。"""
+        return self.size
 
 
 def epsilon_greedy_action(q_values: torch.Tensor, epsilon: float) -> int:
