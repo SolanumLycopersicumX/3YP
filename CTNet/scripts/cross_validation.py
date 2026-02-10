@@ -376,6 +376,11 @@ def main():
     X = np.concatenate([X_train, X_test], axis=0)
     y = np.concatenate([y_train, y_test], axis=0).reshape(-1)
     
+    # 标签从 1 开始，转换为从 0 开始 (CrossEntropyLoss 要求)
+    if y.min() == 1:
+        y = y - 1
+        print(f"Labels converted from 1-based to 0-based: {np.unique(y)}")
+    
     n_classes, n_channels = number_class_channel(args.dataset)
     seq_len = X.shape[-1]
     state_dim = n_channels
