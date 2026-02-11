@@ -2,13 +2,16 @@
 """
 三数据集 RL 控制测试
 
-对 IV-2a, IV-2b, GigaScience 三个数据集进行 RL 控制测试
+对 IV-2a, IV-2b, PhysioNet 三个数据集进行 RL 控制测试
 
 流程:
-1. 用 CTNet 进行 EEG 分类
-2. 将分类结果作为 RL Agent 的输入
-3. RL Agent 控制 2D 环境中的机械臂
-4. 评估控制性能 (到达率、轨迹平滑度等)
+1. 训练简化版 EEG 分类器 (SimpleEEGClassifier)
+2. 评估分类准确率
+3. 训练 RL Agent (Transformer DQN)
+4. 运行控制测试，评估到达率、轨迹平滑度
+
+用法:
+    python rl_control_test.py --datasets IV-2a IV-2b PhysioNet --subjects 1 2 3
 
 创建时间: 2026-02-10
 """
