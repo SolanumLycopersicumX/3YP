@@ -76,18 +76,14 @@ DATASETS = {
         random_baseline=0.50,
         action_mapping={0: 'left', 1: 'right'}
     ),
-    'GigaScience': DatasetConfig(
-        name='GigaScience (Jeong 2020)',
-        type_code='G',
+    'PhysioNet': DatasetConfig(
+        name='PhysioNet EEGMMIDB',
+        type_code='P',
         n_channels=64,
-        n_classes=11,
-        n_subjects=25,
-        random_baseline=1/11,
-        action_mapping={
-            0: 'supination', 1: 'pronation', 2: 'wrist_ext', 3: 'wrist_flex',
-            4: 'finger_ext', 5: 'fist', 6: 'lateral_grasp', 7: 'palmar_grasp',
-            8: 'elbow_flex', 9: 'elbow_ext', 10: 'rest'
-        }
+        n_classes=2,  # 左手 vs 右手
+        n_subjects=109,
+        random_baseline=0.50,
+        action_mapping={0: 'left', 1: 'right'}
     ),
 }
 
@@ -145,7 +141,12 @@ def train_classifier(
     
     # 准备数据
     X = torch.tensor(X_train, dtype=torch.float32)
-    y = torch.tensor(y_train.flatten() - 1, dtype=torch.long)  # 标签从 0 开始
+    y_flat = y_train.flatten()
+    # 自动检测标签范围：如果最小值是 1，则减 1
+    if y_flat.min() >= 1:
+        y = torch.tensor(y_flat - 1, dtype=torch.long)
+    else:
+        y = torch.tensor(y_flat, dtype=torch.long)
     
     # 归一化
     mean, std = X.mean(), X.std()
@@ -185,7 +186,11 @@ def evaluate_classifier(
     """评估分类器并返回预测结果"""
     
     X = torch.tensor(X_test, dtype=torch.float32)
-    y = torch.tensor(y_test.flatten() - 1, dtype=torch.long)
+    y_flat = y_test.flatten()
+    if y_flat.min() >= 1:
+        y = torch.tensor(y_flat - 1, dtype=torch.long)
+    else:
+        y = torch.tensor(y_flat, dtype=torch.long)
     
     # 使用训练集的归一化参数
     mean, std = X.mean(), X.std()
@@ -492,11 +497,31 @@ def run_three_dataset_comparison(
                     X_train, y_train, X_test, y_test = load_data_evaluate(
                         str(data_dir) + "/", config.type_code, subject, "subject-dependent"
                     )
-                else:
-                    from scripts.gigascience_loader import load_gigascience_evaluate
-                    X_train, y_train, X_test, y_test = load_gigascience_evaluate(
-                        data_dir, subject, "subject-dependent"
+                elif config.type_code == 'P':
+                    # PhysioNet 数据
+                    from scripts.physionet_loader import load_subject_local, preprocess_data
+                    from sklearn.model_selection import train_test_split
+                    
+                    physionet_dir = Path(__file__).parent.parent / "physionet_raw"
+                    if not physionet_dir.exists():
+                        physionet_dir = data_dir / "physionet_raw"
+                    runs = [4, 8, 12]  # 左右手想象任务
+                    data, labels = load_subject_local(subject, physionet_dir, runs)
+                    
+                    # 只保留左右手标签，排除休息
+                    mask = labels > 0
+                    data = data[mask]
+                    labels = labels[mask]
+                    
+                    # 滤波
+                    data = preprocess_data(data, l_freq=8.0, h_freq=30.0)
+                    
+                    # 划分训练/测试集
+                    X_train, X_test, y_train, y_test = train_test_split(
+                        data, labels, test_size=0.2, stratify=labels, random_state=42
                     )
+                else:
+                    raise ValueError(f"未知的数据集类型: {config.type_code}")
                 
                 # 运行测试
                 result = run_rl_control_test(
@@ -585,7 +610,7 @@ def visualize_rl_comparison(results: Dict, output_path: Path):
 # ============================================================================
 
 def parse_args():
-    p = argparse.ArgumentParser(description="三数据集 RL 控制测试")
+    p = argparse.ArgumentParser(description="多数据集 RL 控制测试")
     
     p.add_argument("--data-dir", type=Path, default=Path("./mymat_raw/"))
     p.add_argument("--output-dir", type=Path, default=Path("./outputs/rl_control_test/"))
@@ -594,6 +619,10 @@ def parse_args():
     p.add_argument("--device", type=str, default="cuda")
     p.add_argument("--subjects", type=int, nargs="+", default=[1, 2, 3],
                    help="每个数据集测试的被试")
+    p.add_argument("--datasets", type=str, nargs="+", 
+                   default=["IV-2a", "IV-2b", "PhysioNet"],
+                   choices=["IV-2a", "IV-2b", "PhysioNet"],
+                   help="要测试的数据集")
     
     return p.parse_args()
 
@@ -602,18 +631,16 @@ def main():
     args = parse_args()
     
     print("="*60)
-    print("三数据集 RL 控制测试")
+    print("多数据集 RL 控制测试")
     print("="*60)
     print(f"数据目录: {args.data_dir}")
+    print(f"数据集: {args.datasets}")
+    print(f"被试: {args.subjects}")
     print(f"RL 模型: {args.model}")
     print(f"设备: {args.device}")
     print("="*60)
     
-    subjects_config = {
-        'IV-2a': args.subjects,
-        'IV-2b': args.subjects,
-        # 'GigaScience': args.subjects,  # 暂时禁用，需要先下载数据
-    }
+    subjects_config = {ds: args.subjects for ds in args.datasets}
     
     results = run_three_dataset_comparison(
         data_dir=args.data_dir,
