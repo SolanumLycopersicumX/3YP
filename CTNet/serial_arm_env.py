@@ -1,6 +1,6 @@
 import math
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict, Optional, Tuple
 
 import numpy as np
@@ -24,7 +24,7 @@ class SerialConfig:
     move_time_ms: Optional[int] = 250  # 位置模式到达时间（更平滑）
     step_time_scale: float = 2.0       # 每步移动时间缩放（>1 更慢，抖动更少）
     # 标定映射（ID与限位）
-    mapping: So101Map = So101Map.default()
+    mapping: So101Map = field(default_factory=So101Map.default)
 
 
 class SerialArmEnv:

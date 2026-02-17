@@ -198,8 +198,9 @@ def train_and_test(
     batch_size: int = 32,
     lr: float = 1e-3,
     device: str = 'cuda',
+    patience: int = 30,  # 早停耐心值
 ):
-    """训练模型并测试"""
+    """训练模型并测试（带早停）"""
     
     device = torch.device(device if torch.cuda.is_available() else 'cpu')
     
@@ -222,11 +223,13 @@ def train_and_test(
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=1e-4)
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs)
     
-    # 训练
+    # 训练（带早停）
     best_acc = 0
+    best_epoch = 0
     best_weights = None
     train_accs = []
     test_accs = []
+    no_improve_count = 0  # 连续无改善的 epoch 数
     
     for epoch in range(epochs):
         train_loss, train_acc = train_epoch(model, train_loader, criterion, optimizer, device)
@@ -236,18 +239,32 @@ def train_and_test(
         train_accs.append(train_acc)
         test_accs.append(test_acc)
         
+        # 检查是否改善
         if test_acc > best_acc:
             best_acc = test_acc
+            best_epoch = epoch + 1
             best_weights = model.state_dict().copy()
+            no_improve_count = 0  # 重置计数
+        else:
+            no_improve_count += 1
         
         if (epoch + 1) % 20 == 0:
-            print(f"  Epoch {epoch+1:3d}: Train {train_acc:.2%}, Test {test_acc:.2%}")
+            print(f"  Epoch {epoch+1:3d}: Train {train_acc:.2%}, Test {test_acc:.2%} (best: {best_acc:.2%} @ ep{best_epoch})")
+        
+        # 早停检查
+        if no_improve_count >= patience:
+            print(f"  ⏹ 早停: 连续 {patience} 个 epoch 无改善")
+            print(f"    最佳: Epoch {best_epoch}, 准确率 {best_acc:.2%}")
+            break
     
     # 加载最佳权重
     model.load_state_dict(best_weights)
     _, final_acc, preds, labels = evaluate(model, test_loader, criterion, device)
     
-    return final_acc, preds, labels, train_accs, test_accs
+    # 使用记录的最佳准确率（避免重新评估的微小波动）
+    print(f"  ★ 最佳模型: Epoch {best_epoch}, 准确率 {best_acc:.2%}")
+    
+    return model, best_acc, preds, labels, train_accs, test_accs
 
 
 # ============================================================================
@@ -348,6 +365,12 @@ def parse_args():
                    help="设备")
     p.add_argument("--output-dir", type=Path, default=Path("./outputs/physionet_ctnet/"),
                    help="输出目录")
+    p.add_argument("--joint", action="store_true",
+                   help="联合训练模式：合并所有被试数据训练单一模型")
+    p.add_argument("--batch-size", type=int, default=32,
+                   help="批量大小")
+    p.add_argument("--patience", type=int, default=30,
+                   help="早停耐心值：连续多少 epoch 无改善后停止 (默认: 30)")
     
     return p.parse_args()
 
@@ -363,7 +386,85 @@ def main():
     print(f"  数据目录: {args.data_dir}")
     print(f"  训练轮数: {args.epochs}")
     print(f"  设备: {args.device}")
+    print(f"  联合训练: {args.joint}")
     
+    # ============== 联合训练模式 ==============
+    if args.joint:
+        print(f"\n{'='*50}")
+        print(f"联合训练模式: 合并 {len(args.subjects)} 个被试")
+        print('='*50)
+        
+        # 加载所有被试数据
+        print("加载数据...")
+        all_data, all_labels = load_physionet_data(
+            args.subjects, args.data_dir,
+            task='left_right', imagine_only=True
+        )
+        
+        # 预处理 (滤波)
+        print("预处理...")
+        all_data = preprocess_data(all_data, l_freq=8.0, h_freq=30.0)
+        
+        # 标准化
+        all_data = (all_data - all_data.mean(axis=2, keepdims=True)) / (all_data.std(axis=2, keepdims=True) + 1e-8)
+        
+        print(f"  数据形状: {all_data.shape}")
+        print(f"  标签分布: Left={np.sum(all_labels==0)}, Right={np.sum(all_labels==1)}")
+        
+        # 划分训练/测试集
+        X_train, X_test, y_train, y_test = train_test_split(
+            all_data, all_labels, test_size=0.2, stratify=all_labels, random_state=42
+        )
+        
+        print(f"  训练集: {len(y_train)}, 测试集: {len(y_test)}")
+        
+        # 训练
+        print(f"\n训练 {args.epochs} 轮 (早停: patience={args.patience})...")
+        model, acc, preds, true_labels, train_accs, test_accs = train_and_test(
+            X_train, y_train, X_test, y_test,
+            n_channels=all_data.shape[1],
+            n_times=all_data.shape[2],
+            n_classes=2,
+            epochs=args.epochs,
+            batch_size=args.batch_size,
+            device=args.device,
+            patience=args.patience,
+        )
+        
+        print(f"\n  ✓ 最终准确率: {acc:.2%}")
+        
+        # 保存联合模型
+        model_save_path = args.output_dir / "physionet_ctnet_joint.pth"
+        args.output_dir.mkdir(parents=True, exist_ok=True)
+        torch.save({
+            'model_state_dict': model.state_dict(),
+            'n_channels': all_data.shape[1],
+            'n_times': all_data.shape[2],
+            'n_classes': 2,
+            'accuracy': acc,
+            'subjects': args.subjects,
+        }, model_save_path)
+        print(f"  ✓ 联合模型已保存: {model_save_path}")
+        
+        # 可视化训练曲线
+        fig, ax = plt.subplots(1, 1, figsize=(8, 5))
+        ax.plot(train_accs, label='Train')
+        ax.plot(test_accs, label='Test')
+        ax.set_xlabel('Epoch')
+        ax.set_ylabel('Accuracy')
+        ax.set_title(f'Joint Training ({len(args.subjects)} subjects) - Final: {acc:.2%}')
+        ax.legend()
+        ax.grid(True, alpha=0.3)
+        plt.tight_layout()
+        plt.savefig(args.output_dir / 'physionet_joint_training.png', dpi=150)
+        plt.close()
+        
+        print(f"\n✅ 联合训练完成!")
+        print(f"   准确率: {acc:.2%}")
+        print(f"   模型: {model_save_path}")
+        return
+    
+    # ============== 分被试训练模式 ==============
     # 存储结果
     results = {}
     
@@ -401,17 +502,30 @@ def main():
         print(f"  训练集: {len(y_train)}, 测试集: {len(y_test)}")
         
         # 训练
-        print(f"\n训练 {args.epochs} 轮...")
-        acc, preds, true_labels, train_accs, test_accs = train_and_test(
+        print(f"\n训练 {args.epochs} 轮 (早停: patience={args.patience})...")
+        model, acc, preds, true_labels, train_accs, test_accs = train_and_test(
             X_train, y_train, X_test, y_test,
             n_channels=data.shape[1],
             n_times=data.shape[2],
             n_classes=2,
             epochs=args.epochs,
             device=args.device,
+            patience=args.patience,
         )
         
         print(f"\n  ✓ 最终准确率: {acc:.2%}")
+        
+        # ★ 保存模型
+        model_save_path = args.output_dir / f"physionet_ctnet_S{subject:03d}.pth"
+        args.output_dir.mkdir(parents=True, exist_ok=True)
+        torch.save({
+            'model_state_dict': model.state_dict(),
+            'n_channels': data.shape[1],
+            'n_times': data.shape[2],
+            'n_classes': 2,
+            'accuracy': acc,
+        }, model_save_path)
+        print(f"  ✓ 模型已保存: {model_save_path}")
         
         results[subject] = {
             'accuracy': acc,
@@ -419,6 +533,7 @@ def main():
             'labels': true_labels,
             'train_accs': train_accs,
             'test_accs': test_accs,
+            'model_path': str(model_save_path),
         }
     
     # 汇总结果

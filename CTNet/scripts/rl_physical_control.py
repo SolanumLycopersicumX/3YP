@@ -36,6 +36,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import matplotlib.pyplot as plt
 
 # 项目路径设置
 _HERE = Path(__file__).resolve().parent
@@ -183,7 +184,77 @@ class RLPhysicalEnv:
 # EEG 分类器
 # ============================================================================
 
-def load_eeg_classifier(dataset_type: str, subject_id: int, device: torch.device):
+class SimpleEEGClassifier(nn.Module):
+    """简单的 EEG 分类器（用于快速测试）"""
+    def __init__(self, n_channels: int, n_timepoints: int, n_classes: int):
+        super().__init__()
+        self.conv1 = nn.Conv2d(1, 16, (1, 25), padding=(0, 12))
+        self.bn1 = nn.BatchNorm2d(16)
+        self.conv2 = nn.Conv2d(16, 32, (n_channels, 1))
+        self.bn2 = nn.BatchNorm2d(32)
+        self.pool = nn.AdaptiveAvgPool2d((1, 10))
+        self.fc = nn.Linear(32 * 10, n_classes)
+        
+    def forward(self, x):
+        x = F.elu(self.bn1(self.conv1(x)))
+        x = F.elu(self.bn2(self.conv2(x)))
+        x = self.pool(x)
+        x = x.view(x.size(0), -1)
+        return self.fc(x)
+
+
+class SimpleCTNet(nn.Module):
+    """简化版 CTNet 用于 PhysioNet 数据（与 test_physionet_ctnet.py 中一致）"""
+    
+    def __init__(self, n_channels: int, n_times: int, n_classes: int):
+        super().__init__()
+        
+        # 时间卷积
+        self.conv1 = nn.Sequential(
+            nn.Conv2d(1, 40, (1, 25), padding=(0, 12)),
+            nn.BatchNorm2d(40),
+        )
+        
+        # 空间卷积
+        self.conv2 = nn.Sequential(
+            nn.Conv2d(40, 40, (n_channels, 1)),
+            nn.BatchNorm2d(40),
+            nn.ELU(),
+            nn.AvgPool2d((1, 75), stride=(1, 15)),
+            nn.Dropout(0.5),
+        )
+        
+        # 时间卷积 2
+        self.conv3 = nn.Sequential(
+            nn.Conv2d(40, 40, (1, 15), padding=(0, 7)),
+            nn.BatchNorm2d(40),
+            nn.ELU(),
+            nn.AvgPool2d((1, 8), stride=(1, 8)),
+            nn.Dropout(0.5),
+        )
+        
+        # 计算展平后的大小
+        with torch.no_grad():
+            x = torch.zeros(1, 1, n_channels, n_times)
+            x = self.conv1(x)
+            x = self.conv2(x)
+            x = self.conv3(x)
+            flatten_size = x.numel()
+        
+        self.fc = nn.Linear(flatten_size, n_classes)
+    
+    def forward(self, x):
+        # x: (batch, channels, times)
+        x = x.unsqueeze(1)  # (batch, 1, channels, times)
+        x = self.conv1(x)
+        x = self.conv2(x)
+        x = self.conv3(x)
+        x = x.flatten(1)
+        x = self.fc(x)
+        return x
+
+
+def load_eeg_classifier(dataset_type: str, subject_id: int, device: torch.device, n_timepoints: int = 1000):
     """加载 CTNet EEG 分类器"""
     from CTNet_model import (
         EEGTransformer,
@@ -201,9 +272,41 @@ def load_eeg_classifier(dataset_type: str, subject_id: int, device: torch.device
     # 数据集配置
     if dataset_type == "A":
         n_classes, n_channels = 4, 22
-    else:
+    elif dataset_type == "B":
         n_classes, n_channels = 2, 3
+    else:  # PhysioNet
+        n_classes, n_channels = 2, 64
     
+    # PhysioNet: 使用 SimpleCTNet（与 test_physionet_ctnet.py 一致）
+    if dataset_type == "P":
+        print("[CTNet] PhysioNet 使用 SimpleCTNet")
+        # 优先加载联合模型，否则加载单被试模型
+        joint_model_path = _ROOT / "outputs" / "physionet_ctnet" / "physionet_ctnet_joint.pth"
+        subject_model_path = _ROOT / "outputs" / "physionet_ctnet" / f"physionet_ctnet_S{subject_id:03d}.pth"
+        
+        if joint_model_path.exists():
+            model_path = joint_model_path
+            print(f"[CTNet] 加载联合模型: {model_path}")
+        elif subject_model_path.exists():
+            model_path = subject_model_path
+            print(f"[CTNet] 加载单被试模型: {model_path}")
+        else:
+            print(f"[CTNet] 警告: 未找到预训练模型")
+            print("[CTNet] 使用随机初始化的 SimpleCTNet (n_times=721)")
+            model = SimpleCTNet(n_channels, 721, n_classes).to(device)
+            return model
+        
+        checkpoint = torch.load(model_path, map_location=device, weights_only=False)
+        # 获取模型配置
+        n_ch = checkpoint.get('n_channels', 64)
+        n_times = checkpoint.get('n_times', 721)
+        n_cls = checkpoint.get('n_classes', 2)
+        model = SimpleCTNet(n_ch, n_times, n_cls).to(device)
+        model.load_state_dict(checkpoint['model_state_dict'])
+        print(f"[CTNet] 模型加载成功 (acc={checkpoint.get('accuracy', 0):.2%})")
+        return model
+    
+    # BCI Competition: 使用 CTNet
     model = EEGTransformer(
         heads=2,
         emb_size=16,
@@ -440,6 +543,11 @@ def run_rl_physical_control(
             "steps": int(info["steps"]),
             "final_distance": float(info["distance"]),
             "total_reward": float(total_reward),
+            # 轨迹数据用于 Position vs Time 图
+            "target_y": float(target_y),
+            "target_z": float(target_z),
+            "trajectory": [(float(y), float(z)) for y, z in trajectory],
+            "actions": [int(a) for a in actions_taken],
         }
         results.append(result)
         
@@ -470,6 +578,112 @@ def run_rl_physical_control(
 
 
 # ============================================================================
+# Position vs Time 可视化
+# ============================================================================
+
+def visualize_position_vs_time(
+    results: List[Dict],
+    output_dir: Path,
+    dataset_name: str = "Physical Control",
+    filename: str = "position_vs_time.png"
+):
+    """
+    可视化 Position vs Time 图
+    
+    展示：
+    - 目标位置（蓝色虚线）
+    - 实际位置（红色实线）
+    - 位置误差（橙色区域）
+    """
+    if not results:
+        print("警告：没有结果数据用于可视化")
+        return
+    
+    # 选择前 3 个有代表性的 trial（左、右、到达/未到达）
+    sample_trials = []
+    for r in results:
+        if len(sample_trials) < 3 and r.get('trajectory'):
+            sample_trials.append(r)
+    
+    if not sample_trials:
+        print("警告：没有轨迹数据用于 Position vs Time 图")
+        return
+    
+    n_trials = len(sample_trials)
+    fig, axes = plt.subplots(n_trials, 3, figsize=(15, 4 * n_trials))
+    
+    if n_trials == 1:
+        axes = axes.reshape(1, -1)
+    
+    action_names = ["left", "right", "up", "down"]
+    
+    for idx, trial_data in enumerate(sample_trials):
+        trajectory = trial_data['trajectory']
+        target_y = trial_data['target_y']
+        target_z = trial_data['target_z']
+        
+        time_steps = list(range(len(trajectory)))
+        actual_y = [p[0] for p in trajectory]
+        actual_z = [p[1] for p in trajectory]
+        target_y_list = [target_y] * len(trajectory)
+        target_z_list = [target_z] * len(trajectory)
+        
+        # 计算误差
+        errors = [np.sqrt((ay - target_y)**2 + (az - target_z)**2) 
+                  for ay, az in trajectory]
+        
+        trial_num = trial_data['trial']
+        intent = action_names[trial_data['pred_intent']]
+        status = "✓" if trial_data['reached'] else "✗"
+        
+        # --- 子图 1: Y 位置 (左右) ---
+        ax1 = axes[idx, 0]
+        ax1.plot(time_steps, target_y_list, 'b--', linewidth=2, label='Target Y', alpha=0.8)
+        ax1.plot(time_steps, actual_y, 'r-', linewidth=2, label='Actual Y', alpha=0.8)
+        ax1.fill_between(time_steps, target_y_list, actual_y, alpha=0.3, color='orange')
+        ax1.set_xlabel('Time Step')
+        ax1.set_ylabel('Y Position')
+        ax1.set_title(f'Trial {trial_num} ({intent}) {status} - Y Position', fontweight='bold')
+        ax1.legend(loc='upper right')
+        ax1.grid(True, alpha=0.3)
+        ax1.axhline(y=0, color='gray', linestyle='-', alpha=0.3)
+        
+        # --- 子图 2: Z 位置 (上下) ---
+        ax2 = axes[idx, 1]
+        ax2.plot(time_steps, target_z_list, 'b--', linewidth=2, label='Target Z', alpha=0.8)
+        ax2.plot(time_steps, actual_z, 'r-', linewidth=2, label='Actual Z', alpha=0.8)
+        ax2.fill_between(time_steps, target_z_list, actual_z, alpha=0.3, color='orange')
+        ax2.set_xlabel('Time Step')
+        ax2.set_ylabel('Z Position')
+        ax2.set_title(f'Trial {trial_num} ({intent}) {status} - Z Position', fontweight='bold')
+        ax2.legend(loc='upper right')
+        ax2.grid(True, alpha=0.3)
+        ax2.axhline(y=0, color='gray', linestyle='-', alpha=0.3)
+        
+        # --- 子图 3: 距离误差 ---
+        ax3 = axes[idx, 2]
+        ax3.plot(time_steps, errors, 'g-', linewidth=2, label='Distance Error')
+        ax3.axhline(y=0.15, color='r', linestyle='--', alpha=0.7, label='Target Radius')
+        ax3.fill_between(time_steps, 0, errors, alpha=0.3, color='green')
+        ax3.set_xlabel('Time Step')
+        ax3.set_ylabel('Distance to Target')
+        ax3.set_title(f'Trial {trial_num} - Error Convergence', fontweight='bold')
+        ax3.legend(loc='upper right')
+        ax3.grid(True, alpha=0.3)
+        ax3.set_ylim(bottom=0)
+    
+    plt.suptitle(f'{dataset_name} - Position vs Time', fontsize=14, fontweight='bold', y=1.02)
+    plt.tight_layout()
+    
+    output_dir.mkdir(parents=True, exist_ok=True)
+    save_path = output_dir / filename
+    plt.savefig(save_path, dpi=150, bbox_inches='tight')
+    plt.close()
+    
+    print(f"Position vs Time 图已保存: {save_path}")
+
+
+# ============================================================================
 # 主程序
 # ============================================================================
 
@@ -482,14 +696,29 @@ def parse_args():
     
     # 数据
     p.add_argument("--subject", type=int, default=1)
-    p.add_argument("--dataset", choices=["A", "B"], default="A")
+    p.add_argument("--dataset", choices=["A", "B", "P"], default="A",
+                   help="A=IV-2a(4类), B=IV-2b(2类), P=PhysioNet(2类)")
     p.add_argument("--data-dir", type=Path, default=Path("./mymat_raw/"))
+    p.add_argument("--physionet-mat", type=Path, default=Path("./physionet_raw/physionet_3sub.mat"),
+                   help="PhysioNet 数据文件路径")
     
     # 控制
     p.add_argument("--num-trials", type=int, default=10)
     p.add_argument("--action-delay", type=float, default=0.3, help="动作间延时（秒）")
     p.add_argument("--max-steps", type=int, default=30, help="每个 trial 最大步数")
     p.add_argument("--target-radius", type=float, default=0.15, help="到达判定半径")
+    
+    # 平滑控制参数 (新增)
+    p.add_argument("--smoothness", choices=["low", "medium", "high"], default="medium",
+                   help="平滑度: low=快速, medium=平衡, high=慢速平滑")
+    p.add_argument("--move-time-ms", type=int, default=None,
+                   help="每步运动时间 (ms), 覆盖预设")
+    p.add_argument("--step-rad", type=float, default=None,
+                   help="每步弧度, 覆盖预设 (推荐: 0.08-0.15)")
+    p.add_argument("--soft-limit", type=float, default=0.10,
+                   help="软限位边距 (0.0-0.3)")
+    p.add_argument("--use-smooth-env", action="store_true",
+                   help="使用优化版平滑环境 (SerialArmEnvV2)")
     
     # 模型
     p.add_argument("--rl-model", choices=["dqn", "transformer", "light_transformer"], 
@@ -522,28 +751,62 @@ def main():
     
     if args.dataset == "A":
         n_classes, n_channels = 4, 22
-    else:
+    elif args.dataset == "B":
         n_classes, n_channels = 2, 3
+    else:  # PhysioNet
+        n_classes, n_channels = 2, 64
     
     # 加载测试数据
-    test_path = args.data_dir / f"{args.dataset}{args.subject:02d}E.mat"
-    if not test_path.exists():
-        test_path = args.data_dir / f"{args.dataset}{args.subject:02d}T.mat"
-    
-    data_mat = loadmat(test_path)
-    eeg_data = data_mat["data"]
-    eeg_labels = data_mat["label"].flatten()
+    if args.dataset == "P":
+        # PhysioNet 数据
+        print(f"[Data] 加载 PhysioNet 数据: {args.physionet_mat}")
+        data_mat = loadmat(str(args.physionet_mat))
+        eeg_data = data_mat["data"]
+        eeg_labels = data_mat["label"].flatten()
+        subject_ids = data_mat["subject_id"].flatten()
+        
+        # 筛选特定被试的数据
+        mask = subject_ids == args.subject
+        if mask.sum() == 0:
+            print(f"[警告] 被试 {args.subject} 不存在，使用所有数据")
+        else:
+            eeg_data = eeg_data[mask]
+            eeg_labels = eeg_labels[mask]
+            print(f"[Data] 筛选被试 {args.subject}: {len(eeg_data)} trials")
+        
+        # PhysioNet 标签: 0=rest, 1=left, 2=right; 过滤掉休息，转为 0-based
+        mask_valid = eeg_labels > 0  # 只保留 left(1) 和 right(2)
+        eeg_data = eeg_data[mask_valid]
+        eeg_labels = eeg_labels[mask_valid] - 1  # 1,2 -> 0,1
+        print(f"[Data] 过滤后: {len(eeg_data)} trials (L:{(eeg_labels==0).sum()}, R:{(eeg_labels==1).sum()})")
+    else:
+        # BCI Competition 数据
+        test_path = args.data_dir / f"{args.dataset}{args.subject:02d}E.mat"
+        if not test_path.exists():
+            test_path = args.data_dir / f"{args.dataset}{args.subject:02d}T.mat"
+        
+        data_mat = loadmat(test_path)
+        eeg_data = data_mat["data"]
+        eeg_labels = data_mat["label"].flatten()
     
     # 预处理
-    eeg_data = np.expand_dims(eeg_data, axis=1)  # [N, 1, C, T]
-    mean, std = eeg_data.mean(), eeg_data.std() or 1.0
-    eeg_data = (eeg_data - mean) / std
-    eeg_tensor = torch.tensor(eeg_data, dtype=torch.float32)
+    if args.dataset == "P":
+        # PhysioNet: SimpleCTNet 期望 [N, C, T]，内部会 unsqueeze
+        mean, std = eeg_data.mean(), eeg_data.std() or 1.0
+        eeg_data = (eeg_data - mean) / std
+        eeg_tensor = torch.tensor(eeg_data, dtype=torch.float32)  # [N, C, T]
+    else:
+        # BCI Competition: CTNet 期望 [N, 1, C, T]
+        eeg_data = np.expand_dims(eeg_data, axis=1)  # [N, 1, C, T]
+        mean, std = eeg_data.mean(), eeg_data.std() or 1.0
+        eeg_data = (eeg_data - mean) / std
+        eeg_tensor = torch.tensor(eeg_data, dtype=torch.float32)
     
-    print(f"[Data] 加载 {len(eeg_tensor)} 个 EEG trials")
+    print(f"[Data] 加载 {len(eeg_tensor)} 个 EEG trials, shape={eeg_tensor.shape}")
     
     # 加载模型
-    eeg_classifier = load_eeg_classifier(args.dataset, args.subject, device)
+    n_timepoints = eeg_tensor.shape[-1]  # 时间点数
+    eeg_classifier = load_eeg_classifier(args.dataset, args.subject, device, n_timepoints=n_timepoints)
     
     state_dim = 5  # [y, z, target_y, target_z, distance]
     action_dim = 4
@@ -578,6 +841,11 @@ def main():
         with open(output_dir / "results.json", "w") as f:
             json.dump(results, f, indent=2)
         print(f"\n结果已保存: {output_dir / 'results.json'}")
+        
+        # 生成 Position vs Time 图
+        dataset_names = {"A": "BCI IV-2a", "B": "BCI IV-2b", "P": "PhysioNet"}
+        dataset_label = dataset_names.get(args.dataset, args.dataset)
+        visualize_position_vs_time(results, output_dir, dataset_name=dataset_label)
         
     finally:
         # 结束归位
