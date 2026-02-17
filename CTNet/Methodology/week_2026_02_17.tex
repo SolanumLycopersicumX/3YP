@@ -1,12 +1,12 @@
 \documentclass[aspectratio=169, 11pt]{beamer}
 
-% ========== 主题设置 ==========
+% ========== Theme Settings ==========
 \usetheme{Madrid}
 \usecolortheme{whale}
 \setbeamertemplate{navigation symbols}{}
 \setbeamertemplate{footline}[frame number]
 
-% ========== 包 ==========
+% ========== Packages ==========
 \usepackage{tikz}
 \usetikzlibrary{arrows.meta, positioning, shapes.geometric, calc, fit, backgrounds}
 \usepackage{booktabs}
@@ -14,13 +14,13 @@
 \usepackage{amsmath}
 \usepackage{xcolor}
 
-% ========== 颜色定义 ==========
-\definecolor{highlight}{RGB}{255, 100, 100}      % 当前工作模块（红色高亮）
-\definecolor{completed}{RGB}{100, 200, 100}      % 已完成模块（绿色）
-\definecolor{pending}{RGB}{200, 200, 200}        % 待完成模块（灰色）
-\definecolor{inprogress}{RGB}{100, 150, 255}     % 进行中（蓝色）
+% ========== Color Definitions ==========
+\definecolor{highlight}{RGB}{255, 100, 100}      % Current focus (red)
+\definecolor{completed}{RGB}{100, 200, 100}      % Completed (green)
+\definecolor{pending}{RGB}{200, 200, 200}        % Pending (gray)
+\definecolor{inprogress}{RGB}{100, 150, 255}     % In progress (blue)
 
-% ========== 标题信息 ==========
+% ========== Title Information ==========
 \title{Weekly Progress Report}
 \subtitle{Week 7: PhysioNet Joint Model \& Physical Arm Control}
 \author{Student ID: 11314389}
@@ -29,12 +29,12 @@
 
 \begin{document}
 
-% ========== 标题页 ==========
+% ========== Title Page ==========
 \begin{frame}
     \titlepage
 \end{frame}
 
-% ========== Slide 1: 系统架构图 ==========
+% ========== Slide 1: System Architecture ==========
 \begin{frame}{System Overview: Current Focus}
     \begin{center}
     \resizebox{0.95\textwidth}{!}{%
@@ -45,7 +45,7 @@
                       align=center, font=\small},
         arrow/.style={-Latex, thick},
     ]
-        % 所有模块已完成！
+        % All modules completed!
         \node[block, fill=completed!40] (raw) {EEG Raw\\Data};
         \node[block, fill=completed!40, right=of raw] (prep) {Preprocessing\\(Filter + ICA)};
         \node[block, fill=completed!40, right=of prep] (csp) {CTNet/CSP\\Classifier};
@@ -59,7 +59,7 @@
         \draw[arrow] (dqn) -- (ctrl);
         \draw[arrow] (ctrl) -- (robot);
         
-        % 反馈回路
+        % Feedback loop
         \draw[arrow, dashed] (robot.south) -- ++(0,-8mm) -| (dqn.south);
         
     \end{tikzpicture}}
@@ -81,35 +81,35 @@
     \end{columns}
 \end{frame}
 
-% ========== Slide 2: 本周目标 ==========
+% ========== Slide 2: This Week's Objectives ==========
 \begin{frame}{This Week's Objectives}
     \begin{block}{Goals Achieved}
         \begin{enumerate}
-            \item \checkmark\ PhysioNet 联合模型训练 (20 被试, 73.89\% 准确率)
-            \item \checkmark\ 添加早停机制防止过拟合
-            \item \checkmark\ PhysioNet 数据集 RL 物理机械臂控制
-            \item \checkmark\ Position vs Time 可视化添加到物理控制
+            \item \checkmark\ PhysioNet joint model training (20 subjects, 73.89\% accuracy)
+            \item \checkmark\ Added early stopping mechanism to prevent overfitting
+            \item \checkmark\ PhysioNet dataset RL physical arm control
+            \item \checkmark\ Position vs Time visualization added to physical control
         \end{enumerate}
     \end{block}
     
     \vspace{5mm}
     
     \begin{alertblock}{Key Achievement}
-        PhysioNet 数据集现可用于 RL 物理机械臂控制，达到 \textbf{100\% 控制到达率}！
+        PhysioNet dataset now works for RL physical arm control, achieving \textbf{100\% control reach rate}!
     \end{alertblock}
 \end{frame}
 
-% ========== Slide 3: PhysioNet 联合训练 ==========
+% ========== Slide 3: PhysioNet Joint Training ==========
 \begin{frame}{PhysioNet Joint Model Training}
     \begin{columns}[T]
         \column{0.5\textwidth}
         \textbf{Training Configuration:}
         \begin{itemize}
-            \item 被试数量: 20
-            \item 样本总数: $\sim$900 trials
-            \item 网络架构: SimpleCTNet
-            \item 早停 patience: 30 epochs
-            \item 最佳 epoch: 26
+            \item Number of subjects: 20
+            \item Total samples: $\sim$900 trials
+            \item Network architecture: SimpleCTNet
+            \item Early stopping patience: 30 epochs
+            \item Best epoch: 26
         \end{itemize}
         
         \vspace{3mm}
@@ -178,31 +178,31 @@
             \item Smooth velocity control prevents jitter
         \end{itemize}
         
-        % Position vs Time 图可以在这里插入
+        % Position vs Time figure can be inserted here
         % \includegraphics[width=\textwidth]{../outputs/rl_physical_control/position_vs_time.png}
     \end{columns}
 \end{frame}
 
-% ========== Slide 5: 挑战与解决 ==========
+% ========== Slide 5: Challenges & Solutions ==========
 \begin{frame}{Challenges \& Solutions}
     \begin{columns}[T]
         \column{0.5\textwidth}
         \begin{alertblock}{Challenges Encountered}
             \begin{itemize}
-                \item 跨被试变异性导致过拟合
-                \item 训练准确率 100\% vs 测试 67\%
-                \item 机械臂运动抖动/限位碰撞
-                \item 归位速度过慢
+                \item Cross-subject variability causes overfitting
+                \item Train accuracy 100\% vs Test 67\%
+                \item Arm motion jitter / limit collisions
+                \item Slow return-to-home speed
             \end{itemize}
         \end{alertblock}
         
         \column{0.5\textwidth}
         \begin{exampleblock}{Solutions Applied}
             \begin{itemize}
-                \item 添加早停机制 (patience=30)
-                \item 保存最佳权重而非最终权重
-                \item SerialArmEnvV2: 速度控制 + 软限位
-                \item 快速归位脚本 (velocity=500)
+                \item Added early stopping (patience=30)
+                \item Save best weights, not final weights
+                \item SerialArmEnvV2: velocity control + soft limits
+                \item Fast home/return script (velocity=500)
             \end{itemize}
         \end{exampleblock}
     \end{columns}
@@ -252,14 +252,14 @@
     \end{columns}
 \end{frame}
 
-% ========== Slide 7: 下周计划 ==========
+% ========== Slide 7: Next Week's Plan ==========
 \begin{frame}{Next Week's Plan}
     \begin{block}{Planned Tasks}
         \begin{enumerate}
-            \item 扩展动作空间：加入张开/闭合、移动等动作
-            \item 下载更多被试 (50+) 进一步提升模型
-            \item 跨被试泛化实验 (Leave-One-Subject-Out)
-            \item 完善 Methodology 文档
+            \item Extend action space: add gripper open/close, additional movements
+            \item Download more subjects (50+) to further improve model
+            \item Cross-subject generalization experiment (Leave-One-Subject-Out)
+            \item Complete Methodology documentation
         \end{enumerate}
     \end{block}
     
@@ -269,35 +269,35 @@
         \column{0.5\textwidth}
         \textbf{Expected Deliverables:}
         \begin{itemize}
-            \item 扩展动作的物理演示
-            \item 更大数据集的训练结果
-            \item Position vs Time 对比图
+            \item Physical demo with extended actions
+            \item Training results on larger dataset
+            \item Position vs Time comparison plots
         \end{itemize}
         
         \column{0.5\textwidth}
         \textbf{Questions for Supervisor:}
         \begin{itemize}
-            \item 是否需要 Leave-One-Subject-Out 验证？
-            \item 对扩展动作空间的建议？
+            \item Is Leave-One-Subject-Out validation needed?
+            \item Suggestions for extending action space?
         \end{itemize}
     \end{columns}
 \end{frame}
 
-% ========== Slide 8: 时间线 ==========
+% ========== Slide 8: Timeline ==========
 \begin{frame}{Project Timeline}
     \begin{center}
     \resizebox{0.9\textwidth}{!}{%
     \begin{tikzpicture}
-        % 时间轴
+        % Timeline
         \draw[thick, -Latex] (0,0) -- (14,0);
         
-        % 月份标记
+        % Month markers
         \foreach \x/\month in {0/Oct, 2/Nov, 4/Dec, 6/Jan, 8/Feb, 10/Mar, 12/Apr} {
             \draw (\x, 0.1) -- (\x, -0.1);
             \node[below] at (\x, -0.2) {\small \month};
         }
         
-        % 阶段块
+        % Phase blocks
         \fill[completed!50] (0, 0.3) rectangle (2, 0.8);
         \node at (1, 0.55) {\tiny Phase 1};
         
@@ -313,7 +313,7 @@
         \fill[pending!50] (10, 0.3) rectangle (12, 0.8);
         \node at (11, 0.55) {\tiny Writing};
         
-        % 当前位置
+        % Current position
         \draw[highlight, ultra thick] (8.5, -0.5) -- (8.5, 1);
         \node[highlight, above] at (8.5, 1) {\textbf{NOW}};
         
@@ -349,4 +349,3 @@
 \end{frame}
 
 \end{document}
-
