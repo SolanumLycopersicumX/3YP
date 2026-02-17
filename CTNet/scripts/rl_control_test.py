@@ -221,6 +221,8 @@ class RLControlResult:
     avg_steps: float
     avg_reward: float
     trajectory_smoothness: float
+    # 用于 Position vs Time 图
+    sample_trajectory: Optional[Dict[str, Any]] = None
     
     def to_dict(self) -> Dict:
         return {
@@ -238,11 +240,15 @@ def run_rl_control_episode(
     eeg_predictions: np.ndarray,
     device: torch.device,
     max_steps: int = 100,
+    record_trajectory: bool = False,
 ) -> Dict[str, Any]:
     """
     运行一个 RL 控制 episode
     
     使用 EEG 预测作为 RL 状态的一部分
+    
+    Args:
+        record_trajectory: 如果为 True，记录详细轨迹用于 Position vs Time 图
     """
     state = env.reset()
     
@@ -250,6 +256,13 @@ def run_rl_control_episode(
     steps = 0
     positions = [np.array([env._y, env._z])]  # 使用内部属性
     actions = []
+    
+    # 记录目标位置（用于 Position vs Time 图）
+    target_pos = np.array([env._target_y, env._target_z])
+    target_positions = [target_pos.copy()]  # 目标位置每步
+    actual_positions_y = [env._y]  # 实际 Y 位置
+    actual_positions_z = [env._z]  # 实际 Z 位置
+    errors = [np.linalg.norm(np.array([env._y, env._z]) - target_pos)]  # 位置误差
     
     # 随机选择一个 EEG 预测作为当前意图
     trial_idx = np.random.randint(len(eeg_predictions))
@@ -268,8 +281,15 @@ def run_rl_control_episode(
         
         total_reward += reward
         steps += 1
-        positions.append(np.array([env._y, env._z]))
+        current_pos = np.array([env._y, env._z])
+        positions.append(current_pos)
         actions.append(action)
+        
+        # 记录轨迹数据
+        target_positions.append(target_pos.copy())
+        actual_positions_y.append(env._y)
+        actual_positions_z.append(env._z)
+        errors.append(np.linalg.norm(current_pos - target_pos))
         
         state = next_state
         
@@ -283,13 +303,26 @@ def run_rl_control_episode(
     else:
         smoothness = 1.0
     
-    return {
+    result = {
         'reached': info.get('reached', False),
         'steps': steps,
         'reward': total_reward,
         'smoothness': smoothness,
         'positions': positions,
     }
+    
+    # 如果需要记录轨迹数据
+    if record_trajectory:
+        result['trajectory'] = {
+            'time_steps': list(range(len(actual_positions_y))),
+            'target_y': [target_pos[0]] * len(actual_positions_y),
+            'target_z': [target_pos[1]] * len(actual_positions_z),
+            'actual_y': actual_positions_y,
+            'actual_z': actual_positions_z,
+            'errors': errors,
+        }
+    
+    return result
 
 
 def run_rl_control_test(
@@ -428,9 +461,29 @@ def run_rl_control_test(
         print("[Step 4] 控制测试...")
     
     results = []
+    sample_trajectory = None  # 保存一个成功的轨迹用于可视化
+    
     for ep in range(n_episodes):
-        result = run_rl_control_episode(env, rl_model, predictions, device)
+        # 记录第一个 episode 的轨迹（或第一个成功的）
+        record_traj = (ep < 5) or (sample_trajectory is None)
+        result = run_rl_control_episode(env, rl_model, predictions, device, 
+                                         record_trajectory=record_traj)
         results.append(result)
+        
+        # 保存最佳轨迹（成功到达且步数较少）
+        if record_traj and result.get('trajectory') and result['reached']:
+            if sample_trajectory is None or result['steps'] < sample_trajectory.get('steps', 999):
+                sample_trajectory = {
+                    'steps': result['steps'],
+                    **result['trajectory']
+                }
+    
+    # 如果没有成功的轨迹，使用第一个有轨迹数据的
+    if sample_trajectory is None:
+        for r in results:
+            if r.get('trajectory'):
+                sample_trajectory = {'steps': r['steps'], **r['trajectory']}
+                break
     
     reach_rate = sum(r['reached'] for r in results) / len(results)
     avg_steps = np.mean([r['steps'] for r in results])
@@ -453,6 +506,7 @@ def run_rl_control_test(
         avg_steps=avg_steps,
         avg_reward=avg_reward,
         trajectory_smoothness=avg_smoothness,
+        sample_trajectory=sample_trajectory,
     )
 
 
@@ -467,9 +521,18 @@ def run_three_dataset_comparison(
     rl_model_type: str = "transformer",
     device: str = "cuda",
     verbose: bool = True,
+    # 训练速度控制参数
+    rl_training_episodes: int = 200,
+    classifier_epochs: int = 30,
+    test_episodes: int = 50,
 ) -> Dict[str, Dict]:
     """
     运行三个数据集的对比测试
+    
+    Args:
+        rl_training_episodes: RL Agent 训练的 episodes 数量
+        classifier_epochs: EEG 分类器训练的 epochs 数量
+        test_episodes: 控制测试的 episodes 数量
     """
     output_dir.mkdir(parents=True, exist_ok=True)
     device = torch.device(device if torch.cuda.is_available() else "cpu")
@@ -530,6 +593,9 @@ def run_three_dataset_comparison(
                 result = run_rl_control_test(
                     config, X_train, y_train, X_test, y_test,
                     rl_model_type=rl_model_type,
+                    n_episodes=test_episodes,
+                    classifier_epochs=classifier_epochs,
+                    rl_training_episodes=rl_training_episodes,
                     device=device,
                     verbose=verbose,
                 )
@@ -537,6 +603,7 @@ def run_three_dataset_comparison(
                 dataset_results.append({
                     'subject': subject,
                     **result.to_dict(),
+                    'sample_trajectory': result.sample_trajectory,
                 })
                 
             except Exception as e:
@@ -550,12 +617,28 @@ def run_three_dataset_comparison(
                 'mean_smoothness': np.mean([r['trajectory_smoothness'] for r in dataset_results]),
             }
     
-    # 保存结果
+    # 保存结果（排除不可序列化的 sample_trajectory）
+    serializable_results = {}
+    for ds_name, ds_data in all_results.items():
+        serializable_results[ds_name] = {
+            k: v for k, v in ds_data.items() if k != 'subjects'
+        }
+        serializable_results[ds_name]['subjects'] = []
+        for subj in ds_data.get('subjects', []):
+            subj_serializable = {k: v for k, v in subj.items() if k != 'sample_trajectory'}
+            serializable_results[ds_name]['subjects'].append(subj_serializable)
+    
     with open(output_dir / "rl_control_comparison.json", "w") as f:
-        json.dump(all_results, f, indent=2)
+        json.dump(serializable_results, f, indent=2)
     
     # 可视化
     visualize_rl_comparison(all_results, output_dir / "rl_control_comparison.png")
+    
+    # Position vs Time 图（导师要求的新功能）
+    visualize_position_vs_time(all_results, output_dir, "position_vs_time.png")
+    
+    # 综合性能图
+    visualize_overall_performance(all_results, output_dir, "overall_performance.png")
     
     return all_results
 
@@ -608,6 +691,214 @@ def visualize_rl_comparison(results: Dict, output_path: Path):
     print(f"\n可视化已保存: {output_path}")
 
 
+def visualize_position_vs_time(
+    results: Dict[str, Dict],
+    output_dir: Path,
+    filename: str = "position_vs_time.png"
+):
+    """
+    可视化 Position vs Time 图
+    
+    展示：
+    - 目标位置（蓝色虚线）
+    - 实际位置（红色实线）
+    - 位置误差（绿色区域）
+    
+    这是评估系统 overall performance 的关键图表
+    """
+    # 收集有轨迹数据的数据集
+    datasets_with_traj = []
+    for ds_name, ds_data in results.items():
+        for subj in ds_data.get('subjects', []):
+            if subj.get('sample_trajectory'):
+                datasets_with_traj.append((ds_name, subj))
+                break  # 每个数据集取一个被试
+    
+    if not datasets_with_traj:
+        print("警告：没有可用的轨迹数据用于 Position vs Time 图")
+        return
+    
+    n_datasets = len(datasets_with_traj)
+    fig, axes = plt.subplots(n_datasets, 3, figsize=(15, 4 * n_datasets))
+    
+    if n_datasets == 1:
+        axes = axes.reshape(1, -1)
+    
+    for idx, (ds_name, subj_data) in enumerate(datasets_with_traj):
+        traj = subj_data['sample_trajectory']
+        time_steps = traj['time_steps']
+        target_y = traj['target_y']
+        target_z = traj['target_z']
+        actual_y = traj['actual_y']
+        actual_z = traj['actual_z']
+        errors = traj['errors']
+        
+        # --- 子图 1: Y 位置 (左右) ---
+        ax1 = axes[idx, 0]
+        ax1.plot(time_steps, target_y, 'b--', linewidth=2, label='Target Y', alpha=0.8)
+        ax1.plot(time_steps, actual_y, 'r-', linewidth=2, label='Actual Y', alpha=0.8)
+        ax1.fill_between(time_steps, target_y, actual_y, alpha=0.3, color='orange', label='Error')
+        ax1.set_xlabel('Time Step')
+        ax1.set_ylabel('Y Position')
+        ax1.set_title(f'{ds_name} - Y Position vs Time', fontweight='bold')
+        ax1.legend(loc='upper right')
+        ax1.grid(True, alpha=0.3)
+        ax1.set_xlim(0, max(time_steps))
+        
+        # --- 子图 2: Z 位置 (上下) ---
+        ax2 = axes[idx, 1]
+        ax2.plot(time_steps, target_z, 'b--', linewidth=2, label='Target Z', alpha=0.8)
+        ax2.plot(time_steps, actual_z, 'r-', linewidth=2, label='Actual Z', alpha=0.8)
+        ax2.fill_between(time_steps, target_z, actual_z, alpha=0.3, color='orange', label='Error')
+        ax2.set_xlabel('Time Step')
+        ax2.set_ylabel('Z Position')
+        ax2.set_title(f'{ds_name} - Z Position vs Time', fontweight='bold')
+        ax2.legend(loc='upper right')
+        ax2.grid(True, alpha=0.3)
+        ax2.set_xlim(0, max(time_steps))
+        
+        # --- 子图 3: 位置误差曲线 ---
+        ax3 = axes[idx, 2]
+        ax3.plot(time_steps, errors, 'g-', linewidth=2, label='Position Error')
+        ax3.fill_between(time_steps, 0, errors, alpha=0.3, color='green')
+        ax3.axhline(y=0.1, color='red', linestyle='--', linewidth=1, label='Target Threshold (0.1)')
+        ax3.set_xlabel('Time Step')
+        ax3.set_ylabel('Error (Distance)')
+        ax3.set_title(f'{ds_name} - Position Error vs Time', fontweight='bold')
+        ax3.legend(loc='upper right')
+        ax3.grid(True, alpha=0.3)
+        ax3.set_xlim(0, max(time_steps))
+        ax3.set_ylim(0, max(errors) * 1.1)
+        
+        # 添加统计信息
+        final_error = errors[-1]
+        mean_error = np.mean(errors)
+        ax3.text(0.95, 0.95, f'Final: {final_error:.3f}\nMean: {mean_error:.3f}',
+                transform=ax3.transAxes, ha='right', va='top',
+                bbox=dict(boxstyle='round', facecolor='white', alpha=0.8))
+    
+    plt.tight_layout()
+    output_path = output_dir / filename
+    plt.savefig(output_path, dpi=150, bbox_inches='tight')
+    plt.close()
+    
+    print(f"\nPosition vs Time 图已保存: {output_path}")
+
+
+def visualize_overall_performance(
+    results: Dict[str, Dict],
+    output_dir: Path,
+    filename: str = "overall_performance.png"
+):
+    """
+    综合性能可视化：展示系统的 Overall Performance
+    
+    包括：
+    1. 各数据集的平均误差对比
+    2. 误差收敛曲线
+    3. 综合评分雷达图
+    """
+    fig = plt.figure(figsize=(16, 5))
+    
+    # --- 收集所有轨迹数据 ---
+    all_trajectories = {}
+    for ds_name, ds_data in results.items():
+        for subj in ds_data.get('subjects', []):
+            traj = subj.get('sample_trajectory')
+            if traj:
+                if ds_name not in all_trajectories:
+                    all_trajectories[ds_name] = []
+                all_trajectories[ds_name].append(traj)
+    
+    colors = {'IV-2a': '#3498db', 'IV-2b': '#e74c3c', 'PhysioNet': '#2ecc71'}
+    
+    # --- 子图 1: 平均误差对比 ---
+    ax1 = fig.add_subplot(131)
+    datasets = list(all_trajectories.keys())
+    mean_errors = []
+    final_errors = []
+    
+    for ds in datasets:
+        trajs = all_trajectories[ds]
+        ds_mean_errors = [np.mean(t['errors']) for t in trajs]
+        ds_final_errors = [t['errors'][-1] for t in trajs]
+        mean_errors.append(np.mean(ds_mean_errors))
+        final_errors.append(np.mean(ds_final_errors))
+    
+    x = np.arange(len(datasets))
+    width = 0.35
+    bars1 = ax1.bar(x - width/2, mean_errors, width, label='Mean Error', 
+                    color=[colors.get(d, '#888') for d in datasets], alpha=0.7)
+    bars2 = ax1.bar(x + width/2, final_errors, width, label='Final Error',
+                    color=[colors.get(d, '#888') for d in datasets], alpha=1.0)
+    ax1.set_ylabel('Error (Distance)')
+    ax1.set_title('Mean vs Final Position Error', fontweight='bold')
+    ax1.set_xticks(x)
+    ax1.set_xticklabels(datasets)
+    ax1.legend()
+    ax1.grid(True, alpha=0.3, axis='y')
+    
+    # 添加数值标签
+    for bar, val in zip(bars1, mean_errors):
+        ax1.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.01,
+                f'{val:.3f}', ha='center', fontsize=9)
+    for bar, val in zip(bars2, final_errors):
+        ax1.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.01,
+                f'{val:.3f}', ha='center', fontsize=9)
+    
+    # --- 子图 2: 误差收敛曲线（叠加） ---
+    ax2 = fig.add_subplot(132)
+    for ds_name, trajs in all_trajectories.items():
+        # 使用第一个轨迹
+        traj = trajs[0]
+        time_steps = traj['time_steps']
+        errors = traj['errors']
+        ax2.plot(time_steps, errors, linewidth=2, label=ds_name, 
+                 color=colors.get(ds_name, '#888'))
+    
+    ax2.axhline(y=0.1, color='red', linestyle='--', linewidth=1, 
+                label='Target Threshold', alpha=0.7)
+    ax2.set_xlabel('Time Step')
+    ax2.set_ylabel('Position Error')
+    ax2.set_title('Error Convergence Comparison', fontweight='bold')
+    ax2.legend(loc='upper right')
+    ax2.grid(True, alpha=0.3)
+    
+    # --- 子图 3: 综合性能指标 ---
+    ax3 = fig.add_subplot(133)
+    
+    metrics = ['Classification', 'Reach Rate', 'Smoothness', '1-MeanError']
+    for ds_name in results.keys():
+        ds_res = results[ds_name]
+        values = [
+            ds_res.get('mean_classification', 0),
+            ds_res.get('mean_reach_rate', 0),
+            ds_res.get('mean_smoothness', 0),
+            1.0 - (mean_errors[list(results.keys()).index(ds_name)] if ds_name in all_trajectories else 0),
+        ]
+        # 归一化到 0-1
+        values = [min(1.0, max(0.0, v)) for v in values]
+        
+        x_pos = np.arange(len(metrics))
+        ax3.bar(x_pos + 0.2 * list(results.keys()).index(ds_name), values, 
+                width=0.2, label=ds_name, color=colors.get(ds_name, '#888'), alpha=0.8)
+    
+    ax3.set_xticks(np.arange(len(metrics)) + 0.2)
+    ax3.set_xticklabels(metrics, rotation=15)
+    ax3.set_ylabel('Score (0-1)')
+    ax3.set_title('Overall Performance Metrics', fontweight='bold')
+    ax3.legend(loc='upper right')
+    ax3.set_ylim(0, 1.1)
+    ax3.grid(True, alpha=0.3, axis='y')
+    
+    plt.tight_layout()
+    output_path = output_dir / filename
+    plt.savefig(output_path, dpi=150, bbox_inches='tight')
+    plt.close()
+    
+    print(f"\n综合性能图已保存: {output_path}")
+
+
 # ============================================================================
 # 主程序
 # ============================================================================
@@ -627,11 +918,27 @@ def parse_args():
                    choices=["IV-2a", "IV-2b", "PhysioNet"],
                    help="要测试的数据集")
     
+    # 训练速度控制参数
+    p.add_argument("--rl-episodes", type=int, default=200,
+                   help="RL Agent 训练的 episodes 数量 (默认 200，快速测试可用 50)")
+    p.add_argument("--cls-epochs", type=int, default=30,
+                   help="EEG 分类器训练的 epochs 数量 (默认 30)")
+    p.add_argument("--test-episodes", type=int, default=50,
+                   help="控制测试的 episodes 数量 (默认 50)")
+    p.add_argument("--fast", action="store_true",
+                   help="快速测试模式：减少训练轮次")
+    
     return p.parse_args()
 
 
 def main():
     args = parse_args()
+    
+    # 快速模式
+    if args.fast:
+        args.rl_episodes = 50
+        args.cls_epochs = 10
+        args.test_episodes = 20
     
     print("="*60)
     print("多数据集 RL 控制测试")
@@ -641,6 +948,9 @@ def main():
     print(f"被试: {args.subjects}")
     print(f"RL 模型: {args.model}")
     print(f"设备: {args.device}")
+    print(f"RL 训练 episodes: {args.rl_episodes}")
+    print(f"分类器 epochs: {args.cls_epochs}")
+    print(f"测试 episodes: {args.test_episodes}")
     print("="*60)
     
     subjects_config = {ds: args.subjects for ds in args.datasets}
@@ -651,6 +961,9 @@ def main():
         subjects_per_dataset=subjects_config,
         rl_model_type=args.model,
         device=args.device,
+        rl_training_episodes=args.rl_episodes,
+        classifier_epochs=args.cls_epochs,
+        test_episodes=args.test_episodes,
     )
     
     # 打印最终总结
