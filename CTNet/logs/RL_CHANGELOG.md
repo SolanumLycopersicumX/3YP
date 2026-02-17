@@ -35,9 +35,10 @@
 4. [V2.0 - 训练稳定性改进](#v20---训练稳定性改进)
 5. [V2.1 - Position vs Time 可视化](#v21---position-vs-time-可视化)
 6. [V2.2 - 4方向RL模型 + 物理机械臂控制](#v22---4方向rl模型--物理机械臂控制)
-7. [性能对比汇总](#性能对比汇总)
-8. [文件结构](#文件结构)
-9. [未来计划](#未来计划)
+7. [V2.3 - 平滑控制 + 限位保护](#v23---平滑控制--限位保护)
+8. [性能对比汇总](#性能对比汇总)
+9. [文件结构](#文件结构)
+10. [未来计划](#未来计划)
 
 ---
 
@@ -50,6 +51,7 @@
 | V2.0 | 2026-02-02 | Double DQN + Soft Update | 100% (1000 ep) |
 | V2.1 | 2026-02-17 | Position vs Time 可视化 | - |
 | V2.2 | 2026-02-17 | 4方向RL模型 + 物理机械臂控制 | 100% (仿真+物理) |
+| V2.3 | 2026-02-17 | 平滑控制 + 限位保护 | - |
 
 ---
 
@@ -525,12 +527,17 @@ scripts/
 ├── dqn_model.py                    # V1.0 - CNN+LSTM 网络
 ├── dqn_transformer.py              # V1.1 - Transformer 网络
 ├── train_dqn_rl.py                 # V1.0 - 训练循环 + 环境
-├── train_rl_4direction.py          # V2.2 - 4方向RL训练 (新增)
-├── rl_physical_control.py          # V2.2 - 物理机械臂控制 (新增)
+├── train_rl_4direction.py          # V2.2 - 4方向RL训练
+├── rl_physical_control.py          # V2.2 - 物理机械臂控制
+├── test_smooth_control.py          # V2.3 - 平滑参数测试 (新增)
 ├── test_rl_training.py             # V1.0 - 快速测试
 ├── plot_dqn_training.py            # V1.0 - 可视化
 ├── compare_dqn_architectures.py    # V1.1 - 对比实验 V1
 └── compare_dqn_v2.py               # V2.0 - 对比实验 V2 (改进版)
+
+# 环境类
+serial_arm_env.py                   # V1 - 基础串口环境
+serial_arm_env_v2.py                # V2.3 - 优化版串口环境 (新增) ⭐
 
 outputs/
 ├── dqn_policy_full.pth             # V1.0 训练模型 (5000ep)
@@ -543,7 +550,7 @@ outputs/
 ├── architecture_comparison_v2/     # V2.0 对比结果
 │   ├── comparison_v2.png
 │   └── summary_v2.json
-└── rl_physical_control/            # V2.2 物理控制结果 (新增)
+└── rl_physical_control/            # V2.2 物理控制结果
     └── results.json
 
 logs/
@@ -692,12 +699,117 @@ python scripts/rl_physical_control.py \
 
 ---
 
+## V2.3 - 平滑控制 + 限位保护
+
+### 创建日期
+2026-02-17
+
+### 创建原因
+- 物理机械臂运动时存在"抽搐/颤抖"现象
+- 快速启停导致伺服电机震动
+- 累积多步后容易碰触物理限位
+- 步长过短导致方向难以分辨
+
+### 问题分析
+
+| 问题 | 原因 | 影响 |
+|------|------|------|
+| 抽搐/颤抖 | 伺服快速启停 | 运动不平滑，机械磨损 |
+| 限位碰撞 | RL 不知物理约束 | 运动受阻，无法继续 |
+| 方向难分辨 | 步长仅 ~3° | 难以观察运动趋势 |
+
+### 新增文件
+
+| 文件 | 功能 |
+|------|------|
+| `serial_arm_env_v2.py` | 优化版串口环境（平滑控制+限位保护）|
+| `scripts/test_smooth_control.py` | 平滑参数测试脚本 |
+
+### 优化内容
+
+#### 1. 平滑运动参数
+
+| 参数 | V1 (原版) | V2 (优化) | 效果 |
+|------|-----------|-----------|------|
+| `move_time_ms` | 250 | 500 | 运动更慢更平滑 |
+| `action_delay_ms` | ~300 | 600 | 等待运动完成再下一步 |
+| `joint_step_rad` | 0.05 (~3°) | 0.12 (~7°) | 方向更明显 |
+
+#### 2. 软限位保护
+
+```python
+# 软限位计算
+soft_min = hard_min + range * soft_limit_margin  # 默认 10%
+soft_max = hard_max - range * soft_limit_margin
+
+# 动作预判
+if target_ticks < soft_min or target_ticks > soft_max:
+    target_ticks = clamp(target_ticks, soft_min, soft_max)
+    # 不拒绝动作，但限制到安全范围
+```
+
+#### 3. 三种平滑度预设
+
+```python
+# 使用方法
+cfg = create_smooth_config(port, smoothness="medium")
+```
+
+| 预设 | `step_rad` | `move_time_ms` | `delay_ms` | 适用场景 |
+|------|------------|----------------|------------|----------|
+| `low` | 0.10 | 300 | 400 | 快速测试 |
+| `medium` | 0.12 | 500 | 600 | 平衡（默认）|
+| `high` | 0.15 | 800 | 1000 | 演示/录制 |
+
+### 使用方法
+
+```bash
+# 测试平滑参数
+sudo chmod 666 /dev/ttyACM1
+
+# 使用预设
+python scripts/test_smooth_control.py --port /dev/ttyACM1 --smoothness high
+
+# 手动指定参数
+python scripts/test_smooth_control.py --port /dev/ttyACM1 \
+    --move-time 600 --action-delay 800 --step-rad 0.15
+
+# 手动控制模式
+python scripts/test_smooth_control.py --port /dev/ttyACM1 --pattern manual
+
+# RL 控制使用平滑环境
+python scripts/rl_physical_control.py \
+    --serial-port /dev/ttyACM1 \
+    --subject 1 --dataset A \
+    --smoothness high \
+    --use-smooth-env \
+    --pre-home --post-home
+```
+
+### 测试图案
+
+| 图案 | 动作序列 | 用途 |
+|------|----------|------|
+| `square` | L L U U R R D D | 测试 4 方向循环 |
+| `cross` | L R U D | 快速方向切换 |
+| `random` | 随机 | 压力测试 |
+| `manual` | 交互式 | 手动探索限位 |
+
+### 输出文件
+
+| 文件 | 描述 |
+|------|------|
+| `serial_arm_env_v2.py` | 优化版环境类 |
+| `scripts/test_smooth_control.py` | 测试脚本 |
+
+---
+
 ## 未来计划
 
 ### 待实现 (教授任务)
 
-- [ ] **Task 2**: Controller/Limiter - 关节限位保护
-- [ ] **Task 3**: Smoother + Delay - 减少高频颤动
+- [x] **Task 2**: Controller/Limiter - 关节限位保护 ✅ V2.3
+- [x] **Task 3**: Smoother + Delay - 减少高频颤动 ✅ V2.3
 - [x] ~~**Task 4**: 双数据集对比 (IV-2b + GigaScience)~~ → 已改为 PhysioNet
 - [ ] **Task 6**: 扩展动作空间 (张开/闭合, 移动)
 
