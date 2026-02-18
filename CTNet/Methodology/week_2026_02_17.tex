@@ -178,12 +178,38 @@
             \item Smooth velocity control prevents jitter
         \end{itemize}
         
-        % Position vs Time figure can be inserted here
-        % \includegraphics[width=\textwidth]{../outputs/rl_physical_control/position_vs_time.png}
     \end{columns}
 \end{frame}
 
-% ========== Slide 5: Challenges & Solutions ==========
+% ========== Slide 5: Position vs Time Diagram ==========
+\begin{frame}{Position vs Time Analysis (3 Datasets)}
+    \begin{center}
+        \includegraphics[width=0.95\textwidth]{position_vs_time.png}
+    \end{center}
+    
+    \vspace{2mm}
+    \small
+    \textbf{Interpretation:}
+    \begin{itemize}
+        \item \textcolor{blue}{Blue dashed}: Target position (intended) \quad
+        \textcolor{red}{Red solid}: Actual position (achieved)
+        \item Orange area: Position error over time
+        \item All three datasets converge to target within $\sim$8 steps
+    \end{itemize}
+\end{frame}
+
+% ========== Slide 6: Overall Performance ==========
+\begin{frame}{Overall Performance Metrics}
+    \begin{center}
+        \includegraphics[width=0.85\textwidth]{overall_performance.png}
+    \end{center}
+    
+    \vspace{2mm}
+    \small
+    \textbf{Metrics:} Mean error convergence, radar chart comparison across datasets
+\end{frame}
+
+% ========== Slide 7: Challenges & Solutions ==========
 \begin{frame}{Challenges \& Solutions}
     \begin{columns}[T]
         \column{0.5\textwidth}
