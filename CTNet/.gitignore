@@ -14,10 +14,27 @@ mymat_raw/*.mat
 true_labels/
 ica_comparison/
 
-# Model weights and outputs
+# Model weights (too large for GitHub)
 *.pth
 models/
-outputs/
+
+# Outputs - ignore large files but keep comparison images
+outputs/*.json
+outputs/*.gif
+outputs/*.mp4
+outputs/rl_*/
+outputs/batch*/
+outputs/architecture_*/
+outputs/dataset_*/
+outputs/cv_*.json
+
+# Keep comparison images for weekly reports
+!outputs/comparison_*.png
+!outputs/comprehensive_comparison.png
+!outputs/step_size_comparison.png
+!outputs/multi_subject_sequence*/
+!outputs/multi_subject_sequence*/*.png
+!outputs/multi_subject_sequence*/*.json
 A_heads_*/
 B_heads_*/
 CTNet_*/

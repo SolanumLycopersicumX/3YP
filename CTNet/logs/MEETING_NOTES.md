@@ -316,3 +316,108 @@ def number_class_channel(dataset_type: str) -> Tuple[int, int]:
 
 *记录时间：2026-02-17 (下午)*
 
+---
+
+## 2026-02-24 周会
+
+### 本周完成工作
+
+#### 1. 8 方向动作空间
+
+**扩展动作空间**：从 4 方向扩展到 8 方向，包含对角线移动
+
+| 方向 | 动作向量 |
+|------|----------|
+| left | (-1.0, 0.0) |
+| right | (1.0, 0.0) |
+| up | (0.0, 1.0) |
+| down | (0.0, -1.0) |
+| up_left | (-0.707, 0.707) |
+| up_right | (0.707, 0.707) |
+| down_left | (-0.707, -0.707) |
+| down_right | (0.707, -0.707) |
+
+**训练脚本**: `scripts/train_rl_8direction.py`
+
+---
+
+#### 2. 轨迹平滑改进
+
+**尝试的方法**:
+
+| 方法 | 文件 | 效果 |
+|------|------|------|
+| Transformer-based DQN | `train_rl_8direction_smooth.py` | 部分改善 |
+| Optimal Direction Guidance | `train_rl_8direction_optimal.py` | 显著改善 |
+| Rule-based Control | `multi_subject_sequence_control.py --use-rule` | 最优轨迹 |
+
+**最终选择**: Rule-based control (每步选择最优方向)
+
+---
+
+#### 3. 自适应步长
+
+**问题**: 固定步长 (step=0.05) 导致趋近目标速度太慢
+
+**解决方案**: 自适应步长策略
+
+```python
+step_size = min(0.15, max(0.05, distance * 0.3))
+```
+
+- 距离远时：大步快速接近
+- 距离近时：小步精确控制
+
+**结果对比**:
+
+| 指标 | 固定步长 | 自适应步长 | 提升 |
+|------|---------|-----------|------|
+| 总步数 (8 subjects) | 330 | 174 | **47.3%** |
+| Subject 1-4 | 35 步 | 18 步 | 48.6% |
+| Subject 5, 8 | 56 步 | 31 步 | 44.6% |
+| Subject 6, 7 | 39 步 | 20 步 | 48.7% |
+
+---
+
+#### 4. 8 Subject 运动模式测试
+
+| Subject | 运动模式 | 目标数 | 总步数 |
+|---------|---------|--------|--------|
+| 1 | center → right → left → center | 3/3 ✅ | 18 |
+| 2 | center → left → right → center | 3/3 ✅ | 18 |
+| 3 | center → up → down → center | 3/3 ✅ | 18 |
+| 4 | center → down → up → center | 3/3 ✅ | 18 |
+| 5 | Square path (clockwise) | 5/5 ✅ | 31 |
+| 6 | Diagonal sweep (↗↙) | 3/3 ✅ | 20 |
+| 7 | Diagonal sweep (↖↘) | 3/3 ✅ | 20 |
+| 8 | Square path (counter-clockwise) | 5/5 ✅ | 31 |
+
+**到达率**: 100% (28/28 targets)
+
+---
+
+### 输出文件
+
+| 目录 | 内容 |
+|------|------|
+| `outputs/multi_subject_sequence_adaptive/` | 自适应步长结果 |
+| `outputs/comparison_fixed_vs_adaptive.png` | 固定 vs 自适应对比图 |
+| `outputs/step_size_comparison.png` | 步长策略对比 |
+| `Methodology/week_2026_02_24_progress.tex` | 本周 PPT |
+
+---
+
+### 下周计划
+
+| 优先级 | 任务 |
+|--------|------|
+| 🔴 高 | 物理机械臂测试 (自适应步长) |
+| 🔴 高 | 实时 EEG 分类集成 |
+| 🟡 中 | Controller/Limiter: 关节限位保护 |
+| 🟡 中 | Smoother + Delay: 减少高频颤动 |
+| 🟢 低 | 夹爪开合动作扩展 |
+
+---
+
+*记录时间：2026-02-24*
+
