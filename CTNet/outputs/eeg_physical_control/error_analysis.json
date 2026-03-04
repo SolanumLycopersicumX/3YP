@@ -1,0 +1,44 @@
+[
+  {
+    "subject_id": 1,
+    "pattern": "a_horizontal",
+    "error_y": 0.4431306036644429,
+    "error_z": 0.017762554154230566,
+    "total_error": 0.4434864600346842
+  },
+  {
+    "subject_id": 2,
+    "pattern": "b_vertical",
+    "error_y": 0.087678703723886,
+    "error_z": 0.46779303183073184,
+    "total_error": 0.4759389411637685
+  },
+  {
+    "subject_id": 3,
+    "pattern": "c_diagonal_ul_dr",
+    "error_y": 0.37876026491723847,
+    "error_z": 0.390943335423935,
+    "total_error": 0.5443308091524565
+  },
+  {
+    "subject_id": 4,
+    "pattern": "d_diagonal_ur_dl",
+    "error_y": 0.40924834425509365,
+    "error_z": 0.39165894186160144,
+    "total_error": 0.5664635328206794
+  },
+  {
+    "subject_id": 5,
+    "pattern": "e_square_cw",
+    "error_y": 0.5364271718553205,
+    "error_z": 0.5273136820680914,
+    "total_error": 0.7522059757811723
+  },
+  {
+    "subject_id": 6,
+    "pattern": "f_square_ccw",
+    "error_y": 0.5415741451314857,
+    "error_z": 0.5594985778908451,
+    "total_error": 0.7786791465916996
+  }
+]

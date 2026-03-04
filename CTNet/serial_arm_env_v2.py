@@ -189,13 +189,8 @@ class SerialArmEnvV2:
     def close(self):
         """关闭环境"""
         try:
-            # 关闭前切换回快速模式，这样后续归位脚本能快速运行
-            print("[SerialArmEnvV2] 关闭前切换到快速模式...")
-            self._set_fast_mode()
-            
-            for jid in (self._id_lr, self._id_ud):
-                if jid is not None:
-                    self._bus.torque_enable(jid, False)
+            # 不禁用力矩，保持关节位置，让后续同步脚本控制
+            print("[SerialArmEnvV2] 关闭环境 (保持力矩)...")
         except Exception:
             pass
         self._bus.close()
@@ -383,11 +378,20 @@ class SerialArmEnvV2:
         self._step_count += 1
         self._last_action = action
         
-        # 自动回中检查
+        # 检查是否需要因连续限位而回中
+        limit_triggered = ("限位保护" in msg_lr) or ("限位保护" in msg_ud)
+        if limit_triggered:
+            # 连续 3 次触发限位则自动回中
+            if self._consecutive_limit_hits >= 3:
+                print(f"[Step {self._step_count}] ⚠️ 连续{self._consecutive_limit_hits}次触发限位，自动回中...")
+                self._recenter_joints()
+                self._consecutive_limit_hits = 0
+        
+        # 定期自动回中检查
         if (self.cfg.auto_recenter_interval > 0 and 
             self._step_count > 0 and 
             self._step_count % self.cfg.auto_recenter_interval == 0):
-            print(f"[Step {self._step_count}] 自动回中...")
+            print(f"[Step {self._step_count}] 定期自动回中...")
             self._recenter_joints()
         
         # 动作间延时 (核心: 让运动完成, 减少抖动)

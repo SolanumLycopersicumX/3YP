@@ -1,0 +1,14 @@
+{
+  "total_patterns": 6,
+  "patterns": [
+    "a_horizontal",
+    "b_vertical",
+    "c_diagonal_ul_dr",
+    "d_diagonal_ur_dl",
+    "e_square_cw",
+    "f_square_ccw"
+  ],
+  "total_steps": 386,
+  "total_targets_reached": 48,
+  "total_targets": 24
+}
