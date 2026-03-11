@@ -42,7 +42,7 @@ def calculate_sync_velocities(
     targets: dict,
     duration_s: float = 2.0,
     min_velocity: int = 30,
-    max_velocity: int = 450,  # 允许补偿后的速度
+    max_velocity: int = 600,  # 允许补偿后的速度 (增大以支持快速同步)
     uniform_velocity: bool = False,  # 是否使用统一速度
 ) -> tuple:
     """
@@ -118,8 +118,9 @@ def calculate_sync_velocities(
     # 计算每个关节的速度（基于实际时间）
     # 由于负载和物理特性，某些关节实际速度比理论值慢，需要补偿
     VELOCITY_BOOST = {
-        2: 1.3,  # Shoulder Lift - 负载大
-        4: 1.5,  # Wrist Flex - 负载大
+        2: 1.5,  # Shoulder Lift - 负载大，需更多补偿
+        3: 1.3,  # Elbow Flex - 负载中等
+        4: 1.6,  # Wrist Flex - 负载大，需最多补偿
     }
     
     velocities = {}
@@ -133,7 +134,7 @@ def calculate_sync_velocities(
             if jid in VELOCITY_BOOST:
                 boost = VELOCITY_BOOST[jid]
                 velocity = int(velocity * boost)
-                joint_names = {2: "Shoulder Lift", 4: "Wrist Flex"}
+                joint_names = {2: "Shoulder Lift", 3: "Elbow Flex", 4: "Wrist Flex"}
                 print(f"  [补偿] {joint_names[jid]} 速度 x{boost} = {velocity}")
             
             velocity = max(min_velocity, min(max_velocity, velocity))

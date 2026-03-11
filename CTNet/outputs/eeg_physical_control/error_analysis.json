@@ -2,43 +2,43 @@
   {
     "subject_id": 1,
     "pattern": "a_horizontal",
-    "error_y": 0.4431306036644429,
-    "error_z": 0.017762554154230566,
-    "total_error": 0.4434864600346842
+    "error_y": 0.646312715485123,
+    "error_z": 0.0,
+    "total_error": 0.646312715485123
   },
   {
     "subject_id": 2,
     "pattern": "b_vertical",
-    "error_y": 0.087678703723886,
-    "error_z": 0.46779303183073184,
-    "total_error": 0.4759389411637685
+    "error_y": 0.0416295971519871,
+    "error_z": 0.6467198580818757,
+    "total_error": 0.6480583293164884
   },
   {
     "subject_id": 3,
     "pattern": "c_diagonal_ul_dr",
-    "error_y": 0.37876026491723847,
-    "error_z": 0.390943335423935,
-    "total_error": 0.5443308091524565
+    "error_y": 0.7512511970044936,
+    "error_z": 0.681528233524094,
+    "total_error": 1.0143269167734614
   },
   {
     "subject_id": 4,
     "pattern": "d_diagonal_ur_dl",
-    "error_y": 0.40924834425509365,
-    "error_z": 0.39165894186160144,
-    "total_error": 0.5664635328206794
+    "error_y": 0.7271449612791767,
+    "error_z": 0.7514537161432167,
+    "total_error": 1.0456684379951158
   },
   {
     "subject_id": 5,
     "pattern": "e_square_cw",
-    "error_y": 0.5364271718553205,
-    "error_z": 0.5273136820680914,
-    "total_error": 0.7522059757811723
+    "error_y": 0.688990123794602,
+    "error_z": 0.47808058510039647,
+    "total_error": 0.8386110162264973
   },
   {
     "subject_id": 6,
     "pattern": "f_square_ccw",
-    "error_y": 0.5415741451314857,
-    "error_z": 0.5594985778908451,
-    "total_error": 0.7786791465916996
+    "error_y": 0.49207803358356356,
+    "error_z": 0.6475712797540365,
+    "total_error": 0.8133199576413622
   }
 ]

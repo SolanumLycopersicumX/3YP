@@ -1,0 +1,49 @@
+{
+  "mode": "sim",
+  "board": "synthetic",
+  "steps": 3,
+  "norm_step": 0.15,
+  "step_rad": 0.5,
+  "epoch_duration": 1.0,
+  "history": [
+    {
+      "step": 1,
+      "eeg_class": 2,
+      "eeg_class_name": "Both Feet",
+      "eeg_confidence": 0.3400963842868805,
+      "action": 3,
+      "action_name": "down",
+      "position": [
+        0.0,
+        -0.15
+      ],
+      "timestamp": 1.774613857269287
+    },
+    {
+      "step": 2,
+      "eeg_class": 2,
+      "eeg_class_name": "Both Feet",
+      "eeg_confidence": 0.4591468870639801,
+      "action": 3,
+      "action_name": "down",
+      "position": [
+        0.0,
+        -0.3
+      ],
+      "timestamp": 3.278046131134033
+    },
+    {
+      "step": 3,
+      "eeg_class": 2,
+      "eeg_class_name": "Both Feet",
+      "eeg_confidence": 0.3660164475440979,
+      "action": 3,
+      "action_name": "down",
+      "position": [
+        0.0,
+        -0.44999999999999996
+      ],
+      "timestamp": 4.781858682632446
+    }
+  ]
+}

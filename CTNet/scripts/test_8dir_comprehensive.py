@@ -80,37 +80,37 @@ class TestPattern:
     targets: List[Tuple[float, float]]
 
 
-# 定义所有测试模式 - 适中幅度，清晰可观测
+# 定义所有测试模式 - 大幅度运动，减小相对误差
 TEST_PATTERNS = {
     "a_horizontal": TestPattern(
         name="a_horizontal",
         description="Horizontal (Left->Right->Center)",
-        targets=[(-0.75, 0.0), (0.75, 0.0), (0.0, 0.0)],
+        targets=[(-1.00, 0.0), (1.00, 0.0), (0.0, 0.0)],
     ),
     "b_vertical": TestPattern(
         name="b_vertical", 
         description="Vertical (Up->Down->Center)",
-        targets=[(0.0, 0.75), (0.0, -0.75), (0.0, 0.0)],
+        targets=[(0.0, 1.00), (0.0, -1.00), (0.0, 0.0)],
     ),
     "c_diagonal_ul_dr": TestPattern(
         name="c_diagonal_ul_dr",
         description="Diagonal (UpperLeft->LowerRight)",
-        targets=[(-0.6, 0.6), (0.6, -0.6), (0.0, 0.0)],
+        targets=[(-0.85, 0.85), (0.85, -0.85), (0.0, 0.0)],
     ),
     "d_diagonal_ur_dl": TestPattern(
         name="d_diagonal_ur_dl",
         description="Diagonal (UpperRight->LowerLeft)",
-        targets=[(0.6, 0.6), (-0.6, -0.6), (0.0, 0.0)],
+        targets=[(0.85, 0.85), (-0.85, -0.85), (0.0, 0.0)],
     ),
     "e_square_cw": TestPattern(
         name="e_square_cw",
         description="Square (Clockwise)",
-        targets=[(0.6, 0.0), (0.6, -0.6), (-0.6, -0.6), (-0.6, 0.6), (0.6, 0.6), (0.0, 0.0)],
+        targets=[(0.85, 0.0), (0.85, -0.85), (-0.85, -0.85), (-0.85, 0.85), (0.85, 0.85), (0.0, 0.0)],
     ),
     "f_square_ccw": TestPattern(
         name="f_square_ccw",
         description="Square (Counter-Clockwise)",
-        targets=[(0.0, 0.6), (0.6, 0.6), (0.6, -0.6), (-0.6, -0.6), (-0.6, 0.6), (0.0, 0.0)],
+        targets=[(0.0, 0.85), (0.85, 0.85), (0.85, -0.85), (-0.85, -0.85), (-0.85, 0.85), (0.0, 0.0)],
     ),
 }
 
@@ -205,10 +205,12 @@ class SmoothMotionController:
         if action not in ACTION_VECTORS:
             return (self._y, self._z)
         
+        old_y, old_z = self._y, self._z
         dy, dz = ACTION_VECTORS[action]
         
-        self._y = np.clip(self._y + dy * self.norm_step, -1.0, 1.0)
-        self._z = np.clip(self._z + dz * self.norm_step, -1.0, 1.0)
+        # 使用实际变化的 y 和 z 来计算真正的位移
+        eff_dy = (self._y - old_y) / self.norm_step if self.norm_step else 0.0
+        eff_dz = (self._z - old_z) / self.norm_step if self.norm_step else 0.0
         
         id_lr = self.serial_env._id_lr
         id_ud = self.serial_env._id_ud
@@ -219,8 +221,8 @@ class SmoothMotionController:
         if cur_lr is None or cur_ud is None:
             return (self._y, self._z)
         
-        d_lr_rad = -dy * self.step_rad
-        d_ud_rad = dz * self.step_rad
+        d_lr_rad = -eff_dy * self.step_rad
+        d_ud_rad = eff_dz * self.step_rad
         
         d_lr_ticks = So101Bus.rad_to_ticks(d_lr_rad)
         d_ud_ticks = So101Bus.rad_to_ticks(d_ud_rad)
@@ -228,13 +230,7 @@ class SmoothMotionController:
         target_lr = cur_lr + d_lr_ticks
         target_ud = cur_ud + d_ud_ticks
         
-        lim_lr = self.serial_env._joint_limits.get(id_lr)
-        lim_ud = self.serial_env._joint_limits.get(id_ud)
-        
-        if lim_lr:
-            target_lr = lim_lr.clamp(target_lr)
-        if lim_ud:
-            target_ud = lim_ud.clamp(target_ud)
+        # 用户要求去除限位限制 (让机械臂能自由移动或由舵机自身硬件限位)
         
         try:
             bus = self.serial_env._bus
@@ -608,12 +604,12 @@ def parse_args():
     p = argparse.ArgumentParser(description="8 方向综合运动测试")
     
     p.add_argument("--serial-port", type=str, default="/dev/ttyACM1")
-    p.add_argument("--step-rad", type=float, default=0.35,
-                   help="每步弧度 (默认 0.35)")
-    p.add_argument("--norm-step", type=float, default=0.12,
-                   help="归一化步长 (默认 0.12，更多步数)")
-    p.add_argument("--velocity", type=int, default=100,
-                   help="测试运动速度 (默认 100)")
+    p.add_argument("--step-rad", type=float, default=0.70,
+                   help="每步弧度 (默认 0.70)")
+    p.add_argument("--norm-step", type=float, default=0.25,
+                   help="归一化步长 (默认 0.25)")
+    p.add_argument("--velocity", type=int, default=140,
+                   help="测试运动速度 (默认 140)")
     p.add_argument("--no-soft-motion", action="store_true",
                    help="禁用回中减速功能")
     p.add_argument("--repeat", type=int, default=2,
@@ -653,7 +649,14 @@ def main():
     print("  3. 同步归位 (home速度)")
     print()
     
-    # 初始化环境
+    # ========== 测试开始前: 同步归中 (home速度) ==========
+    # 注意: 必须在 SerialArmEnvV2 之前调用, 因为外部脚本需要独占串口
+    print("\n" + "=" * 60)
+    print("测试开始前 - 同步归中 (home速度)")
+    print("=" * 60)
+    go_to_home(args.serial_port, args.home_json, duration=2.0)
+    
+    # 初始化环境 (归中完成后再打开串口)
     cfg = SerialConfigV2(
         port=args.serial_port,
         move_velocity=args.velocity,
@@ -680,15 +683,9 @@ def main():
     all_results = {}
     
     try:
-        # ========== 测试开始前: 同步归中 (home速度) ==========
+        # ========== 测试开始 [ 所有动作使用速度140 ] ==========
         print("\n" + "=" * 60)
-        print("测试开始前 - 同步归中 (home速度)")
-        print("=" * 60)
-        go_to_home(args.serial_port, args.home_json)
-        
-        # ========== 测试开始 [ 所有动作使用速度100 ] ==========
-        print("\n" + "=" * 60)
-        print("测试开始 [ 所有动作使用速度 100 ]")
+        print(f"测试开始 [ 所有动作使用速度 {args.velocity} ]")
         print("=" * 60)
         
         pattern_names = list(TEST_PATTERNS.keys())
@@ -774,12 +771,12 @@ def main():
         print("\n" + "=" * 60)
         print("测试结束后 - 先回中位")
         print("=" * 60)
-        go_to_home(args.serial_port, args.home_json, duration=4.0)
+        go_to_home(args.serial_port, args.home_json, duration=2.0)
         
         print("\n" + "=" * 60)
         print("测试结束后 - 同步归位")
         print("=" * 60)
-        go_to_return(args.serial_port, args.return_json, duration=4.0)
+        go_to_return(args.serial_port, args.return_json, duration=2.0)
 
 
 if __name__ == "__main__":

@@ -8,7 +8,7 @@
     "e_square_cw",
     "f_square_ccw"
   ],
-  "total_steps": 386,
-  "total_targets_reached": 48,
+  "total_steps": 320,
+  "total_targets_reached": 46,
   "total_targets": 24
 }

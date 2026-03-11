@@ -1,0 +1,1321 @@
+{
+  "name": "e_square_cw",
+  "description": "Square (CW)",
+  "targets": [
+    [
+      0.85,
+      0.0
+    ],
+    [
+      0.85,
+      -0.85
+    ],
+    [
+      -0.85,
+      -0.85
+    ],
+    [
+      -0.85,
+      0.85
+    ],
+    [
+      0.85,
+      0.85
+    ],
+    [
+      0.0,
+      0.0
+    ]
+  ],
+  "total_steps": 75,
+  "reached": 6,
+  "total_targets": 6,
+  "trajectory": [
+    [
+      0.0,
+      0.0
+    ],
+    [
+      0.1,
+      0.0
+    ],
+    [
+      0.2,
+      0.0
+    ],
+    [
+      0.30000000000000004,
+      0.0
+    ],
+    [
+      0.4,
+      0.0
+    ],
+    [
+      0.5,
+      0.0
+    ],
+    [
+      0.6,
+      0.0
+    ],
+    [
+      0.7,
+      0.0
+    ],
+    [
+      0.7999999999999999,
+      0.0
+    ],
+    [
+      0.7999999999999999,
+      -0.1
+    ],
+    [
+      0.7999999999999999,
+      -0.2
+    ],
+    [
+      0.7999999999999999,
+      -0.30000000000000004
+    ],
+    [
+      0.7999999999999999,
+      -0.4
+    ],
+    [
+      0.7999999999999999,
+      -0.5
+    ],
+    [
+      0.7999999999999999,
+      -0.6
+    ],
+    [
+      0.7999999999999999,
+      -0.7
+    ],
+    [
+      0.7999999999999999,
+      -0.7999999999999999
+    ],
+    [
+      0.7,
+      -0.7999999999999999
+    ],
+    [
+      0.6,
+      -0.7999999999999999
+    ],
+    [
+      0.5,
+      -0.7999999999999999
+    ],
+    [
+      0.4,
+      -0.7999999999999999
+    ],
+    [
+      0.30000000000000004,
+      -0.7999999999999999
+    ],
+    [
+      0.20000000000000004,
+      -0.7999999999999999
+    ],
+    [
+      0.10000000000000003,
+      -0.7999999999999999
+    ],
+    [
+      2.7755575615628914e-17,
+      -0.7999999999999999
+    ],
+    [
+      -0.09999999999999998,
+      -0.7999999999999999
+    ],
+    [
+      -0.19999999999999998,
+      -0.7999999999999999
+    ],
+    [
+      -0.3,
+      -0.7999999999999999
+    ],
+    [
+      -0.4,
+      -0.7999999999999999
+    ],
+    [
+      -0.5,
+      -0.7999999999999999
+    ],
+    [
+      -0.6,
+      -0.7999999999999999
+    ],
+    [
+      -0.7,
+      -0.7999999999999999
+    ],
+    [
+      -0.7999999999999999,
+      -0.7999999999999999
+    ],
+    [
+      -0.7999999999999999,
+      -0.7
+    ],
+    [
+      -0.7999999999999999,
+      -0.6
+    ],
+    [
+      -0.7999999999999999,
+      -0.5
+    ],
+    [
+      -0.7999999999999999,
+      -0.4
+    ],
+    [
+      -0.7999999999999999,
+      -0.30000000000000004
+    ],
+    [
+      -0.7999999999999999,
+      -0.20000000000000004
+    ],
+    [
+      -0.7999999999999999,
+      -0.10000000000000003
+    ],
+    [
+      -0.7999999999999999,
+      -2.7755575615628914e-17
+    ],
+    [
+      -0.7999999999999999,
+      0.09999999999999998
+    ],
+    [
+      -0.7999999999999999,
+      0.19999999999999998
+    ],
+    [
+      -0.7999999999999999,
+      0.3
+    ],
+    [
+      -0.7999999999999999,
+      0.4
+    ],
+    [
+      -0.7999999999999999,
+      0.5
+    ],
+    [
+      -0.7999999999999999,
+      0.6
+    ],
+    [
+      -0.7999999999999999,
+      0.7
+    ],
+    [
+      -0.7999999999999999,
+      0.7999999999999999
+    ],
+    [
+      -0.7,
+      0.7999999999999999
+    ],
+    [
+      -0.6,
+      0.7999999999999999
+    ],
+    [
+      -0.5,
+      0.7999999999999999
+    ],
+    [
+      -0.4,
+      0.7999999999999999
+    ],
+    [
+      -0.30000000000000004,
+      0.7999999999999999
+    ],
+    [
+      -0.20000000000000004,
+      0.7999999999999999
+    ],
+    [
+      -0.10000000000000003,
+      0.7999999999999999
+    ],
+    [
+      -2.7755575615628914e-17,
+      0.7999999999999999
+    ],
+    [
+      0.09999999999999998,
+      0.7999999999999999
+    ],
+    [
+      0.19999999999999998,
+      0.7999999999999999
+    ],
+    [
+      0.3,
+      0.7999999999999999
+    ],
+    [
+      0.4,
+      0.7999999999999999
+    ],
+    [
+      0.5,
+      0.7999999999999999
+    ],
+    [
+      0.6,
+      0.7999999999999999
+    ],
+    [
+      0.7,
+      0.7999999999999999
+    ],
+    [
+      0.7999999999999999,
+      0.7999999999999999
+    ],
+    [
+      0.7293,
+      0.7293
+    ],
+    [
+      0.6586,
+      0.6586
+    ],
+    [
+      0.5879,
+      0.5879
+    ],
+    [
+      0.5172,
+      0.5172
+    ],
+    [
+      0.4465,
+      0.4465
+    ],
+    [
+      0.3758,
+      0.3758
+    ],
+    [
+      0.30510000000000004,
+      0.30510000000000004
+    ],
+    [
+      0.23440000000000005,
+      0.23440000000000005
+    ],
+    [
+      0.16370000000000007,
+      0.16370000000000007
+    ],
+    [
+      0.09300000000000007,
+      0.09300000000000007
+    ],
+    [
+      0.02230000000000007,
+      0.02230000000000007
+    ]
+  ],
+  "timestamps": [
+    0.0,
+    1.5048372745513916,
+    3.0095484256744385,
+    4.514007091522217,
+    6.019079685211182,
+    7.5241734981536865,
+    9.029293537139893,
+    10.533658504486084,
+    12.037234544754028,
+    13.541731595993042,
+    15.04584264755249,
+    16.55059027671814,
+    18.054690837860107,
+    19.5589382648468,
+    21.063234090805054,
+    22.56774592399597,
+    24.072991371154785,
+    25.578168630599976,
+    27.083083152770996,
+    28.58748149871826,
+    30.091501474380493,
+    31.595902919769287,
+    33.10099267959595,
+    34.606160402297974,
+    36.11087441444397,
+    37.61578583717346,
+    39.12046003341675,
+    40.62460660934448,
+    42.12894916534424,
+    43.63357472419739,
+    45.1375834941864,
+    46.641902446746826,
+    48.14671540260315,
+    49.65192794799805,
+    51.15709853172302,
+    52.66166067123413,
+    54.1664822101593,
+    55.67153310775757,
+    57.17557191848755,
+    58.679861545562744,
+    60.18536877632141,
+    61.690075159072876,
+    63.19515824317932,
+    64.69982171058655,
+    66.2054533958435,
+    67.70959424972534,
+    69.21385765075684,
+    70.71905469894409,
+    72.22419905662537,
+    73.72883152961731,
+    75.23397898674011,
+    76.73857831954956,
+    78.24257516860962,
+    79.74671220779419,
+    81.25045132637024,
+    82.75550174713135,
+    84.25986647605896,
+    85.76557922363281,
+    87.27084541320801,
+    88.77598524093628,
+    90.28162550926208,
+    91.78716540336609,
+    93.29262042045593,
+    94.79677271842957,
+    96.30184602737427,
+    97.8069999217987,
+    99.31151580810547,
+    100.81631779670715,
+    102.32091975212097,
+    103.82569813728333,
+    105.32960081100464,
+    106.83474540710449,
+    108.34041118621826,
+    109.84458518028259,
+    111.34862065315247,
+    112.85258221626282
+  ],
+  "mode": "sim",
+  "board": "synthetic",
+  "eeg_history": [
+    {
+      "step": 1,
+      "eeg_class": 0,
+      "eeg_class_name": "Left Hand",
+      "eeg_confidence": 0.30351120233535767,
+      "action_used": 1,
+      "action_name": "right",
+      "position": [
+        0.1,
+        0.0
+      ]
+    },
+    {
+      "step": 2,
+      "eeg_class": 1,
+      "eeg_class_name": "Right Hand",
+      "eeg_confidence": 0.34002187848091125,
+      "action_used": 1,
+      "action_name": "right",
+      "position": [
+        0.2,
+        0.0
+      ]
+    },
+    {
+      "step": 3,
+      "eeg_class": 2,
+      "eeg_class_name": "Both Feet",
+      "eeg_confidence": 0.3909252882003784,
+      "action_used": 1,
+      "action_name": "right",
+      "position": [
+        0.30000000000000004,
+        0.0
+      ]
+    },
+    {
+      "step": 4,
+      "eeg_class": 0,
+      "eeg_class_name": "Left Hand",
+      "eeg_confidence": 0.3459029495716095,
+      "action_used": 1,
+      "action_name": "right",
+      "position": [
+        0.4,
+        0.0
+      ]
+    },
+    {
+      "step": 5,
+      "eeg_class": 2,
+      "eeg_class_name": "Both Feet",
+      "eeg_confidence": 0.48610082268714905,
+      "action_used": 1,
+      "action_name": "right",
+      "position": [
+        0.5,
+        0.0
+      ]
+    },
+    {
+      "step": 6,
+      "eeg_class": 3,
+      "eeg_class_name": "Tongue",
+      "eeg_confidence": 0.3375675678253174,
+      "action_used": 1,
+      "action_name": "right",
+      "position": [
+        0.6,
+        0.0
+      ]
+    },
+    {
+      "step": 7,
+      "eeg_class": 2,
+      "eeg_class_name": "Both Feet",
+      "eeg_confidence": 0.3996813893318176,
+      "action_used": 1,
+      "action_name": "right",
+      "position": [
+        0.7,
+        0.0
+      ]
+    },
+    {
+      "step": 8,
+      "eeg_class": 2,
+      "eeg_class_name": "Both Feet",
+      "eeg_confidence": 0.5355188846588135,
+      "action_used": 1,
+      "action_name": "right",
+      "position": [
+        0.7999999999999999,
+        0.0
+      ]
+    },
+    {
+      "step": 9,
+      "eeg_class": 2,
+      "eeg_class_name": "Both Feet",
+      "eeg_confidence": 0.2710927426815033,
+      "action_used": 3,
+      "action_name": "down",
+      "position": [
+        0.7999999999999999,
+        -0.1
+      ]
+    },
+    {
+      "step": 10,
+      "eeg_class": 2,
+      "eeg_class_name": "Both Feet",
+      "eeg_confidence": 0.37180569767951965,
+      "action_used": 3,
+      "action_name": "down",
+      "position": [
+        0.7999999999999999,
+        -0.2
+      ]
+    },
+    {
+      "step": 11,
+      "eeg_class": 2,
+      "eeg_class_name": "Both Feet",
+      "eeg_confidence": 0.4434022903442383,
+      "action_used": 3,
+      "action_name": "down",
+      "position": [
+        0.7999999999999999,
+        -0.30000000000000004
+      ]
+    },
+    {
+      "step": 12,
+      "eeg_class": 2,
+      "eeg_class_name": "Both Feet",
+      "eeg_confidence": 0.3950013816356659,
+      "action_used": 3,
+      "action_name": "down",
+      "position": [
+        0.7999999999999999,
+        -0.4
+      ]
+    },
+    {
+      "step": 13,
+      "eeg_class": 1,
+      "eeg_class_name": "Right Hand",
+      "eeg_confidence": 0.3640269935131073,
+      "action_used": 3,
+      "action_name": "down",
+      "position": [
+        0.7999999999999999,
+        -0.5
+      ]
+    },
+    {
+      "step": 14,
+      "eeg_class": 2,
+      "eeg_class_name": "Both Feet",
+      "eeg_confidence": 0.39208725094795227,
+      "action_used": 3,
+      "action_name": "down",
+      "position": [
+        0.7999999999999999,
+        -0.6
+      ]
+    },
+    {
+      "step": 15,
+      "eeg_class": 2,
+      "eeg_class_name": "Both Feet",
+      "eeg_confidence": 0.349107563495636,
+      "action_used": 3,
+      "action_name": "down",
+      "position": [
+        0.7999999999999999,
+        -0.7
+      ]
+    },
+    {
+      "step": 16,
+      "eeg_class": 3,
+      "eeg_class_name": "Tongue",
+      "eeg_confidence": 0.3640335202217102,
+      "action_used": 3,
+      "action_name": "down",
+      "position": [
+        0.7999999999999999,
+        -0.7999999999999999
+      ]
+    },
+    {
+      "step": 17,
+      "eeg_class": 2,
+      "eeg_class_name": "Both Feet",
+      "eeg_confidence": 0.41001465916633606,
+      "action_used": 0,
+      "action_name": "left",
+      "position": [
+        0.7,
+        -0.7999999999999999
+      ]
+    },
+    {
+      "step": 18,
+      "eeg_class": 3,
+      "eeg_class_name": "Tongue",
+      "eeg_confidence": 0.3694944679737091,
+      "action_used": 0,
+      "action_name": "left",
+      "position": [
+        0.6,
+        -0.7999999999999999
+      ]
+    },
+    {
+      "step": 19,
+      "eeg_class": 0,
+      "eeg_class_name": "Left Hand",
+      "eeg_confidence": 0.2980438768863678,
+      "action_used": 0,
+      "action_name": "left",
+      "position": [
+        0.5,
+        -0.7999999999999999
+      ]
+    },
+    {
+      "step": 20,
+      "eeg_class": 2,
+      "eeg_class_name": "Both Feet",
+      "eeg_confidence": 0.5183989405632019,
+      "action_used": 0,
+      "action_name": "left",
+      "position": [
+        0.4,
+        -0.7999999999999999
+      ]
+    },
+    {
+      "step": 21,
+      "eeg_class": 2,
+      "eeg_class_name": "Both Feet",
+      "eeg_confidence": 0.43842801451683044,
+      "action_used": 0,
+      "action_name": "left",
+      "position": [
+        0.30000000000000004,
+        -0.7999999999999999
+      ]
+    },
+    {
+      "step": 22,
+      "eeg_class": 2,
+      "eeg_class_name": "Both Feet",
+      "eeg_confidence": 0.311052531003952,
+      "action_used": 0,
+      "action_name": "left",
+      "position": [
+        0.20000000000000004,
+        -0.7999999999999999
+      ]
+    },
+    {
+      "step": 23,
+      "eeg_class": 2,
+      "eeg_class_name": "Both Feet",
+      "eeg_confidence": 0.4293351173400879,
+      "action_used": 0,
+      "action_name": "left",
+      "position": [
+        0.10000000000000003,
+        -0.7999999999999999
+      ]
+    },
+    {
+      "step": 24,
+      "eeg_class": 2,
+      "eeg_class_name": "Both Feet",
+      "eeg_confidence": 0.6476872563362122,
+      "action_used": 0,
+      "action_name": "left",
+      "position": [
+        2.7755575615628914e-17,
+        -0.7999999999999999
+      ]
+    },
+    {
+      "step": 25,
+      "eeg_class": 1,
+      "eeg_class_name": "Right Hand",
+      "eeg_confidence": 0.3964416980743408,
+      "action_used": 0,
+      "action_name": "left",
+      "position": [
+        -0.09999999999999998,
+        -0.7999999999999999
+      ]
+    },
+    {
+      "step": 26,
+      "eeg_class": 2,
+      "eeg_class_name": "Both Feet",
+      "eeg_confidence": 0.4577735960483551,
+      "action_used": 0,
+      "action_name": "left",
+      "position": [
+        -0.19999999999999998,
+        -0.7999999999999999
+      ]
+    },
+    {
+      "step": 27,
+      "eeg_class": 2,
+      "eeg_class_name": "Both Feet",
+      "eeg_confidence": 0.5479078888893127,
+      "action_used": 0,
+      "action_name": "left",
+      "position": [
+        -0.3,
+        -0.7999999999999999
+      ]
+    },
+    {
+      "step": 28,
+      "eeg_class": 2,
+      "eeg_class_name": "Both Feet",
+      "eeg_confidence": 0.3497563898563385,
+      "action_used": 0,
+      "action_name": "left",
+      "position": [
+        -0.4,
+        -0.7999999999999999
+      ]
+    },
+    {
+      "step": 29,
+      "eeg_class": 2,
+      "eeg_class_name": "Both Feet",
+      "eeg_confidence": 0.3486621081829071,
+      "action_used": 0,
+      "action_name": "left",
+      "position": [
+        -0.5,
+        -0.7999999999999999
+      ]
+    },
+    {
+      "step": 30,
+      "eeg_class": 2,
+      "eeg_class_name": "Both Feet",
+      "eeg_confidence": 0.3281315863132477,
+      "action_used": 0,
+      "action_name": "left",
+      "position": [
+        -0.6,
+        -0.7999999999999999
+      ]
+    },
+    {
+      "step": 31,
+      "eeg_class": 2,
+      "eeg_class_name": "Both Feet",
+      "eeg_confidence": 0.40594884753227234,
+      "action_used": 0,
+      "action_name": "left",
+      "position": [
+        -0.7,
+        -0.7999999999999999
+      ]
+    },
+    {
+      "step": 32,
+      "eeg_class": 3,
+      "eeg_class_name": "Tongue",
+      "eeg_confidence": 0.33101779222488403,
+      "action_used": 0,
+      "action_name": "left",
+      "position": [
+        -0.7999999999999999,
+        -0.7999999999999999
+      ]
+    },
+    {
+      "step": 33,
+      "eeg_class": 2,
+      "eeg_class_name": "Both Feet",
+      "eeg_confidence": 0.34181341528892517,
+      "action_used": 2,
+      "action_name": "up",
+      "position": [
+        -0.7999999999999999,
+        -0.7
+      ]
+    },
+    {
+      "step": 34,
+      "eeg_class": 0,
+      "eeg_class_name": "Left Hand",
+      "eeg_confidence": 0.3521532714366913,
+      "action_used": 2,
+      "action_name": "up",
+      "position": [
+        -0.7999999999999999,
+        -0.6
+      ]
+    },
+    {
+      "step": 35,
+      "eeg_class": 1,
+      "eeg_class_name": "Right Hand",
+      "eeg_confidence": 0.35423558950424194,
+      "action_used": 2,
+      "action_name": "up",
+      "position": [
+        -0.7999999999999999,
+        -0.5
+      ]
+    },
+    {
+      "step": 36,
+      "eeg_class": 2,
+      "eeg_class_name": "Both Feet",
+      "eeg_confidence": 0.4350071847438812,
+      "action_used": 2,
+      "action_name": "up",
+      "position": [
+        -0.7999999999999999,
+        -0.4
+      ]
+    },
+    {
+      "step": 37,
+      "eeg_class": 2,
+      "eeg_class_name": "Both Feet",
+      "eeg_confidence": 0.3968634605407715,
+      "action_used": 2,
+      "action_name": "up",
+      "position": [
+        -0.7999999999999999,
+        -0.30000000000000004
+      ]
+    },
+    {
+      "step": 38,
+      "eeg_class": 0,
+      "eeg_class_name": "Left Hand",
+      "eeg_confidence": 0.3075198233127594,
+      "action_used": 2,
+      "action_name": "up",
+      "position": [
+        -0.7999999999999999,
+        -0.20000000000000004
+      ]
+    },
+    {
+      "step": 39,
+      "eeg_class": 2,
+      "eeg_class_name": "Both Feet",
+      "eeg_confidence": 0.4671139419078827,
+      "action_used": 2,
+      "action_name": "up",
+      "position": [
+        -0.7999999999999999,
+        -0.10000000000000003
+      ]
+    },
+    {
+      "step": 40,
+      "eeg_class": 2,
+      "eeg_class_name": "Both Feet",
+      "eeg_confidence": 0.3634065091609955,
+      "action_used": 2,
+      "action_name": "up",
+      "position": [
+        -0.7999999999999999,
+        -2.7755575615628914e-17
+      ]
+    },
+    {
+      "step": 41,
+      "eeg_class": 2,
+      "eeg_class_name": "Both Feet",
+      "eeg_confidence": 0.42152899503707886,
+      "action_used": 2,
+      "action_name": "up",
+      "position": [
+        -0.7999999999999999,
+        0.09999999999999998
+      ]
+    },
+    {
+      "step": 42,
+      "eeg_class": 2,
+      "eeg_class_name": "Both Feet",
+      "eeg_confidence": 0.3813802897930145,
+      "action_used": 2,
+      "action_name": "up",
+      "position": [
+        -0.7999999999999999,
+        0.19999999999999998
+      ]
+    },
+    {
+      "step": 43,
+      "eeg_class": 2,
+      "eeg_class_name": "Both Feet",
+      "eeg_confidence": 0.5423708558082581,
+      "action_used": 2,
+      "action_name": "up",
+      "position": [
+        -0.7999999999999999,
+        0.3
+      ]
+    },
+    {
+      "step": 44,
+      "eeg_class": 2,
+      "eeg_class_name": "Both Feet",
+      "eeg_confidence": 0.37516671419143677,
+      "action_used": 2,
+      "action_name": "up",
+      "position": [
+        -0.7999999999999999,
+        0.4
+      ]
+    },
+    {
+      "step": 45,
+      "eeg_class": 2,
+      "eeg_class_name": "Both Feet",
+      "eeg_confidence": 0.3824847936630249,
+      "action_used": 2,
+      "action_name": "up",
+      "position": [
+        -0.7999999999999999,
+        0.5
+      ]
+    },
+    {
+      "step": 46,
+      "eeg_class": 2,
+      "eeg_class_name": "Both Feet",
+      "eeg_confidence": 0.4182223081588745,
+      "action_used": 2,
+      "action_name": "up",
+      "position": [
+        -0.7999999999999999,
+        0.6
+      ]
+    },
+    {
+      "step": 47,
+      "eeg_class": 0,
+      "eeg_class_name": "Left Hand",
+      "eeg_confidence": 0.40319472551345825,
+      "action_used": 2,
+      "action_name": "up",
+      "position": [
+        -0.7999999999999999,
+        0.7
+      ]
+    },
+    {
+      "step": 48,
+      "eeg_class": 2,
+      "eeg_class_name": "Both Feet",
+      "eeg_confidence": 0.45653486251831055,
+      "action_used": 2,
+      "action_name": "up",
+      "position": [
+        -0.7999999999999999,
+        0.7999999999999999
+      ]
+    },
+    {
+      "step": 49,
+      "eeg_class": 2,
+      "eeg_class_name": "Both Feet",
+      "eeg_confidence": 0.34836411476135254,
+      "action_used": 1,
+      "action_name": "right",
+      "position": [
+        -0.7,
+        0.7999999999999999
+      ]
+    },
+    {
+      "step": 50,
+      "eeg_class": 2,
+      "eeg_class_name": "Both Feet",
+      "eeg_confidence": 0.28653520345687866,
+      "action_used": 1,
+      "action_name": "right",
+      "position": [
+        -0.6,
+        0.7999999999999999
+      ]
+    },
+    {
+      "step": 51,
+      "eeg_class": 2,
+      "eeg_class_name": "Both Feet",
+      "eeg_confidence": 0.5847586989402771,
+      "action_used": 1,
+      "action_name": "right",
+      "position": [
+        -0.5,
+        0.7999999999999999
+      ]
+    },
+    {
+      "step": 52,
+      "eeg_class": 2,
+      "eeg_class_name": "Both Feet",
+      "eeg_confidence": 0.41495805978775024,
+      "action_used": 1,
+      "action_name": "right",
+      "position": [
+        -0.4,
+        0.7999999999999999
+      ]
+    },
+    {
+      "step": 53,
+      "eeg_class": 0,
+      "eeg_class_name": "Left Hand",
+      "eeg_confidence": 0.32955819368362427,
+      "action_used": 1,
+      "action_name": "right",
+      "position": [
+        -0.30000000000000004,
+        0.7999999999999999
+      ]
+    },
+    {
+      "step": 54,
+      "eeg_class": 2,
+      "eeg_class_name": "Both Feet",
+      "eeg_confidence": 0.3937399685382843,
+      "action_used": 1,
+      "action_name": "right",
+      "position": [
+        -0.20000000000000004,
+        0.7999999999999999
+      ]
+    },
+    {
+      "step": 55,
+      "eeg_class": 2,
+      "eeg_class_name": "Both Feet",
+      "eeg_confidence": 0.4804893434047699,
+      "action_used": 1,
+      "action_name": "right",
+      "position": [
+        -0.10000000000000003,
+        0.7999999999999999
+      ]
+    },
+    {
+      "step": 56,
+      "eeg_class": 1,
+      "eeg_class_name": "Right Hand",
+      "eeg_confidence": 0.38236358761787415,
+      "action_used": 1,
+      "action_name": "right",
+      "position": [
+        -2.7755575615628914e-17,
+        0.7999999999999999
+      ]
+    },
+    {
+      "step": 57,
+      "eeg_class": 2,
+      "eeg_class_name": "Both Feet",
+      "eeg_confidence": 0.3964284658432007,
+      "action_used": 1,
+      "action_name": "right",
+      "position": [
+        0.09999999999999998,
+        0.7999999999999999
+      ]
+    },
+    {
+      "step": 58,
+      "eeg_class": 2,
+      "eeg_class_name": "Both Feet",
+      "eeg_confidence": 0.4235755205154419,
+      "action_used": 1,
+      "action_name": "right",
+      "position": [
+        0.19999999999999998,
+        0.7999999999999999
+      ]
+    },
+    {
+      "step": 59,
+      "eeg_class": 1,
+      "eeg_class_name": "Right Hand",
+      "eeg_confidence": 0.35261738300323486,
+      "action_used": 1,
+      "action_name": "right",
+      "position": [
+        0.3,
+        0.7999999999999999
+      ]
+    },
+    {
+      "step": 60,
+      "eeg_class": 0,
+      "eeg_class_name": "Left Hand",
+      "eeg_confidence": 0.2794741690158844,
+      "action_used": 1,
+      "action_name": "right",
+      "position": [
+        0.4,
+        0.7999999999999999
+      ]
+    },
+    {
+      "step": 61,
+      "eeg_class": 2,
+      "eeg_class_name": "Both Feet",
+      "eeg_confidence": 0.5210441946983337,
+      "action_used": 1,
+      "action_name": "right",
+      "position": [
+        0.5,
+        0.7999999999999999
+      ]
+    },
+    {
+      "step": 62,
+      "eeg_class": 2,
+      "eeg_class_name": "Both Feet",
+      "eeg_confidence": 0.3992413878440857,
+      "action_used": 1,
+      "action_name": "right",
+      "position": [
+        0.6,
+        0.7999999999999999
+      ]
+    },
+    {
+      "step": 63,
+      "eeg_class": 2,
+      "eeg_class_name": "Both Feet",
+      "eeg_confidence": 0.4418030381202698,
+      "action_used": 1,
+      "action_name": "right",
+      "position": [
+        0.7,
+        0.7999999999999999
+      ]
+    },
+    {
+      "step": 64,
+      "eeg_class": 1,
+      "eeg_class_name": "Right Hand",
+      "eeg_confidence": 0.4734708368778229,
+      "action_used": 1,
+      "action_name": "right",
+      "position": [
+        0.7999999999999999,
+        0.7999999999999999
+      ]
+    },
+    {
+      "step": 65,
+      "eeg_class": 2,
+      "eeg_class_name": "Both Feet",
+      "eeg_confidence": 0.44688162207603455,
+      "action_used": 6,
+      "action_name": "down_left",
+      "position": [
+        0.7293,
+        0.7293
+      ]
+    },
+    {
+      "step": 66,
+      "eeg_class": 3,
+      "eeg_class_name": "Tongue",
+      "eeg_confidence": 0.2867368757724762,
+      "action_used": 6,
+      "action_name": "down_left",
+      "position": [
+        0.6586,
+        0.6586
+      ]
+    },
+    {
+      "step": 67,
+      "eeg_class": 2,
+      "eeg_class_name": "Both Feet",
+      "eeg_confidence": 0.373989075422287,
+      "action_used": 6,
+      "action_name": "down_left",
+      "position": [
+        0.5879,
+        0.5879
+      ]
+    },
+    {
+      "step": 68,
+      "eeg_class": 2,
+      "eeg_class_name": "Both Feet",
+      "eeg_confidence": 0.4710805118083954,
+      "action_used": 6,
+      "action_name": "down_left",
+      "position": [
+        0.5172,
+        0.5172
+      ]
+    },
+    {
+      "step": 69,
+      "eeg_class": 2,
+      "eeg_class_name": "Both Feet",
+      "eeg_confidence": 0.32969343662261963,
+      "action_used": 6,
+      "action_name": "down_left",
+      "position": [
+        0.4465,
+        0.4465
+      ]
+    },
+    {
+      "step": 70,
+      "eeg_class": 2,
+      "eeg_class_name": "Both Feet",
+      "eeg_confidence": 0.4394771456718445,
+      "action_used": 6,
+      "action_name": "down_left",
+      "position": [
+        0.3758,
+        0.3758
+      ]
+    },
+    {
+      "step": 71,
+      "eeg_class": 2,
+      "eeg_class_name": "Both Feet",
+      "eeg_confidence": 0.6189064979553223,
+      "action_used": 6,
+      "action_name": "down_left",
+      "position": [
+        0.30510000000000004,
+        0.30510000000000004
+      ]
+    },
+    {
+      "step": 72,
+      "eeg_class": 2,
+      "eeg_class_name": "Both Feet",
+      "eeg_confidence": 0.4147995710372925,
+      "action_used": 6,
+      "action_name": "down_left",
+      "position": [
+        0.23440000000000005,
+        0.23440000000000005
+      ]
+    },
+    {
+      "step": 73,
+      "eeg_class": 2,
+      "eeg_class_name": "Both Feet",
+      "eeg_confidence": 0.460200697183609,
+      "action_used": 6,
+      "action_name": "down_left",
+      "position": [
+        0.16370000000000007,
+        0.16370000000000007
+      ]
+    },
+    {
+      "step": 74,
+      "eeg_class": 0,
+      "eeg_class_name": "Left Hand",
+      "eeg_confidence": 0.34425094723701477,
+      "action_used": 6,
+      "action_name": "down_left",
+      "position": [
+        0.09300000000000007,
+        0.09300000000000007
+      ]
+    },
+    {
+      "step": 75,
+      "eeg_class": 0,
+      "eeg_class_name": "Left Hand",
+      "eeg_confidence": 0.3463473618030548,
+      "action_used": 6,
+      "action_name": "down_left",
+      "position": [
+        0.02230000000000007,
+        0.02230000000000007
+      ]
+    }
+  ]
+}

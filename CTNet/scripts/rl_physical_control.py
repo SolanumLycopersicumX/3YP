@@ -46,6 +46,7 @@ if str(_ROOT) not in sys.path:
 
 from drivers.so101_serial import So101Bus, So101Map
 from serial_arm_env import SerialArmEnv, SerialConfig
+from serial_arm_env_v2 import SerialArmEnvV2, SerialConfigV2
 from scripts.dqn_transformer import TransformerDQN, LightTransformerDQN
 from scripts.dqn_model import DQNNetwork
 
@@ -72,6 +73,13 @@ class RLPhysicalConfig:
     # 控制
     action_delay: float = 0.3  # 动作间延时
     joint_step_rad: float = 0.05  # 关节每步弧度
+    
+    # ========== 平滑控制参数 (SerialArmEnvV2) ==========
+    use_smooth_env: bool = False  # 是否使用优化版环境
+    move_velocity: int = 80  # 运动速度 (ticks/s), 越小越慢
+    action_delay_ms: int = 600  # 动作间延时 (ms)
+    soft_limit_margin: float = 0.10  # 软限位边距 (占总行程比例)
+    auto_recenter_interval: int = 10  # 自动回中间隔 (0=禁用)
 
 
 # ============================================================================
@@ -274,12 +282,53 @@ def load_eeg_classifier(dataset_type: str, subject_id: int, device: torch.device
         n_classes, n_channels = 4, 22
     elif dataset_type == "B":
         n_classes, n_channels = 2, 3
-    else:  # PhysioNet
+    elif dataset_type == "P4":
+        n_classes, n_channels = 4, 64
+    else:  # PhysioNet 2-class
         n_classes, n_channels = 2, 64
     
-    # PhysioNet: 使用 SimpleCTNet（与 test_physionet_ctnet.py 一致）
+    # PhysioNet 4-class: 使用完整 EEGTransformer
+    if dataset_type == "P4":
+        print("[CTNet] PhysioNet 4-class 使用 EEGTransformer")
+        
+        # 从 train_physionet_4class_ctnet.py 导入模型定义
+        from scripts.train_physionet_4class_ctnet import EEGTransformer as PhysioNetEEGTransformer
+        
+        # 尝试加载预训练模型
+        model_path = _ROOT / "outputs" / "physionet_4class_ctnet" / "physionet_4class_ctnet.pth"
+        
+        if model_path.exists():
+            print(f"[CTNet] 加载 4-class 模型: {model_path}")
+            checkpoint = torch.load(model_path, map_location=device, weights_only=False)
+            
+            model = PhysioNetEEGTransformer(
+                n_channels=checkpoint.get('n_channels', 64),
+                n_times=checkpoint.get('n_times', 721),
+                n_classes=checkpoint.get('n_classes', 4),
+                d_model=checkpoint.get('d_model', 64),
+                n_heads=checkpoint.get('n_heads', 8),
+                n_layers=checkpoint.get('n_layers', 2),
+                dropout=checkpoint.get('dropout', 0.1),
+            ).to(device)
+            
+            model.load_state_dict(checkpoint['model_state_dict'])
+            print(f"[CTNet] 4-class 模型加载成功 (acc={checkpoint.get('accuracy', 0):.2%})")
+        else:
+            print(f"[CTNet] 警告: 未找到 4-class 预训练模型 ({model_path})")
+            print("[CTNet] 请先运行: python scripts/train_physionet_4class_ctnet.py")
+            # 使用随机初始化
+            model = PhysioNetEEGTransformer(
+                n_channels=64,
+                n_times=n_timepoints,
+                n_classes=4,
+            ).to(device)
+        
+        model.eval()
+        return model
+    
+    # PhysioNet 2-class: 使用 SimpleCTNet（与 test_physionet_ctnet.py 一致）
     if dataset_type == "P":
-        print("[CTNet] PhysioNet 使用 SimpleCTNet")
+        print("[CTNet] PhysioNet 2-class 使用 SimpleCTNet")
         # 优先加载联合模型，否则加载单被试模型
         joint_model_path = _ROOT / "outputs" / "physionet_ctnet" / "physionet_ctnet_joint.pth"
         subject_model_path = _ROOT / "outputs" / "physionet_ctnet" / f"physionet_ctnet_S{subject_id:03d}.pth"
@@ -433,35 +482,54 @@ def run_rl_physical_control(
     """
     
     # 创建串口环境
-    serial_cfg = SerialConfig(
-        port=config.serial_port,
-        baud=config.serial_baud,
-        timeout=config.serial_timeout,
-        joint_step_rad=config.joint_step_rad,
-        max_steps=config.max_steps,
-    )
-    serial_env = SerialArmEnv(serial_cfg, render_mode="human")
+    if config.use_smooth_env:
+        # 使用优化版 SerialArmEnvV2 (平滑 + 限位 + 自动回中)
+        print("[SerialEnv] 使用优化版 SerialArmEnvV2")
+        serial_cfg = SerialConfigV2(
+            port=config.serial_port,
+            baud=config.serial_baud,
+            timeout=config.serial_timeout,
+            joint_step_rad=config.joint_step_rad,
+            move_velocity=config.move_velocity,
+            action_delay_ms=config.action_delay_ms,
+            soft_limit_margin=config.soft_limit_margin,
+            auto_recenter_interval=config.auto_recenter_interval,
+        )
+        serial_env = SerialArmEnvV2(serial_cfg, render_mode="human")
+    else:
+        # 使用原版 SerialArmEnv
+        serial_cfg = SerialConfig(
+            port=config.serial_port,
+            baud=config.serial_baud,
+            timeout=config.serial_timeout,
+            joint_step_rad=config.joint_step_rad,
+            max_steps=config.max_steps,
+        )
+        serial_env = SerialArmEnv(serial_cfg, render_mode="human")
     
     # 创建 RL 物理环境
     env = RLPhysicalEnv(config, serial_env)
     
     # 意图到目标位置的映射
-    # 0=left, 1=right, 2=up/feet, 3=down/tongue (4类)
-    # 0=left, 1=right (2类)
+    # PhysioNet 4-class: 0=left, 1=right, 2=hands(up), 3=feet(down)
+    # BCI Competition IV-2a: 0=left, 1=right, 2=feet, 3=tongue
+    # 2-class: 0=left, 1=right
     n_classes = eeg_labels.max() + 1 if eeg_labels.min() == 0 else eeg_labels.max()
     
     if n_classes == 4:
         intent_to_target = {
-            0: (-0.5, 0.0),   # left
-            1: (0.5, 0.0),    # right
-            2: (0.0, 0.5),    # up (feet)
-            3: (0.0, -0.5),   # down (tongue)
+            0: (-0.5, 0.0),   # left hand → move left
+            1: (0.5, 0.0),    # right hand → move right
+            2: (0.0, 0.5),    # hands (PhysioNet) / feet (IV-2a) → move up
+            3: (0.0, -0.5),   # feet (PhysioNet) / tongue (IV-2a) → move down
         }
+        intent_names = ["left", "right", "hands/up", "feet/down"]
     else:
         intent_to_target = {
             0: (-0.5, 0.0),   # left
             1: (0.5, 0.0),    # right
         }
+        intent_names = ["left", "right"]
     
     action_names = ["left", "right", "up", "down"]
     results = []
@@ -495,7 +563,9 @@ def run_rl_physical_control(
         
         if verbose:
             print(f"\n[Trial {trial+1}/{num_trials}]")
-            print(f"  EEG 预测意图: {action_names[pred_intent]} (真实: {action_names[true_label]})")
+            pred_name = intent_names[pred_intent] if pred_intent < len(intent_names) else f"unknown({pred_intent})"
+            true_name = intent_names[true_label] if true_label < len(intent_names) else f"unknown({true_label})"
+            print(f"  EEG 预测意图: {pred_name} (真实: {true_name})")
             print(f"  目标位置: ({target_y:.2f}, {target_z:.2f})")
         
         # 重置环境
@@ -696,11 +766,14 @@ def parse_args():
     
     # 数据
     p.add_argument("--subject", type=int, default=1)
-    p.add_argument("--dataset", choices=["A", "B", "P"], default="A",
-                   help="A=IV-2a(4类), B=IV-2b(2类), P=PhysioNet(2类)")
+    p.add_argument("--dataset", choices=["A", "B", "P", "P4"], default="A",
+                   help="A=IV-2a(4类), B=IV-2b(2类), P=PhysioNet(2类), P4=PhysioNet(4类)")
     p.add_argument("--data-dir", type=Path, default=Path("./mymat_raw/"))
     p.add_argument("--physionet-mat", type=Path, default=Path("./physionet_raw/physionet_3sub.mat"),
-                   help="PhysioNet 数据文件路径")
+                   help="PhysioNet 数据文件路径 (2类)")
+    p.add_argument("--physionet-4class-mat", type=Path, 
+                   default=Path("./physionet_raw/physionet_4class.mat"),
+                   help="PhysioNet 4类数据文件路径")
     
     # 控制
     p.add_argument("--num-trials", type=int, default=10)
@@ -719,6 +792,12 @@ def parse_args():
                    help="软限位边距 (0.0-0.3)")
     p.add_argument("--use-smooth-env", action="store_true",
                    help="使用优化版平滑环境 (SerialArmEnvV2)")
+    p.add_argument("--move-velocity", type=int, default=80,
+                   help="运动速度 (ticks/s), 越小越慢 (推荐: 60-120)")
+    p.add_argument("--action-delay-ms", type=int, default=600,
+                   help="动作间延时 (ms), 确保运动完成")
+    p.add_argument("--auto-recenter", type=int, default=10,
+                   help="自动回中间隔 (0=禁用, >0=每N步回中)")
     
     # 模型
     p.add_argument("--rl-model", choices=["dqn", "transformer", "light_transformer"], 
@@ -753,13 +832,51 @@ def main():
         n_classes, n_channels = 4, 22
     elif args.dataset == "B":
         n_classes, n_channels = 2, 3
-    else:  # PhysioNet
+    elif args.dataset == "P4":
+        n_classes, n_channels = 4, 64
+    else:  # PhysioNet 2-class
         n_classes, n_channels = 2, 64
     
     # 加载测试数据
-    if args.dataset == "P":
-        # PhysioNet 数据
-        print(f"[Data] 加载 PhysioNet 数据: {args.physionet_mat}")
+    if args.dataset == "P4":
+        # PhysioNet 4-class 数据 (left, right, hands→up, feet→down)
+        print(f"[Data] 加载 PhysioNet 4-class 数据...")
+        
+        # 优先使用预处理的 .mat 文件
+        if args.physionet_4class_mat.exists():
+            print(f"[Data] 从 {args.physionet_4class_mat} 加载")
+            data_mat = loadmat(str(args.physionet_4class_mat))
+            eeg_data = data_mat["data"]
+            eeg_labels = data_mat["label"].flatten()
+            subject_ids = data_mat.get("subject_id", np.zeros(len(eeg_labels))).flatten()
+            
+            # 筛选特定被试
+            if subject_ids.max() > 0:
+                mask = subject_ids == args.subject
+                if mask.sum() > 0:
+                    eeg_data = eeg_data[mask]
+                    eeg_labels = eeg_labels[mask]
+                    print(f"[Data] 筛选被试 {args.subject}: {len(eeg_data)} trials")
+        else:
+            # 使用 MNE 直接加载
+            try:
+                from scripts.physionet_loader import load_subject_4class_mne
+                print(f"[Data] 使用 MNE 加载被试 {args.subject} 的 4-class 数据...")
+                eeg_data, eeg_labels = load_subject_4class_mne(args.subject)
+                print(f"[Data] 加载完成: {len(eeg_data)} trials")
+            except ImportError as e:
+                print(f"[Error] 需要安装 MNE: pip install mne")
+                return
+        
+        # 标签已经是 0-based: 0=left, 1=right, 2=hands, 3=feet
+        unique_labels, counts = np.unique(eeg_labels, return_counts=True)
+        label_names = {0: 'left', 1: 'right', 2: 'hands(up)', 3: 'feet(down)'}
+        label_str = ', '.join([f"{label_names.get(l, l)}:{c}" for l, c in zip(unique_labels, counts)])
+        print(f"[Data] 标签分布: {label_str}")
+        
+    elif args.dataset == "P":
+        # PhysioNet 2-class 数据
+        print(f"[Data] 加载 PhysioNet 2-class 数据: {args.physionet_mat}")
         data_mat = loadmat(str(args.physionet_mat))
         eeg_data = data_mat["data"]
         eeg_labels = data_mat["label"].flatten()
@@ -790,7 +907,7 @@ def main():
         eeg_labels = data_mat["label"].flatten()
     
     # 预处理
-    if args.dataset == "P":
+    if args.dataset in ["P", "P4"]:
         # PhysioNet: SimpleCTNet 期望 [N, C, T]，内部会 unsqueeze
         mean, std = eeg_data.mean(), eeg_data.std() or 1.0
         eeg_data = (eeg_data - mean) / std
@@ -819,6 +936,13 @@ def main():
         target_radius=args.target_radius,
         max_steps=args.max_steps,
         action_delay=args.action_delay,
+        joint_step_rad=args.step_rad if args.step_rad else 0.12,  # 使用优化后的默认步长
+        # 平滑控制参数
+        use_smooth_env=args.use_smooth_env,
+        move_velocity=args.move_velocity if hasattr(args, 'move_velocity') else 80,
+        action_delay_ms=args.action_delay_ms if hasattr(args, 'action_delay_ms') else 600,
+        soft_limit_margin=args.soft_limit,
+        auto_recenter_interval=args.auto_recenter if hasattr(args, 'auto_recenter') else 10,
     )
     
     # 运行控制

@@ -56,11 +56,21 @@ MI_RUNS = {
     'hands_feet_imagine': [6, 10, 14],  # 想象双手/双脚
 }
 
-# 事件编码
+# 事件编码 (2类模式)
 EVENT_DICT = {
     'rest': 0,       # T0
     'left/hands': 1,  # T1
     'right/feet': 2,  # T2
+}
+
+# 4类标签映射
+# left_right_imagine: T1=left, T2=right
+# hands_feet_imagine: T1=hands(up), T2=feet(down)
+LABEL_MAP_4CLASS = {
+    'left': 0,    # 左手 → left
+    'right': 1,   # 右手 → right
+    'hands': 2,   # 双手 → up
+    'feet': 3,    # 双脚 → down
 }
 
 # Epoch 参数
@@ -139,6 +149,173 @@ def load_subject_mne(
     labels = np.array([label_map[l] for l in labels])
     
     return data.astype(np.float32), labels.astype(np.int64)
+
+
+def load_subject_4class_mne(
+    subject: int,
+    tmin: float = TMIN,
+    tmax: float = TMAX,
+    baseline: Optional[Tuple[float, float]] = None,
+) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    加载单个被试的 4 类数据（左手、右手、双手、双脚）
+    
+    合并 left_right_imagine 和 hands_feet_imagine 两种任务
+    
+    参数:
+        subject: 被试编号 (1-109)
+        tmin, tmax: epoch 时间范围
+        baseline: 基线校正范围
+    
+    返回:
+        data: (n_epochs, n_channels, n_times)
+        labels: (n_epochs,) - 0=left, 1=right, 2=hands(up), 3=feet(down)
+    """
+    if not MNE_AVAILABLE:
+        raise ImportError("需要安装 MNE: pip install mne")
+    
+    all_data = []
+    all_labels = []
+    
+    # 加载 left_right_imagine (runs 4, 8, 12)
+    # T1 = left (label 0), T2 = right (label 1)
+    lr_runs = MI_RUNS['left_right_imagine']
+    raw_fnames = eegbci.load_data(subject, lr_runs)
+    raws = [read_raw_edf(f, preload=True, verbose=False) for f in raw_fnames]
+    raw_lr = mne.concatenate_raws(raws)
+    eegbci.standardize(raw_lr)
+    montage = mne.channels.make_standard_montage('standard_1005')
+    raw_lr.set_montage(montage, on_missing='ignore')
+    
+    events_lr, event_id_lr = mne.events_from_annotations(raw_lr, verbose=False)
+    picks = mne.pick_types(raw_lr.info, eeg=True, stim=False)
+    
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        epochs_lr = mne.Epochs(
+            raw_lr, events_lr, event_id_lr,
+            tmin=tmin, tmax=tmax,
+            proj=True, picks=picks,
+            baseline=baseline,
+            preload=True,
+            verbose=False
+        )
+    
+    data_lr = epochs_lr.get_data()
+    labels_lr = epochs_lr.events[:, -1]
+    
+    # 将 MNE 事件 ID 映射到我们的标签
+    # 通常 T1=1 → left(0), T2=2 → right(1), T0=0 → rest (过滤掉)
+    unique_lr = np.unique(labels_lr)
+    sorted_lr = sorted(unique_lr)
+    # sorted_lr 通常是 [T0_id, T1_id, T2_id]
+    # 我们只要 T1 和 T2
+    if len(sorted_lr) >= 3:
+        t0_id, t1_id, t2_id = sorted_lr[0], sorted_lr[1], sorted_lr[2]
+    else:
+        t1_id, t2_id = sorted_lr[0], sorted_lr[1]
+        t0_id = -1
+    
+    # 过滤 rest 并映射标签
+    mask_lr = labels_lr != t0_id
+    data_lr = data_lr[mask_lr]
+    labels_lr = labels_lr[mask_lr]
+    labels_lr = np.where(labels_lr == t1_id, 0, 1)  # T1→left(0), T2→right(1)
+    
+    all_data.append(data_lr)
+    all_labels.append(labels_lr)
+    
+    # 加载 hands_feet_imagine (runs 6, 10, 14)
+    # T1 = hands (label 2), T2 = feet (label 3)
+    hf_runs = MI_RUNS['hands_feet_imagine']
+    raw_fnames = eegbci.load_data(subject, hf_runs)
+    raws = [read_raw_edf(f, preload=True, verbose=False) for f in raw_fnames]
+    raw_hf = mne.concatenate_raws(raws)
+    eegbci.standardize(raw_hf)
+    raw_hf.set_montage(montage, on_missing='ignore')
+    
+    events_hf, event_id_hf = mne.events_from_annotations(raw_hf, verbose=False)
+    
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        epochs_hf = mne.Epochs(
+            raw_hf, events_hf, event_id_hf,
+            tmin=tmin, tmax=tmax,
+            proj=True, picks=picks,
+            baseline=baseline,
+            preload=True,
+            verbose=False
+        )
+    
+    data_hf = epochs_hf.get_data()
+    labels_hf = epochs_hf.events[:, -1]
+    
+    unique_hf = np.unique(labels_hf)
+    sorted_hf = sorted(unique_hf)
+    if len(sorted_hf) >= 3:
+        t0_id, t1_id, t2_id = sorted_hf[0], sorted_hf[1], sorted_hf[2]
+    else:
+        t1_id, t2_id = sorted_hf[0], sorted_hf[1]
+        t0_id = -1
+    
+    mask_hf = labels_hf != t0_id
+    data_hf = data_hf[mask_hf]
+    labels_hf = labels_hf[mask_hf]
+    labels_hf = np.where(labels_hf == t1_id, 2, 3)  # T1→hands(2), T2→feet(3)
+    
+    all_data.append(data_hf)
+    all_labels.append(labels_hf)
+    
+    # 合并
+    data = np.concatenate(all_data, axis=0)
+    labels = np.concatenate(all_labels, axis=0)
+    
+    return data.astype(np.float32), labels.astype(np.int64)
+
+
+def load_multiple_subjects_4class_mne(
+    subjects: List[int],
+    verbose: bool = True,
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """
+    加载多个被试的 4 类数据
+    
+    返回:
+        all_data: (total_epochs, n_channels, n_times)
+        all_labels: (total_epochs,) - 0=left, 1=right, 2=hands, 3=feet
+        subject_ids: (total_epochs,)
+    """
+    all_data = []
+    all_labels = []
+    subject_ids = []
+    
+    for subject in subjects:
+        if verbose:
+            print(f"  加载 Subject {subject:03d} (4类)...", end=" ")
+        
+        try:
+            data, labels = load_subject_4class_mne(subject)
+            all_data.append(data)
+            all_labels.append(labels)
+            subject_ids.append(np.full(len(labels), subject))
+            
+            # 统计各类数量
+            n_left = (labels == 0).sum()
+            n_right = (labels == 1).sum()
+            n_hands = (labels == 2).sum()
+            n_feet = (labels == 3).sum()
+            
+            if verbose:
+                print(f"✓ {len(labels)} epochs (L:{n_left} R:{n_right} H:{n_hands} F:{n_feet})")
+        except Exception as e:
+            if verbose:
+                print(f"✗ {e}")
+    
+    return (
+        np.concatenate(all_data, axis=0),
+        np.concatenate(all_labels, axis=0),
+        np.concatenate(subject_ids, axis=0),
+    )
 
 
 def load_multiple_subjects_mne(
@@ -319,9 +496,9 @@ def parse_args():
     
     p.add_argument("--subjects", type=int, nargs="+", default=[1, 2, 3],
                    help="被试编号")
-    p.add_argument("--task", choices=['left_right', 'hands_feet', 'all'], 
+    p.add_argument("--task", choices=['left_right', 'hands_feet', 'all', '4class'], 
                    default='left_right',
-                   help="任务类型")
+                   help="任务类型: left_right(2类), hands_feet(2类), 4class(4类合并)")
     p.add_argument("--imagine-only", action="store_true",
                    help="只加载运动想象任务 (不包括实际运动)")
     p.add_argument("--output-mat", type=Path, default=None,
@@ -346,57 +523,71 @@ def main():
         print("   pip install mne")
         return
     
-    # 确定要加载的 runs
-    if args.task == 'left_right':
-        if args.imagine_only:
-            runs = MI_RUNS['left_right_imagine']
-        else:
-            runs = MI_RUNS['left_right_real'] + MI_RUNS['left_right_imagine']
-    elif args.task == 'hands_feet':
-        if args.imagine_only:
-            runs = MI_RUNS['hands_feet_imagine']
-        else:
-            runs = MI_RUNS['hands_feet_real'] + MI_RUNS['hands_feet_imagine']
-    else:  # all
-        runs = list(range(3, 15))  # runs 3-14
-    
-    runs = sorted(set(runs))
-    
-    print(f"\n配置:")
-    print(f"  被试: {args.subjects}")
-    print(f"  任务: {args.task}")
-    print(f"  Runs: {runs}")
-    print(f"  想象任务only: {args.imagine_only}")
-    
-    # 加载数据
-    print(f"\n加载数据...")
-    
-    if args.data_dir and args.data_dir.exists():
-        # 从本地加载
-        all_data = []
-        all_labels = []
-        all_subject_ids = []
+    # 4类模式特殊处理
+    if args.task == '4class':
+        print(f"\n配置:")
+        print(f"  被试: {args.subjects}")
+        print(f"  任务: 4class (左手/右手/双手/双脚)")
+        print(f"  标签: 0=left, 1=right, 2=hands(up), 3=feet(down)")
         
-        for subject in args.subjects:
-            print(f"  Subject {subject:03d}...", end=" ")
-            try:
-                data, labels = load_subject_local(subject, args.data_dir, runs)
-                all_data.append(data)
-                all_labels.append(labels)
-                all_subject_ids.append(np.full(len(labels), subject))
-                print(f"✓ {len(labels)} epochs")
-            except Exception as e:
-                print(f"✗ {e}")
-        
-        data = np.concatenate(all_data, axis=0)
-        labels = np.concatenate(all_labels, axis=0)
-        subject_ids = np.concatenate(all_subject_ids, axis=0)
-    else:
-        # 使用 MNE 自动下载
+        # 加载 4 类数据
+        print(f"\n加载 4 类数据...")
         print("  (使用 MNE 自动下载，首次运行会较慢)")
-        data, labels, subject_ids = load_multiple_subjects_mne(
-            args.subjects, runs, verbose=True
+        data, labels, subject_ids = load_multiple_subjects_4class_mne(
+            args.subjects, verbose=True
         )
+    else:
+        # 确定要加载的 runs (2类模式)
+        if args.task == 'left_right':
+            if args.imagine_only:
+                runs = MI_RUNS['left_right_imagine']
+            else:
+                runs = MI_RUNS['left_right_real'] + MI_RUNS['left_right_imagine']
+        elif args.task == 'hands_feet':
+            if args.imagine_only:
+                runs = MI_RUNS['hands_feet_imagine']
+            else:
+                runs = MI_RUNS['hands_feet_real'] + MI_RUNS['hands_feet_imagine']
+        else:  # all
+            runs = list(range(3, 15))  # runs 3-14
+        
+        runs = sorted(set(runs))
+        
+        print(f"\n配置:")
+        print(f"  被试: {args.subjects}")
+        print(f"  任务: {args.task}")
+        print(f"  Runs: {runs}")
+        print(f"  想象任务only: {args.imagine_only}")
+        
+        # 加载数据
+        print(f"\n加载数据...")
+        
+        if args.data_dir and args.data_dir.exists():
+            # 从本地加载
+            all_data = []
+            all_labels = []
+            all_subject_ids = []
+            
+            for subject in args.subjects:
+                print(f"  Subject {subject:03d}...", end=" ")
+                try:
+                    data, labels = load_subject_local(subject, args.data_dir, runs)
+                    all_data.append(data)
+                    all_labels.append(labels)
+                    all_subject_ids.append(np.full(len(labels), subject))
+                    print(f"✓ {len(labels)} epochs")
+                except Exception as e:
+                    print(f"✗ {e}")
+            
+            data = np.concatenate(all_data, axis=0)
+            labels = np.concatenate(all_labels, axis=0)
+            subject_ids = np.concatenate(all_subject_ids, axis=0)
+        else:
+            # 使用 MNE 自动下载
+            print("  (使用 MNE 自动下载，首次运行会较慢)")
+            data, labels, subject_ids = load_multiple_subjects_mne(
+                args.subjects, runs, verbose=True
+            )
     
     print(f"\n数据加载完成:")
     print(f"  Shape: {data.shape}")

@@ -1,0 +1,67 @@
+{
+  "metric": "endpoint_error (final_distance_to_target)",
+  "unit": "normalized",
+  "note": "V1 uses step_rad=0.35/norm_step=0.12, V2/BF uses step_rad=0.70/norm_step=0.10",
+  "datasets": {
+    "V1 Physical (Baseline)": {
+      "overall_endpoint_error": 0.1348,
+      "workspace_pct": 6.74,
+      "angle_rad": 0.393,
+      "angle_deg": 22.5,
+      "reach_rate_pct": 87.5,
+      "per_pattern": {
+        "Horizontal": 0.6667,
+        "Vertical": 0.0,
+        "Diag UL-DR": 0.0318,
+        "Diag UR-DL": 0.0318,
+        "Square CW": 0.087,
+        "Square CCW": 0.087
+      }
+    },
+    "V1 EEG Control": {
+      "overall_endpoint_error": 0.0292,
+      "workspace_pct": 1.46,
+      "angle_rad": 0.085,
+      "angle_deg": 4.9,
+      "reach_rate_pct": 81.8,
+      "per_pattern": {
+        "Horizontal": 0.0,
+        "Vertical": 0.0,
+        "Diag UL-DR": 0.1072,
+        "Diag UR-DL": 0.1072,
+        "Square CW": 0.0,
+        "Square CCW": 0.0
+      }
+    },
+    "V2 Physical (Optimized)": {
+      "overall_endpoint_error": 0.0812,
+      "workspace_pct": 4.06,
+      "angle_rad": 0.568,
+      "angle_deg": 32.6,
+      "reach_rate_pct": 100.0,
+      "per_pattern": {
+        "Horizontal": 0.1,
+        "Vertical": 0.1,
+        "Diag UL-DR": 0.1015,
+        "Diag UR-DL": 0.1015,
+        "Square CW": 0.0616,
+        "Square CCW": 0.0616
+      }
+    },
+    "BrainFlow (Sim)": {
+      "overall_endpoint_error": 0.0807,
+      "workspace_pct": 4.04,
+      "angle_rad": 0.565,
+      "angle_deg": 32.4,
+      "reach_rate_pct": 100.0,
+      "per_pattern": {
+        "Horizontal": 0.1,
+        "Vertical": 0.1,
+        "Diag UL-DR": 0.1015,
+        "Diag UR-DL": 0.1015,
+        "Square CW": 0.0607,
+        "Square CCW": 0.0607
+      }
+    }
+  }
+}

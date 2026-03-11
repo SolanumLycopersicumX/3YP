@@ -54,17 +54,17 @@ class MovementTarget:
     
     @staticmethod
     def from_name(name: str) -> "MovementTarget":
-        # 使用与 test_8dir_comprehensive.py 相同的幅度 (0.75)
+        # 大幅度运动，减小相对误差 (1.00 / 0.85)
         positions = {
             "center": (0.0, 0.0),
-            "left":   (-0.75, 0.0),
-            "right":  (0.75, 0.0),
-            "up":     (0.0, 0.75),
-            "down":   (0.0, -0.75),
-            "up_left":    (-0.6, 0.6),
-            "up_right":   (0.6, 0.6),
-            "down_left":  (-0.6, -0.6),
-            "down_right": (0.6, -0.6),
+            "left":   (-1.00, 0.0),
+            "right":  (1.00, 0.0),
+            "up":     (0.0, 1.00),
+            "down":   (0.0, -1.00),
+            "up_left":    (-0.85, 0.85),
+            "up_right":   (0.85, 0.85),
+            "down_left":  (-0.85, -0.85),
+            "down_right": (0.85, -0.85),
         }
         if name not in positions:
             raise ValueError(f"Unknown position: {name}")
@@ -282,8 +282,13 @@ class EEGPhysicalController:
         
         dy, dz = ACTION_VECTORS[action]
         
+        old_y, old_z = self._y, self._z
         self._y = np.clip(self._y + dy * self.norm_step, -1.0, 1.0)
         self._z = np.clip(self._z + dz * self.norm_step, -1.0, 1.0)
+        
+        # 使用实际变化的 y 和 z 来计算真正的位移
+        eff_dy = (self._y - old_y) / self.norm_step if self.norm_step else 0.0
+        eff_dz = (self._z - old_z) / self.norm_step if self.norm_step else 0.0
         
         id_lr = self.serial_env._id_lr
         id_ud = self.serial_env._id_ud
@@ -295,8 +300,8 @@ class EEGPhysicalController:
             return (self._y, self._z)
         
         from drivers.so101_serial import So101Bus
-        d_lr_rad = -dy * self.step_rad
-        d_ud_rad = dz * self.step_rad
+        d_lr_rad = -eff_dy * self.step_rad
+        d_ud_rad = eff_dz * self.step_rad
         
         d_lr_ticks = So101Bus.rad_to_ticks(d_lr_rad)
         d_ud_ticks = So101Bus.rad_to_ticks(d_ud_rad)
@@ -304,13 +309,7 @@ class EEGPhysicalController:
         target_lr = cur_lr + d_lr_ticks
         target_ud = cur_ud + d_ud_ticks
         
-        lim_lr = self.serial_env._joint_limits.get(id_lr)
-        lim_ud = self.serial_env._joint_limits.get(id_ud)
-        
-        if lim_lr:
-            target_lr = lim_lr.clamp(target_lr)
-        if lim_ud:
-            target_ud = lim_ud.clamp(target_ud)
+        # 用户要求去除限位限制 (让机械臂能自由移动或由舵机自身硬件限位)
         
         try:
             bus = self.serial_env._bus
@@ -644,9 +643,9 @@ def parse_args():
     p.add_argument("--subjects", type=int, nargs="+", default=[1, 2, 3, 4, 5, 6])
     p.add_argument("--noise-level", type=float, default=0.1,
                    help="EEG 分类噪声水平 (0-1)")
-    p.add_argument("--step-rad", type=float, default=0.35)
-    p.add_argument("--norm-step", type=float, default=0.12)
-    p.add_argument("--velocity", type=int, default=100)
+    p.add_argument("--step-rad", type=float, default=0.70)
+    p.add_argument("--norm-step", type=float, default=0.25)
+    p.add_argument("--velocity", type=int, default=140)
     p.add_argument("--target-radius", type=float, default=0.12)
     p.add_argument("--output-dir", type=Path, default=_ROOT / "outputs" / "eeg_physical_control")
     p.add_argument("--home-json", type=Path, default=_ROOT / "serial_home.json")
@@ -671,7 +670,12 @@ def main():
     print(f"速度: {args.velocity}")
     print()
     
-    # 初始化环境
+    # ========== 测试开始前: 同步归中 ==========
+    # 注意: 必须在 SerialArmEnvV2 之前调用, 因为外部脚本需要独占串口
+    print("\n[同步归中]")
+    go_to_home_sync(args.serial_port, args.home_json, duration=2.0)
+    
+    # 初始化环境 (归中完成后再打开串口)
     cfg = SerialConfigV2(
         port=args.serial_port,
         move_velocity=args.velocity,
@@ -698,9 +702,6 @@ def main():
     all_results: Dict[int, SubjectResult] = {}
     
     try:
-        # 测试开始前同步归中
-        print("\n[同步归中]")
-        go_to_home_sync(args.serial_port, args.home_json)
         
         # 运行每个 subject 的序列
         for subject_id in args.subjects:
@@ -737,11 +738,11 @@ def main():
             with open(output_dir / f"subject_{subject_id}.json", "w") as f:
                 json.dump(result_json, f, indent=2)
             
-            # 归中准备下一个测试
+            # 归中准备下一个测试 (使用内部归中，不需要独占串口)
             if subject_id != args.subjects[-1]:
                 controller.reset()
-                print("\n  [归中]")
-                go_to_home_sync(args.serial_port, args.home_json)
+                print("\n  [归中] 使用内部归中...")
+                serial_env._recenter_joints()
         
         # 加载物理测试结果进行对比
         physical_results = {}
@@ -792,10 +793,10 @@ def main():
         
         # 先回中位确保所有关节位置正确，再归位
         print("\n[先回中位]")
-        go_to_home_sync(args.serial_port, args.home_json, duration=4.0)
+        go_to_home_sync(args.serial_port, args.home_json, duration=2.0)
         
         print("\n[同步归位]")
-        go_to_return_sync(args.serial_port, args.return_json, duration=4.0)
+        go_to_return_sync(args.serial_port, args.return_json, duration=2.0)
 
 
 if __name__ == "__main__":

@@ -1,0 +1,587 @@
+{
+  "1": {
+    "baseline_accuracy": 0.3125,
+    "biased_tests": {
+      "Set A (40L/30R/20F/10T)": {
+        "accuracy": 0.4375,
+        "actual_counts": [
+          32,
+          24,
+          16,
+          8
+        ],
+        "pred_counts": [
+          52,
+          24,
+          3,
+          1
+        ]
+      },
+      "Set B (10L/40R/30F/20T)": {
+        "accuracy": 0.4305555555555556,
+        "actual_counts": [
+          8,
+          32,
+          24,
+          8
+        ],
+        "pred_counts": [
+          39,
+          22,
+          10,
+          1
+        ]
+      },
+      "Set C (20L/10R/40F/30T)": {
+        "accuracy": 0.325,
+        "actual_counts": [
+          16,
+          8,
+          32,
+          24
+        ],
+        "pred_counts": [
+          47,
+          20,
+          11,
+          2
+        ]
+      },
+      "Set D (30L/20R/10F/40T)": {
+        "accuracy": 0.35,
+        "actual_counts": [
+          24,
+          16,
+          8,
+          32
+        ],
+        "pred_counts": [
+          47,
+          26,
+          5,
+          2
+        ]
+      }
+    }
+  },
+  "2": {
+    "baseline_accuracy": 0.2673611111111111,
+    "biased_tests": {
+      "Set A (40L/30R/20F/10T)": {
+        "accuracy": 0.275,
+        "actual_counts": [
+          32,
+          24,
+          16,
+          8
+        ],
+        "pred_counts": [
+          18,
+          9,
+          53,
+          0
+        ]
+      },
+      "Set B (10L/40R/30F/20T)": {
+        "accuracy": 0.3055555555555556,
+        "actual_counts": [
+          8,
+          32,
+          24,
+          8
+        ],
+        "pred_counts": [
+          15,
+          8,
+          49,
+          0
+        ]
+      },
+      "Set C (20L/10R/40F/30T)": {
+        "accuracy": 0.3125,
+        "actual_counts": [
+          16,
+          8,
+          32,
+          24
+        ],
+        "pred_counts": [
+          18,
+          9,
+          53,
+          0
+        ]
+      },
+      "Set D (30L/20R/10F/40T)": {
+        "accuracy": 0.1875,
+        "actual_counts": [
+          24,
+          16,
+          8,
+          32
+        ],
+        "pred_counts": [
+          16,
+          9,
+          55,
+          0
+        ]
+      }
+    }
+  },
+  "3": {
+    "baseline_accuracy": 0.3055555555555556,
+    "biased_tests": {
+      "Set A (40L/30R/20F/10T)": {
+        "accuracy": 0.3875,
+        "actual_counts": [
+          32,
+          24,
+          16,
+          8
+        ],
+        "pred_counts": [
+          52,
+          24,
+          4,
+          0
+        ]
+      },
+      "Set B (10L/40R/30F/20T)": {
+        "accuracy": 0.3611111111111111,
+        "actual_counts": [
+          8,
+          32,
+          24,
+          8
+        ],
+        "pred_counts": [
+          40,
+          21,
+          11,
+          0
+        ]
+      },
+      "Set C (20L/10R/40F/30T)": {
+        "accuracy": 0.35,
+        "actual_counts": [
+          16,
+          8,
+          32,
+          24
+        ],
+        "pred_counts": [
+          44,
+          18,
+          18,
+          0
+        ]
+      },
+      "Set D (30L/20R/10F/40T)": {
+        "accuracy": 0.325,
+        "actual_counts": [
+          24,
+          16,
+          8,
+          32
+        ],
+        "pred_counts": [
+          49,
+          20,
+          11,
+          0
+        ]
+      }
+    }
+  },
+  "4": {
+    "baseline_accuracy": 0.2847222222222222,
+    "biased_tests": {
+      "Set A (40L/30R/20F/10T)": {
+        "accuracy": 0.35,
+        "actual_counts": [
+          32,
+          24,
+          16,
+          8
+        ],
+        "pred_counts": [
+          27,
+          27,
+          26,
+          0
+        ]
+      },
+      "Set B (10L/40R/30F/20T)": {
+        "accuracy": 0.3611111111111111,
+        "actual_counts": [
+          8,
+          32,
+          24,
+          8
+        ],
+        "pred_counts": [
+          27,
+          21,
+          24,
+          0
+        ]
+      },
+      "Set C (20L/10R/40F/30T)": {
+        "accuracy": 0.275,
+        "actual_counts": [
+          16,
+          8,
+          32,
+          24
+        ],
+        "pred_counts": [
+          29,
+          16,
+          35,
+          0
+        ]
+      },
+      "Set D (30L/20R/10F/40T)": {
+        "accuracy": 0.2125,
+        "actual_counts": [
+          24,
+          16,
+          8,
+          32
+        ],
+        "pred_counts": [
+          33,
+          22,
+          25,
+          0
+        ]
+      }
+    }
+  },
+  "5": {
+    "baseline_accuracy": 0.23958333333333334,
+    "biased_tests": {
+      "Set A (40L/30R/20F/10T)": {
+        "accuracy": 0.325,
+        "actual_counts": [
+          32,
+          24,
+          16,
+          8
+        ],
+        "pred_counts": [
+          32,
+          22,
+          26,
+          0
+        ]
+      },
+      "Set B (10L/40R/30F/20T)": {
+        "accuracy": 0.18055555555555555,
+        "actual_counts": [
+          8,
+          32,
+          24,
+          8
+        ],
+        "pred_counts": [
+          32,
+          15,
+          25,
+          0
+        ]
+      },
+      "Set C (20L/10R/40F/30T)": {
+        "accuracy": 0.2125,
+        "actual_counts": [
+          16,
+          8,
+          32,
+          24
+        ],
+        "pred_counts": [
+          32,
+          23,
+          25,
+          0
+        ]
+      },
+      "Set D (30L/20R/10F/40T)": {
+        "accuracy": 0.175,
+        "actual_counts": [
+          24,
+          16,
+          8,
+          32
+        ],
+        "pred_counts": [
+          34,
+          19,
+          27,
+          0
+        ]
+      }
+    }
+  },
+  "6": {
+    "baseline_accuracy": 0.2951388888888889,
+    "biased_tests": {
+      "Set A (40L/30R/20F/10T)": {
+        "accuracy": 0.5,
+        "actual_counts": [
+          32,
+          24,
+          16,
+          8
+        ],
+        "pred_counts": [
+          49,
+          23,
+          7,
+          1
+        ]
+      },
+      "Set B (10L/40R/30F/20T)": {
+        "accuracy": 0.3055555555555556,
+        "actual_counts": [
+          8,
+          32,
+          24,
+          8
+        ],
+        "pred_counts": [
+          39,
+          21,
+          12,
+          0
+        ]
+      },
+      "Set C (20L/10R/40F/30T)": {
+        "accuracy": 0.325,
+        "actual_counts": [
+          16,
+          8,
+          32,
+          24
+        ],
+        "pred_counts": [
+          47,
+          16,
+          15,
+          2
+        ]
+      },
+      "Set D (30L/20R/10F/40T)": {
+        "accuracy": 0.375,
+        "actual_counts": [
+          24,
+          16,
+          8,
+          32
+        ],
+        "pred_counts": [
+          48,
+          17,
+          13,
+          2
+        ]
+      }
+    }
+  },
+  "7": {
+    "baseline_accuracy": 0.2708333333333333,
+    "biased_tests": {
+      "Set A (40L/30R/20F/10T)": {
+        "accuracy": 0.2875,
+        "actual_counts": [
+          32,
+          24,
+          16,
+          8
+        ],
+        "pred_counts": [
+          34,
+          24,
+          22,
+          0
+        ]
+      },
+      "Set B (10L/40R/30F/20T)": {
+        "accuracy": 0.2638888888888889,
+        "actual_counts": [
+          8,
+          32,
+          24,
+          8
+        ],
+        "pred_counts": [
+          28,
+          24,
+          20,
+          0
+        ]
+      },
+      "Set C (20L/10R/40F/30T)": {
+        "accuracy": 0.3,
+        "actual_counts": [
+          16,
+          8,
+          32,
+          24
+        ],
+        "pred_counts": [
+          25,
+          28,
+          27,
+          0
+        ]
+      },
+      "Set D (30L/20R/10F/40T)": {
+        "accuracy": 0.225,
+        "actual_counts": [
+          24,
+          16,
+          8,
+          32
+        ],
+        "pred_counts": [
+          30,
+          20,
+          30,
+          0
+        ]
+      }
+    }
+  },
+  "8": {
+    "baseline_accuracy": 0.22916666666666666,
+    "biased_tests": {
+      "Set A (40L/30R/20F/10T)": {
+        "accuracy": 0.2875,
+        "actual_counts": [
+          32,
+          24,
+          16,
+          8
+        ],
+        "pred_counts": [
+          35,
+          32,
+          12,
+          1
+        ]
+      },
+      "Set B (10L/40R/30F/20T)": {
+        "accuracy": 0.25,
+        "actual_counts": [
+          8,
+          32,
+          24,
+          8
+        ],
+        "pred_counts": [
+          39,
+          22,
+          11,
+          0
+        ]
+      },
+      "Set C (20L/10R/40F/30T)": {
+        "accuracy": 0.2,
+        "actual_counts": [
+          16,
+          8,
+          32,
+          24
+        ],
+        "pred_counts": [
+          44,
+          23,
+          12,
+          1
+        ]
+      },
+      "Set D (30L/20R/10F/40T)": {
+        "accuracy": 0.2,
+        "actual_counts": [
+          24,
+          16,
+          8,
+          32
+        ],
+        "pred_counts": [
+          40,
+          28,
+          11,
+          1
+        ]
+      }
+    }
+  },
+  "9": {
+    "baseline_accuracy": 0.3263888888888889,
+    "biased_tests": {
+      "Set A (40L/30R/20F/10T)": {
+        "accuracy": 0.4125,
+        "actual_counts": [
+          32,
+          24,
+          16,
+          8
+        ],
+        "pred_counts": [
+          33,
+          31,
+          13,
+          3
+        ]
+      },
+      "Set B (10L/40R/30F/20T)": {
+        "accuracy": 0.3333333333333333,
+        "actual_counts": [
+          8,
+          32,
+          24,
+          8
+        ],
+        "pred_counts": [
+          22,
+          28,
+          21,
+          1
+        ]
+      },
+      "Set C (20L/10R/40F/30T)": {
+        "accuracy": 0.2875,
+        "actual_counts": [
+          16,
+          8,
+          32,
+          24
+        ],
+        "pred_counts": [
+          26,
+          30,
+          22,
+          2
+        ]
+      },
+      "Set D (30L/20R/10F/40T)": {
+        "accuracy": 0.3,
+        "actual_counts": [
+          24,
+          16,
+          8,
+          32
+        ],
+        "pred_counts": [
+          27,
+          34,
+          17,
+          2
+        ]
+      }
+    }
+  }
+}

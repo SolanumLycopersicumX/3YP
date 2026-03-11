@@ -280,29 +280,40 @@
 \end{frame}
 
 % ========== Slide 11: Error Analysis ==========
-\begin{frame}{Error Analysis: EEG Control Accuracy}
+\begin{frame}{Error Analysis: EEG Control --- Endpoint Error}
     \begin{columns}[T]
-        \column{0.5\textwidth}
+        \column{0.48\textwidth}
         \begin{center}
-            \includegraphics[width=\textwidth]{../outputs/eeg_physical_control/error_analysis.png}
+            \includegraphics[width=\textwidth,height=0.55\textheight,keepaspectratio]{../outputs/eeg_physical_control/error_analysis_endpoint.png}
         \end{center}
         
-        \column{0.5\textwidth}
-        \textbf{Error Metrics:}
-        \begin{itemize}
-            \item Y Error: Left-right deviation
-            \item Z Error: Up-down deviation
-            \item Total Error: Combined deviation
-        \end{itemize}
+        \column{0.52\textwidth}
+        \textbf{Metric:} Endpoint Error $d = \sqrt{(\Delta y)^2 + (\Delta z)^2}$
         
-        \vspace{3mm}
-        \textbf{Key Findings:}
-        \begin{itemize}
-            \item Simple patterns (S1-S4) have lower error
-            \item Complex patterns (S5-S6) show higher variability
-            \item Mean total error remains acceptable
-        \end{itemize}
+        \vspace{1mm}
+        \begin{table}
+            \centering
+            \scriptsize
+            \begin{tabular}{lcc}
+                \toprule
+                Subject & Error & Workspace\% \\
+                \midrule
+                S1--S2 (Horiz/Vert) & 0.000 & 0.00\% \\
+                S3--S4 (Diagonal) & 0.107 & 5.36\% \\
+                S5--S6 (Square) & 0.000 & 0.00\% \\
+                \midrule
+                \textbf{Mean} & \textbf{0.036} & \textbf{1.79\%} \\
+                \bottomrule
+            \end{tabular}
+        \end{table}
     \end{columns}
+    
+    \vspace{1mm}
+    \begin{block}{Error Unit}
+    \footnotesize
+    All errors: \textbf{endpoint error} (final distance to target) in normalized coordinates $[-1, 1]$. \\
+    Workspace\% $= \frac{\text{error}}{2.0} \times 100\%$. V1 step: $0.12$ norm $= 0.35$ rad ($20.1^\circ$). Reach threshold: $< 0.12$ (6\%).
+    \end{block}
 \end{frame}
 
 % ========== Slide 12: Technical Challenges ==========
@@ -376,8 +387,8 @@
                 \midrule
                 Subjects Tested & 6 \\
                 Noise Level & 10\% \\
-                Avg. Total Error & Low \\
-                Trajectory Match & Good \\
+                Mean Endpoint Error & 0.036 (1.79\%) \\
+                Target Reach Rate & 81.8\% \\
                 \bottomrule
             \end{tabular}
         \end{table}
