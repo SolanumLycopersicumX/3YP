@@ -1,0 +1,95 @@
+{
+  "IV-2a": {
+    "mean_classification": 0.5960648148148148,
+    "mean_reach_rate": 0.7799999999999999,
+    "mean_smoothness": 0.5509097977591693,
+    "subjects": [
+      {
+        "subject": 1,
+        "classification_accuracy": 0.71875,
+        "control_reach_rate": 0.74,
+        "avg_steps": 36.9,
+        "avg_reward": -3.141930408930074,
+        "trajectory_smoothness": 0.5513825429128835
+      },
+      {
+        "subject": 2,
+        "classification_accuracy": 0.3194444444444444,
+        "control_reach_rate": 0.8,
+        "avg_steps": 30.48,
+        "avg_reward": -0.1579007215413682,
+        "trajectory_smoothness": 0.5210208004585714
+      },
+      {
+        "subject": 3,
+        "classification_accuracy": 0.75,
+        "control_reach_rate": 0.8,
+        "avg_steps": 30.7,
+        "avg_reward": 0.5313563000037145,
+        "trajectory_smoothness": 0.580326049906053
+      }
+    ]
+  },
+  "IV-2b": {
+    "mean_classification": 0.6447916666666667,
+    "mean_reach_rate": 0.8133333333333334,
+    "mean_smoothness": 0.5447266925182325,
+    "subjects": [
+      {
+        "subject": 1,
+        "classification_accuracy": 0.746875,
+        "control_reach_rate": 1.0,
+        "avg_steps": 14.42,
+        "avg_reward": 10.392321132902836,
+        "trajectory_smoothness": 0.6366280852640727
+      },
+      {
+        "subject": 2,
+        "classification_accuracy": 0.575,
+        "control_reach_rate": 0.44,
+        "avg_steps": 61.68,
+        "avg_reward": -19.012744824524145,
+        "trajectory_smoothness": 0.3591539823609483
+      },
+      {
+        "subject": 3,
+        "classification_accuracy": 0.6125,
+        "control_reach_rate": 1.0,
+        "avg_steps": 14.58,
+        "avg_reward": 10.389240485998211,
+        "trajectory_smoothness": 0.6383980099296763
+      }
+    ]
+  },
+  "PhysioNet": {
+    "mean_classification": 0.6666666666666666,
+    "mean_reach_rate": 0.7799999999999999,
+    "mean_smoothness": 0.5301147676311764,
+    "subjects": [
+      {
+        "subject": 1,
+        "classification_accuracy": 0.4444444444444444,
+        "control_reach_rate": 0.92,
+        "avg_steps": 21.82,
+        "avg_reward": 6.672321679455263,
+        "trajectory_smoothness": 0.5334169453697317
+      },
+      {
+        "subject": 2,
+        "classification_accuracy": 0.7777777777777778,
+        "control_reach_rate": 0.66,
+        "avg_steps": 42.26,
+        "avg_reward": -7.220730524672567,
+        "trajectory_smoothness": 0.5407476585334171
+      },
+      {
+        "subject": 3,
+        "classification_accuracy": 0.7777777777777778,
+        "control_reach_rate": 0.76,
+        "avg_steps": 35.12,
+        "avg_reward": -0.4830702787830052,
+        "trajectory_smoothness": 0.5161796989903802
+      }
+    ]
+  }
+}

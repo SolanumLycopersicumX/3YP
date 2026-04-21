@@ -1,0 +1,50 @@
+# Python cache and virtual environment artifacts
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.venv/
+venv/
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+
+# LaTeX build artifacts
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+*.toc
+
+# External vendored repositories with their own Git history and large assets
+02_Code/lerobot/
+
+# Large raw datasets and derived dataset files
+06_Data/
+*.gdf
+*.edf
+*.event
+*.mat
+
+# Model checkpoints and binary training artifacts
+*.pth
+*.npy
+*.npz
+*.xlsx
+
+# Keep lightweight experiment summaries and figures, but ignore bulky model outputs
+03_Experiments/**/*.pth
+03_Experiments/**/*.npy
+04_Trained_Models/
+
+# Large demo videos
+*.mp4
+*.webm
+
+# Personal / administrative files not needed for the code repository
+01_Reports/ZhengXu_CV_v5.*
+01_Reports/ZhengXu_CV_v5_CN.*
+01_Reports/Risk assessment form-*

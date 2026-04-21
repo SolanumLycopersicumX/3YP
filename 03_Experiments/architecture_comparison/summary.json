@@ -1,0 +1,32 @@
+{
+  "config": {
+    "episodes": 500,
+    "seed": 42
+  },
+  "results": [
+    {
+      "name": "CNN+LSTM",
+      "params": 129732,
+      "training_time": 75.08901977539062,
+      "final_reward": -1.3966374214196078,
+      "final_reach_rate": 31.0,
+      "final_steps": 81.87
+    },
+    {
+      "name": "LightTransformer",
+      "params": 13028,
+      "training_time": 82.87090873718262,
+      "final_reward": -4.99080804936124,
+      "final_reach_rate": 6.0,
+      "final_steps": 96.48
+    },
+    {
+      "name": "Transformer",
+      "params": 104900,
+      "training_time": 94.80949640274048,
+      "final_reward": -7.032423549458355,
+      "final_reach_rate": 8.0,
+      "final_steps": 94.82
+    }
+  ]
+}

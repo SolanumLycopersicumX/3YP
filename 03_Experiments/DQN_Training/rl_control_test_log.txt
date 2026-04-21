@@ -1,0 +1,98 @@
+/home/tomato/.local/lib/python3.13/site-packages/torch/nn/modules/transformer.py:382: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  warnings.warn(
+============================================================
+三数据集 RL 控制测试
+============================================================
+数据目录: mymat_raw
+RL 模型: transformer
+设备: cuda
+============================================================
+
+============================================================
+RL 控制测试: BCI Competition IV-2a
+============================================================
+通道: 22, 类别: 4
+
+[Step 1] 训练 EEG 分类器...
+[Step 2] 评估分类器...
+  分类准确率: 67.71%
+[Step 3] 训练 RL Agent...
+  RL 训练完成 (500 episodes)
+[Step 4] 控制测试...
+  IV-2a Subject 1 失败: 'RLArm2DEnv' object has no attribute 'position'
+
+============================================================
+RL 控制测试: BCI Competition IV-2a
+============================================================
+通道: 22, 类别: 4
+
+[Step 1] 训练 EEG 分类器...
+[Step 2] 评估分类器...
+  分类准确率: 29.17%
+[Step 3] 训练 RL Agent...
+  RL 训练完成 (500 episodes)
+[Step 4] 控制测试...
+  IV-2a Subject 2 失败: 'RLArm2DEnv' object has no attribute 'position'
+
+============================================================
+RL 控制测试: BCI Competition IV-2a
+============================================================
+通道: 22, 类别: 4
+
+[Step 1] 训练 EEG 分类器...
+[Step 2] 评估分类器...
+  分类准确率: 81.60%
+[Step 3] 训练 RL Agent...
+  RL 训练完成 (500 episodes)
+[Step 4] 控制测试...
+  IV-2a Subject 3 失败: 'RLArm2DEnv' object has no attribute 'position'
+
+============================================================
+RL 控制测试: BCI Competition IV-2b
+============================================================
+通道: 3, 类别: 2
+
+[Step 1] 训练 EEG 分类器...
+[Step 2] 评估分类器...
+  分类准确率: 74.69%
+[Step 3] 训练 RL Agent...
+  RL 训练完成 (500 episodes)
+[Step 4] 控制测试...
+  IV-2b Subject 1 失败: 'RLArm2DEnv' object has no attribute 'position'
+
+============================================================
+RL 控制测试: BCI Competition IV-2b
+============================================================
+通道: 3, 类别: 2
+
+[Step 1] 训练 EEG 分类器...
+[Step 2] 评估分类器...
+  分类准确率: 56.79%
+[Step 3] 训练 RL Agent...
+  RL 训练完成 (500 episodes)
+[Step 4] 控制测试...
+  IV-2b Subject 2 失败: 'RLArm2DEnv' object has no attribute 'position'
+
+============================================================
+RL 控制测试: BCI Competition IV-2b
+============================================================
+通道: 3, 类别: 2
+
+[Step 1] 训练 EEG 分类器...
+[Step 2] 评估分类器...
+  分类准确率: 62.19%
+[Step 3] 训练 RL Agent...
+  RL 训练完成 (500 episodes)
+[Step 4] 控制测试...
+  IV-2b Subject 3 失败: 'RLArm2DEnv' object has no attribute 'position'
+
+跳过 GigaScience (无被试)
+
+可视化已保存: outputs/rl_control_test/rl_control_comparison.png
+
+============================================================
+最终结果总结
+============================================================
+数据集             分类准确率           控制到达率           平滑度       
+------------------------------------------------------------
+============================================================

@@ -1,0 +1,13 @@
+{
+  "model_type": "transformer",
+  "episodes": 1000,
+  "final_reach_rate": 100.0,
+  "direction_rates": {
+    "left": 100.0,
+    "right": 100.0,
+    "up": 100.0,
+    "down": 100.0
+  },
+  "training_time_seconds": 73.75561428070068,
+  "best_reach_rate": 100.0
+}

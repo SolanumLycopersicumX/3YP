@@ -1,0 +1,235 @@
+{
+  "experiment": "Filter vs ICA Comparison",
+  "date": "2026-03-24T00:31:24.696021",
+  "conditions": {
+    "A": "8-30Hz filter + no ICA (current pipeline)",
+    "B": "No filter + ICA",
+    "C": "No filter + no ICA"
+  },
+  "subjects": {
+    "S01": {
+      "A_filter_noICA": {
+        "accuracy": 51.724137931034484,
+        "n_test": 58
+      },
+      "B_noFilter_ICA": {
+        "accuracy": 46.55172413793103,
+        "n_test": 58
+      },
+      "C_noFilter_noICA": {
+        "accuracy": 55.172413793103445,
+        "n_test": 58
+      },
+      "comparison": {
+        "A_vs_B": 5.172413793103452,
+        "A_vs_C": -3.448275862068961,
+        "B_vs_C": -8.620689655172413
+      }
+    },
+    "S02": {
+      "A_filter_noICA": {
+        "accuracy": 51.724137931034484,
+        "n_test": 58
+      },
+      "B_noFilter_ICA": {
+        "accuracy": 56.896551724137936,
+        "n_test": 58
+      },
+      "C_noFilter_noICA": {
+        "accuracy": 51.724137931034484,
+        "n_test": 58
+      },
+      "comparison": {
+        "A_vs_B": -5.172413793103452,
+        "A_vs_C": 0.0,
+        "B_vs_C": 5.172413793103452
+      }
+    },
+    "S03": {
+      "A_filter_noICA": {
+        "accuracy": 72.41379310344827,
+        "n_test": 58
+      },
+      "B_noFilter_ICA": {
+        "accuracy": 75.86206896551724,
+        "n_test": 58
+      },
+      "C_noFilter_noICA": {
+        "accuracy": 86.20689655172413,
+        "n_test": 58
+      },
+      "comparison": {
+        "A_vs_B": -3.448275862068968,
+        "A_vs_C": -13.793103448275858,
+        "B_vs_C": -10.34482758620689
+      }
+    },
+    "S04": {
+      "A_filter_noICA": {
+        "accuracy": 36.206896551724135,
+        "n_test": 58
+      },
+      "B_noFilter_ICA": {
+        "accuracy": 41.37931034482759,
+        "n_test": 58
+      },
+      "C_noFilter_noICA": {
+        "accuracy": 43.103448275862064,
+        "n_test": 58
+      },
+      "comparison": {
+        "A_vs_B": -5.172413793103452,
+        "A_vs_C": -6.896551724137929,
+        "B_vs_C": -1.7241379310344769
+      }
+    },
+    "S05": {
+      "A_filter_noICA": {
+        "accuracy": 34.48275862068966,
+        "n_test": 58
+      },
+      "B_noFilter_ICA": {
+        "accuracy": 67.24137931034483,
+        "n_test": 58
+      },
+      "C_noFilter_noICA": {
+        "accuracy": 68.96551724137932,
+        "n_test": 58
+      },
+      "comparison": {
+        "A_vs_B": -32.75862068965517,
+        "A_vs_C": -34.48275862068966,
+        "B_vs_C": -1.724137931034491
+      }
+    },
+    "S06": {
+      "A_filter_noICA": {
+        "accuracy": 39.6551724137931,
+        "n_test": 58
+      },
+      "B_noFilter_ICA": {
+        "accuracy": 41.37931034482759,
+        "n_test": 58
+      },
+      "C_noFilter_noICA": {
+        "accuracy": 48.275862068965516,
+        "n_test": 58
+      },
+      "comparison": {
+        "A_vs_B": -1.724137931034484,
+        "A_vs_C": -8.620689655172413,
+        "B_vs_C": -6.896551724137929
+      }
+    },
+    "S07": {
+      "A_filter_noICA": {
+        "accuracy": 48.275862068965516,
+        "n_test": 58
+      },
+      "B_noFilter_ICA": {
+        "accuracy": 68.96551724137932,
+        "n_test": 58
+      },
+      "C_noFilter_noICA": {
+        "accuracy": 81.03448275862068,
+        "n_test": 58
+      },
+      "comparison": {
+        "A_vs_B": -20.6896551724138,
+        "A_vs_C": -32.75862068965517,
+        "B_vs_C": -12.068965517241367
+      }
+    },
+    "S08": {
+      "A_filter_noICA": {
+        "accuracy": 67.24137931034483,
+        "n_test": 58
+      },
+      "B_noFilter_ICA": {
+        "accuracy": 75.86206896551724,
+        "n_test": 58
+      },
+      "C_noFilter_noICA": {
+        "accuracy": 79.3103448275862,
+        "n_test": 58
+      },
+      "comparison": {
+        "A_vs_B": -8.620689655172413,
+        "A_vs_C": -12.06896551724138,
+        "B_vs_C": -3.448275862068968
+      }
+    },
+    "S09": {
+      "A_filter_noICA": {
+        "accuracy": 72.41379310344827,
+        "n_test": 58
+      },
+      "B_noFilter_ICA": {
+        "accuracy": 81.03448275862068,
+        "n_test": 58
+      },
+      "C_noFilter_noICA": {
+        "accuracy": 72.41379310344827,
+        "n_test": 58
+      },
+      "comparison": {
+        "A_vs_B": -8.620689655172413,
+        "A_vs_C": 0.0,
+        "B_vs_C": 8.620689655172413
+      }
+    }
+  },
+  "summary": {
+    "A_filter_noICA": {
+      "mean": 52.68199233716476,
+      "std": 14.08013396552717,
+      "values": [
+        51.724137931034484,
+        51.724137931034484,
+        72.41379310344827,
+        36.206896551724135,
+        34.48275862068966,
+        39.6551724137931,
+        48.275862068965516,
+        67.24137931034483,
+        72.41379310344827
+      ]
+    },
+    "B_noFilter_ICA": {
+      "mean": 61.685823754789276,
+      "std": 14.669877179369077,
+      "values": [
+        46.55172413793103,
+        56.896551724137936,
+        75.86206896551724,
+        41.37931034482759,
+        67.24137931034483,
+        41.37931034482759,
+        68.96551724137932,
+        75.86206896551724,
+        81.03448275862068
+      ]
+    },
+    "C_noFilter_noICA": {
+      "mean": 65.13409961685824,
+      "std": 14.959711115214281,
+      "values": [
+        55.172413793103445,
+        51.724137931034484,
+        86.20689655172413,
+        43.103448275862064,
+        68.96551724137932,
+        48.275862068965516,
+        81.03448275862068,
+        79.3103448275862,
+        72.41379310344827
+      ]
+    },
+    "conclusion": {
+      "filter_vs_ICA_advantage": -9.003831417624518,
+      "filter_vs_raw_advantage": -12.452107279693479,
+      "ICA_vs_raw_advantage": -3.448275862068961,
+      "verdict": "ICA shows benefit"
+    }
+  }
+}
