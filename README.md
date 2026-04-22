@@ -3,6 +3,34 @@
 
 本文件夹包含我在毕业设计中**自己完成的所有工作**，与原始CTNet GitHub项目区分开来。
 
+## 中文版概览
+
+该仓库整理了我在曼彻斯特大学毕业设计期间独立完成的主要工作，主题是基于脑机接口（BCI）的机械臂控制系统。系统将基于 CTNet 的运动想象 EEG 分类、面向目标到达任务的强化学习控制，以及 SO-101 机械臂的仿真到实物部署流程整合在一起。
+
+仓库内容聚焦于我自己的代码、实验结果、训练模型和项目文档，并与原始 CTNet GitHub 项目分开维护。目前结果包括 PhysioNet 运动想象数据集上的 88.78% pooled accuracy、通道缩减与滤波消融实验，以及离线或仿真条件下的端到端评估。由于 NHS 伦理审批限制，真人被试硬件验证尚未完成。
+
+中文快速链接：
+- [项目索引](05_Documentation/PROJECT_INDEX.md)
+- [最终报告草稿](01_Reports/final_report_draft_v10.pdf)
+- [周报](01_Reports/week_2026_04_22_feedback.pdf)
+- [代码目录](02_Code/)
+- [实验结果目录](03_Experiments/)
+- [参考资料](07_References/README.md)
+
+## English Overview
+
+This repository contains the work I completed for my final-year project at The University of Manchester. The project develops a brain-computer interface (BCI) pipeline for robotic arm control by combining CTNet-based motor imagery EEG classification, reinforcement learning for target-reaching control, and simulation-to-real deployment on an SO-101 robotic arm.
+
+This repository is kept separate from the original CTNet GitHub project and focuses on my own code, experiments, trained models, and documentation. Current results include 88.78% pooled accuracy on the PhysioNet motor imagery dataset, channel-reduction and filtering ablation studies, and offline or simulation-based end-to-end evaluation. Due to NHS ethics approval constraints, hardware validation with human subjects has not yet been completed.
+
+Quick links:
+- [Project Index](05_Documentation/PROJECT_INDEX.md)
+- [Final Report Draft](01_Reports/final_report_draft_v10.pdf)
+- [Weekly Report](01_Reports/week_2026_04_22_feedback.pdf)
+- [Code Directory](02_Code/)
+- [Experiment Outputs](03_Experiments/)
+- [References](07_References/README.md)
+
 ---
 
 ## 📁 文件夹结构

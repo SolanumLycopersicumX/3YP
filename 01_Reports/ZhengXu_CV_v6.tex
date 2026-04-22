@@ -1,0 +1,95 @@
+\documentclass[11pt, a4paper]{article}
+
+\usepackage[margin=1.8cm]{geometry}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{hyperref}
+\usepackage{xcolor}
+
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+
+\titleformat{\section}{\large\bfseries\scshape}{}{0em}{}[\titlerule]
+\titlespacing*{\section}{0pt}{10pt}{6pt}
+
+\newcommand{\entry}[2]{\textbf{#1} \hfill #2}
+
+\begin{document}
+
+% ========== HEADER ==========
+\begin{center}
+    {\LARGE \textbf{Zheng XU}} \\[4pt]
+    Email: \href{mailto:zheng.xu.tomato@gmail.com}{zheng.xu.tomato@gmail.com} \quad | \quad Mobile: +44 7436674580 \\[2pt]
+    GitHub: \href{https://github.com/SolanumLycopersicumX/3YP.git}{github.com/SolanumLycopersicumX/3YP.git}
+\end{center}
+
+% ========== EDUCATION ==========
+\section{Education}
+
+\entry{University of Manchester}{Sep. 2023 -- Present} \\
+BEng (Hons) Electrical and Electronic Engineering
+\begin{itemize}[leftmargin=*, nosep, topsep=2pt]
+    \item Results: First Class (Expected)
+    \item Core Modules: Control Systems I \& II, Digital Signal Processing, Microcontroller Engineering I \& II, Computer Systems Architecture, Concurrent Systems, VLSI \& High Speed Digital Design, Digital Systems Design I \& II, Electronic Circuit Design I \& II, Sensors \& Instrumentation, C Programming, Numerical Analysis
+\end{itemize}
+
+% ========== RESEARCH PROJECTS ==========
+\section{Research Projects}
+
+\entry{BCI-based Robotic Arm Control System (Deep Reinforcement Learning)}{Sep. 2025 -- Present} \\
+\textit{University of Manchester Final Year Project}
+\begin{itemize}[leftmargin=*, nosep, topsep=2pt]
+    \item Designed EEGTransformer, a hybrid CNN--Transformer architecture for motor imagery EEG classification, achieving 73.80\% (BCI IV-2a, 4-class), 82.87\% (IV-2b, 2-class), and 88.78\% (PhysioNet, 109 subjects) accuracy across three benchmark datasets.
+    \item Implemented a two-stage transfer learning protocol (cross-subject pre-training + subject-specific fine-tuning) that improved classification accuracy by 32\% with minimal calibration data ($\sim$90 trials per user).
+    \item Conducted systematic channel reduction study from 64 to 8 electrodes for OpenBCI deployment; identified C3 as the most critical motor cortex electrode and retained 72.54\% accuracy.
+    \item Validated preprocessing pipeline through controlled ablation: proved 8--30\,Hz bandpass filtering improves accuracy by +18.44\%, justifying exclusion of ICA.
+    \item Engineered a Transformer-based Deep Q-Network (SequenceTransformerDQN) for continuous control, mapping noisy 4-class MI signals to 8-direction planar trajectories; achieved a 99\% simulated reach rate through robust closed-loop error compensation.
+    \item Developed a complete Sim2Real pipeline by constructing a unified OpenAI Gym-compatible interface, bridging PyBullet simulation and the physical SO-101 robotic arm to enable seamless zero-shot deployment of RL policies.
+    \item Implemented real-time serial control algorithms for the multi-joint manipulator, featuring synchronized joint velocity profiling, dynamic trajectory interpolation, and soft-limit boundary protections to ensure precise and smooth hardware actuation.
+\end{itemize}
+
+\vspace{4pt}
+\entry{Hai'an Institute of Intelligent Equipment, Shanghai Jiao Tong University}{Jun. 2025 -- Jul. 2025} \\
+\textit{Research Intern}
+\begin{itemize}[leftmargin=*, nosep, topsep=2pt]
+    \item Conducted research on robotic arm control systems, focusing on motion accuracy and dynamic response optimisation.
+    \item Designed and implemented control algorithms in MATLAB and embedded C++ for trajectory planning and feedback regulation.
+    \item Prepared experimental reports and presented findings to the laboratory's research supervisors.
+\end{itemize}
+
+\vspace{4pt}
+\entry{Embedded Systems Project}{Sep. 2024 -- Apr. 2025}
+\begin{itemize}[leftmargin=*, nosep, topsep=2pt]
+    \item Designed and implemented an autonomous line-following robot using an STM32 Nucleo-F401RE microcontroller.
+    \item Integrated multiple sensors (TCRT5000 IR, MPU-6050 gyroscope, HC-SR04 ultrasonic) for real-time environmental perception.
+    \item Developed a PID control algorithm in C++ for accurate path-tracking and obstacle avoidance.
+    \item Designed custom PCBs in Altium Designer; performed sensor calibration and signal conditioning to reduce noise.
+    \item Implemented Bluetooth Low Energy (BLE) communication for wireless data logging and remote debugging.
+\end{itemize}
+
+\vspace{4pt}
+\entry{Quanser Aero 2 Control Systems Project}{Jun. 2023 -- Jul. 2023}
+\begin{itemize}[leftmargin=*, nosep, topsep=2pt]
+    \item Modelled and analysed the Quanser Aero 2 dual-rotor platform using MATLAB and Simulink.
+    \item Identified rotor and pitch subsystem dynamics; estimated system parameters (gain, damping ratio, natural frequency).
+    \item Designed and tuned P, PI, and PID controllers; compared simulated and experimental responses.
+    \item Demonstrated proficiency in system identification, control theory, and real-time hardware-in-the-loop testing using QUARC.
+\end{itemize}
+
+% ========== SKILLS ==========
+\section{Skills \& Certifications}
+\begin{itemize}[leftmargin=*, nosep, topsep=2pt]
+    \item \textbf{Programming:} Python (PyTorch, MNE-Python, NumPy), C/C++, MATLAB, VHDL, Assembly
+    \item \textbf{Embedded Systems:} STM32, PIC series, real-time control, sensor integration, PCB design (Altium Designer)
+    \item \textbf{Simulation \& Modelling:} MATLAB/Simulink, LabVIEW, SolidWorks, PyBullet, Sentaurus TCAD
+    \item \textbf{Machine Learning:} Deep reinforcement learning (DQN), Transformer architectures, transfer learning, EEG signal processing
+    \item \textbf{Languages:} Chinese (native), English (proficient, TOEFL 106/120)
+\end{itemize}
+
+\vspace{4pt}
+\textbf{Certifications:}
+\begin{itemize}[leftmargin=*, nosep, topsep=2pt]
+    \item Certified MATLAB Associate -- MathWorks
+\end{itemize}
+
+\end{document}

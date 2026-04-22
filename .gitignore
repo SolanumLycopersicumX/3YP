@@ -15,9 +15,12 @@ Thumbs.db
 *.fdb_latexmk
 *.fls
 *.log
+*.nav
 *.out
+*.snm
 *.synctex.gz
 *.toc
+*.vrb
 
 # External vendored repositories with their own Git history and large assets
 02_Code/lerobot/

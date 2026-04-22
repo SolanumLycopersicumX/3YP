@@ -1,0 +1,276 @@
+\documentclass[aspectratio=169, 11pt]{beamer}
+
+% ========== Theme ==========
+\usetheme{Madrid}
+\usecolortheme{whale}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}[frame number]
+
+% ========== Packages ==========
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric, calc, fit, backgrounds}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{xcolor}
+
+% ========== Colours ==========
+\definecolor{highlight}{RGB}{220, 70, 70}
+\definecolor{completed}{RGB}{80, 185, 100}
+\definecolor{pending}{RGB}{180, 180, 180}
+\definecolor{inprogress}{RGB}{90, 140, 240}
+
+% ========== Title ==========
+\title{Weekly Progress Report}
+\subtitle{Week 31 --- Draft Feedback Review and Revision Plan}
+\author{Student ID: 11314389}
+\institute{BCI Control System Project}
+\date{April 22, 2026}
+
+\begin{document}
+
+% ===================================================
+% TITLE PAGE
+% ===================================================
+\begin{frame}
+    \titlepage
+\end{frame}
+
+% ===================================================
+% SLIDE 1: Agenda
+% ===================================================
+\begin{frame}[shrink=7]{Week 31 Agenda --- Feedback Discussion on the Final Draft}
+
+    \begin{block}{Purpose of This Meeting}
+        Use the annotated comments on the report draft to identify the main problems in the current version and confirm how the next revision should be prioritised.
+    \end{block}
+
+    \vspace{2mm}
+    \begin{exampleblock}{Topics for Discussion}
+        \begin{enumerate}
+            \item Main issues raised in the annotated feedback on the draft
+            \item Why the current \textbf{Methodology} chapter is not yet working well enough
+            \item Specific changes planned for the next revision
+            \item Which remaining sections should be prioritised after the \textbf{Methods} rewrite
+        \end{enumerate}
+    \end{exampleblock}
+
+    \vspace{2mm}
+    \begin{alertblock}{Main Goal}
+        Leave this meeting with a clear and defensible revision plan for the next draft.
+    \end{alertblock}
+\end{frame}
+
+% ===================================================
+% SLIDE 2: Core Feedback
+% ===================================================
+\begin{frame}[shrink=7]{1. Core Issues Identified in the Feedback}
+
+    \begin{columns}[T]
+        \column{0.49\textwidth}
+        \textbf{Main Writing Problems}
+        \begin{itemize}
+            \item Methods and results are mixed together
+            \item Some explanation appears too interpretive for a methods chapter
+            \item Several claims are stronger than the evidence currently shown
+            \item Some statements need references or weaker wording
+        \end{itemize}
+
+        \vspace{2mm}
+        \textbf{Main Structural Problems}
+        \begin{itemize}
+            \item The boundary between Literature Review and Methods is not always clear
+            \item Some technical content appears before it is properly introduced
+            \item The chapter does not yet read like a clean reproducible protocol
+        \end{itemize}
+
+        \column{0.47\textwidth}
+        \begin{alertblock}{Most Important Overall Message}
+            The current chapter is not being judged mainly on whether the technical method is good or bad. The bigger problem is that it does not yet read like a proper \textbf{Methods} chapter.
+        \end{alertblock}
+
+        \vspace{2mm}
+        \begin{exampleblock}{Interpretation}
+            The next revision should focus first on clarity, reproducibility, and chapter boundaries, rather than on adding more technical novelty.
+        \end{exampleblock}
+    \end{columns}
+\end{frame}
+
+% ===================================================
+% SLIDE 3: Methodology Problems
+% ===================================================
+\begin{frame}[shrink=7]{2. Why the Current Methodology Chapter Needs Revision}
+
+    \begin{columns}[T]
+        \column{0.5\textwidth}
+        \textbf{What Is Missing or Unclear}
+        \begin{itemize}
+            \item Dataset description is incomplete
+            \item Sampling rates and channel context need to be clearer
+            \item Preprocessing choices need stronger justification
+            \item Normalisation procedure is not explicit enough
+            \item Model details are not yet reproducible enough
+            \item Training / validation / testing protocol needs to be clearer
+        \end{itemize}
+
+        \column{0.47\textwidth}
+        \textbf{What Is Currently in the Wrong Place}
+        \begin{itemize}
+            \item Accuracy improvements appearing inside the methods chapter
+            \item Comparative performance statements before the results chapter
+            \item Interpretation of why performance changed before the evidence is shown
+        \end{itemize}
+
+        \vspace{2mm}
+        \begin{alertblock}{Expected Revision Direction}
+            Chapter 3 should answer ``what was done and how'', while Chapter 4 should answer ``what happened'' and ``what it means''.
+        \end{alertblock}
+    \end{columns}
+\end{frame}
+
+% ===================================================
+% SLIDE 4: Planned Methods Rewrite
+% ===================================================
+\begin{frame}[shrink=7]{3. Planned Rewrite of the Methods Chapter}
+
+    \begin{table}
+        \centering
+        \small
+        \begin{tabular}{p{4.2cm}p{6.3cm}c}
+            \toprule
+            \textbf{Feedback Area} & \textbf{Planned Change} & \textbf{Priority} \\
+            \midrule
+            Results mixed into Methods
+            & Move all accuracy gains, comparisons, and outcome statements into Chapter 4
+            & \textcolor{highlight}{High} \\
+            Dataset description too thin
+            & Add sampling rate, channel count, class definition, and protocol table
+            & \textcolor{highlight}{High} \\
+            Preprocessing not reproducible enough
+            & State filter range, epoch length, normalisation rule, and ICA status explicitly
+            & \textcolor{highlight}{High} \\
+            Model description too abstract
+            & Add clearer EEGTransformer architecture explanation, figure, and config summary
+            & \textcolor{highlight}{High} \\
+            Training protocol unclear
+            & Clarify subject-dependent, LOSO, pooled training, and fine-tuning procedures
+            & \textcolor{highlight}{High} \\
+            Some claims too strong
+            & Add references where needed or reduce certainty in wording
+            & \textcolor{inprogress}{Medium} \\
+            \bottomrule
+        \end{tabular}
+    \end{table}
+\end{frame}
+
+% ===================================================
+% SLIDE 5: Proposed New Chapter Logic
+% ===================================================
+\begin{frame}[shrink=6]{4. Proposed Logic for the Next Draft}
+
+    \begin{columns}[T]
+        \column{0.48\textwidth}
+        \textbf{Chapter 2: Literature Review}
+        \begin{itemize}
+            \item Explain the existing MI classification landscape
+            \item Introduce benchmark datasets and prior methods
+            \item Set up why the project approach is reasonable
+        \end{itemize}
+
+        \vspace{2mm}
+        \textbf{Chapter 3: Methods}
+        \begin{itemize}
+            \item Datasets used
+            \item Preprocessing pipeline
+            \item EEGTransformer architecture
+            \item Training protocol
+            \item Channel reduction protocol
+            \item RL formulation
+        \end{itemize}
+
+        \column{0.48\textwidth}
+        \textbf{Chapter 4: Results and Discussion}
+        \begin{itemize}
+            \item Classification results
+            \item Channel reduction results
+            \item RL performance
+            \item ICA / filter ablation results
+            \item Interpretation and limitations
+        \end{itemize}
+
+        \vspace{2mm}
+        \begin{exampleblock}{Benefit of This Separation}
+            The report becomes easier to follow because the marker no longer has to mentally separate protocol, evidence, and interpretation while reading the same section.
+        \end{exampleblock}
+    \end{columns}
+\end{frame}
+
+% ===================================================
+% SLIDE 6: Wider Draft Improvements
+% ===================================================
+\begin{frame}[shrink=7]{5. Additional Improvements Planned Beyond Methods}
+
+    \begin{columns}[T]
+        \column{0.5\textwidth}
+        \textbf{Writing / Presentation}
+        \begin{itemize}
+            \item Reduce over-strong interpretive language
+            \item Use more cautious phrasing where evidence is limited
+            \item Improve figure readability, especially overview diagrams
+            \item Standardise terms such as \textit{participant} where appropriate
+        \end{itemize}
+
+        \column{0.46\textwidth}
+        \textbf{Final Report Structure}
+        \begin{itemize}
+            \item Check alignment with handbook and report template
+            \item Ensure Project Management is presented correctly
+            \item Improve appendix organisation
+            \item Include repository evidence and supporting materials clearly
+        \end{itemize}
+
+        \vspace{2mm}
+        \begin{alertblock}{Reason for These Changes}
+            Even if the technical work is strong, weak structure and unclear academic writing could reduce the overall impression of the report.
+        \end{alertblock}
+    \end{columns}
+\end{frame}
+
+% ===================================================
+% SLIDE 7: Revision Plan
+% ===================================================
+\begin{frame}[shrink=6]{6. Revision Plan After This Meeting}
+
+    \begin{table}
+        \centering
+        \small
+        \begin{tabular}{p{5.0cm}p{5.4cm}c}
+            \toprule
+            \textbf{Task} & \textbf{Planned Outcome} & \textbf{Order} \\
+            \midrule
+            Rewrite Methods chapter
+            & Clean reproducible protocol chapter with no embedded results
+            & 1 \\
+            Reorganise Results / Discussion
+            & Move outcomes and interpretation to the correct sections
+            & 2 \\
+            Tighten language and citations
+            & Fewer unsupported claims and clearer academic tone
+            & 3 \\
+            Check format against template
+            & Draft looks closer to a final submission
+            & 4 \\
+            Final consistency pass
+            & Stable terminology, figure quality, and appendix structure
+            & 5 \\
+            \bottomrule
+        \end{tabular}
+    \end{table}
+
+    \vspace{2mm}
+    \begin{alertblock}{Question for This Meeting}
+        After the Methods rewrite, which section should be treated as the next highest priority: \textbf{Discussion}, \textbf{overall structure / formatting}, or \textbf{appendix / submission packaging}?
+    \end{alertblock}
+\end{frame}
+
+\end{document}

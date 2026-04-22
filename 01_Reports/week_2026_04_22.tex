@@ -1,0 +1,259 @@
+\documentclass[aspectratio=169, 11pt]{beamer}
+
+% ========== Theme ==========
+\usetheme{Madrid}
+\usecolortheme{whale}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}[frame number]
+
+% ========== Packages ==========
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric, calc, fit, backgrounds}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{xcolor}
+
+% ========== Colours ==========
+\definecolor{highlight}{RGB}{220, 70, 70}
+\definecolor{completed}{RGB}{80, 185, 100}
+\definecolor{pending}{RGB}{180, 180, 180}
+\definecolor{inprogress}{RGB}{90, 140, 240}
+
+% ========== Title ==========
+\title{Weekly Progress Report}
+\subtitle{Week 31 --- Easter Break Final Draft Revision}
+\author{Student ID: 11314389}
+\institute{BCI Control System Project}
+\date{April 22, 2026}
+
+\begin{document}
+
+% ===================================================
+% TITLE PAGE
+% ===================================================
+\begin{frame}
+    \titlepage
+\end{frame}
+
+% ===================================================
+% SLIDE 1: Agenda
+% ===================================================
+\begin{frame}[shrink=8]{Week 31 Agenda --- Holiday Work on the Final Draft}
+
+    \begin{block}{Main Focus After the Wednesday Meeting}
+        \begin{enumerate}
+            \item Rewrite the \textbf{Methods} chapter based on the annotated feedback on the report draft.
+            \item Bring the report structure closer to the \textbf{3YP Handbook} and the official \textbf{Report Template}.
+            \item Use the holiday period to convert the draft from a strong technical report into a more submission-ready final-year project report.
+            \item Resolve the remaining review issues in language, structure, figures, and appendices.
+        \end{enumerate}
+    \end{block}
+
+    \vspace{2mm}
+    \begin{alertblock}{Overall Outcome}
+        Final Report Draft v10 was produced, reorganised, and recompiled during the holiday period. The report is now much closer to the expected final submission format.
+    \end{alertblock}
+\end{frame}
+
+% ===================================================
+% SLIDE 2: Holiday Priority Shift
+% ===================================================
+\begin{frame}[shrink=6]{1. Holiday Priority Shift --- From Experiments to Report Consolidation}
+
+    \begin{columns}[T]
+        \column{0.48\textwidth}
+        \textbf{Priority Before the Break}
+        \begin{itemize}
+            \item Core experiments already complete
+            \item Main quantitative results already established
+            \item Main risk was no longer model performance
+            \item Main risk became report clarity and submission readiness
+        \end{itemize}
+
+        \vspace{2mm}
+        \begin{exampleblock}{Working Decision}
+            The holiday period was used mainly for report restructuring and quality improvement rather than for adding new technical experiments.
+        \end{exampleblock}
+
+        \column{0.48\textwidth}
+        \textbf{Holiday Workstreams}
+        \begin{itemize}
+            \item Rewrite the Methods chapter
+            \item Tighten chapter boundaries
+            \item Align with handbook and template requirements
+            \item Clean up appendix structure and repository evidence
+            \item Improve overall readability for the marker
+        \end{itemize}
+    \end{columns}
+\end{frame}
+
+% ===================================================
+% SLIDE 3: Methods Rewrite
+% ===================================================
+\begin{frame}[shrink=7]{2. Methods Rewrite Based on Feedback}
+
+    \begin{columns}[T]
+        \column{0.5\textwidth}
+        \textbf{Problems in the Earlier Draft}
+        \begin{itemize}
+            \item Methods and results were still mixed together
+            \item Reproducibility details were incomplete
+            \item Experimental protocol boundaries were unclear
+            \item Some explanation was placed too early in the report
+        \end{itemize}
+
+        \vspace{2mm}
+        \begin{alertblock}{Revision Goal}
+            Make Chapter 3 read like a reproducible \textbf{Methods} chapter rather than a hybrid of methods, results, and interpretation.
+        \end{alertblock}
+
+        \column{0.48\textwidth}
+        \textbf{What Was Added or Clarified}
+        \begin{itemize}
+            \item Dataset table with channels, sampling rates, classes, and protocol
+            \item Clear preprocessing description: 8--30\,Hz filter, epoching, normalisation
+            \item EEGTransformer architecture figure and configuration table
+            \item Explicit training protocols for subject-dependent, LOSO, pooled training, and fine-tuning
+            \item RL state, action, reward, and optimisation settings
+        \end{itemize}
+    \end{columns}
+\end{frame}
+
+% ===================================================
+% SLIDE 4: Structure and Template Alignment
+% ===================================================
+\begin{frame}[shrink=7]{3. Handbook and Template Alignment During the Break}
+
+    \begin{columns}[T]
+        \column{0.48\textwidth}
+        \textbf{Formatting / Structure Checked}
+        \begin{itemize}
+            \item A4 paper, 2\,cm margins, 1.5 spacing
+            \item Left-aligned main text
+            \item Calibri 12 or close equivalent
+            \item Main-body Project Management section
+            \item Required appendix and repository material
+        \end{itemize}
+
+        \vspace{2mm}
+        \begin{exampleblock}{Font Status}
+            True Calibri is not installed locally, so the report now uses XeLaTeX with automatic fallback to Carlito, a close compatible alternative.
+        \end{exampleblock}
+
+        \column{0.5\textwidth}
+        \textbf{Structural Changes Completed}
+        \begin{itemize}
+            \item Added title page and front matter
+            \item Renamed \textbf{Methodology} to \textbf{Methods}
+            \item Separated \textbf{Results and Discussion} more clearly
+            \item Restored \textbf{Project Management} to the main body
+            \item Added organised appendix sections and GitHub links
+        \end{itemize}
+    \end{columns}
+\end{frame}
+
+% ===================================================
+% SLIDE 5: Final Draft Fixes
+% ===================================================
+\begin{frame}[shrink=9]{4. Additional Final-Draft Fixes Completed in the Holiday Period}
+
+    \begin{table}
+        \centering
+        \small
+        \begin{tabular}{p{4.1cm}p{5.9cm}c}
+            \toprule
+            \textbf{Issue} & \textbf{Action Taken} & \textbf{Status} \\
+            \midrule
+            Project Management placement
+            & Returned to the main body
+            & \textcolor{completed}{Fixed} \\
+            Discussion phrasing too strong
+            & Reworded using more cautious, evidence-based language
+            & \textcolor{completed}{Fixed} \\
+            System overview figure readability
+            & Enlarged internal font and removed hard shrink behaviour
+            & \textcolor{completed}{Fixed} \\
+            Risk appendix reference outdated
+            & Updated appendix references to the new files in \texttt{05\_Documentation}
+            & \textcolor{completed}{Fixed} \\
+            Supervisor-style wording
+            & Replaced with more neutral wording
+            & \textcolor{completed}{Fixed} \\
+            Terminology consistency
+            & Partially normalised ``subject'' to ``participant''
+            & \textcolor{inprogress}{Improved} \\
+            \bottomrule
+        \end{tabular}
+    \end{table}
+
+    \vspace{2mm}
+    \begin{exampleblock}{Risk Files Now Referenced}
+        \texttt{05\_Documentation/Risk assessment form-11314389\_v3.docx}\\
+        \texttt{05\_Documentation/Risk assessment form-11314389\_v3.pdf}
+    \end{exampleblock}
+\end{frame}
+
+% ===================================================
+% SLIDE 6: Current Status
+% ===================================================
+\begin{frame}[shrink=8]{5. Current Status of Final Report Draft v10}
+
+    \begin{table}
+        \centering
+        \small
+        \begin{tabular}{llc}
+            \toprule
+            \textbf{Area} & \textbf{Current Status} & \textbf{State} \\
+            \midrule
+            Methods chapter             & Fully rewritten around protocol clarity          & \textcolor{completed}{\checkmark} \\
+            Results separation          & Quantitative results moved out of Methods        & \textcolor{completed}{\checkmark} \\
+            Model documentation         & Figure, config table, and implementation detail  & \textcolor{completed}{\checkmark} \\
+            RL formulation              & State/action/reward/training setup specified     & \textcolor{completed}{\checkmark} \\
+            Front matter                & Added and aligned with template style            & \textcolor{completed}{\checkmark} \\
+            Project Management          & Included in main body                            & \textcolor{completed}{\checkmark} \\
+            Appendix structure          & Organised; risk material linked                  & \textcolor{completed}{\checkmark} \\
+            PDF compilation             & XeLaTeX build successful                         & \textcolor{completed}{\checkmark} \\
+            True Calibri font           & Not available on this machine                    & \textcolor{pending}{Known limit} \\
+            Final appendix artefacts    & Proposal / Gantt / CPD still need final copies   & \textcolor{pending}{To insert} \\
+            \bottomrule
+        \end{tabular}
+    \end{table}
+
+    \vspace{2mm}
+    \begin{center}
+        \textbf{Current compiled report length: 31 pages}
+    \end{center}
+\end{frame}
+
+% ===================================================
+% SLIDE 7: Next Steps
+% ===================================================
+\begin{frame}[shrink=6]{6. Next Steps After the Holiday Revision}
+
+    \begin{columns}[T]
+        \column{0.52\textwidth}
+        \textbf{Completed During the Break}
+        \begin{itemize}
+            \item Rewrote the Methods chapter
+            \item Restructured the report to match the template more closely
+            \item Resolved the main issues identified in re-review
+            \item Recompiled and checked Final Report Draft v10
+        \end{itemize}
+
+        \column{0.46\textwidth}
+        \textbf{Still to Finish Before Submission}
+        \begin{itemize}
+            \item Insert the final proposal, Gantt chart, and CPD appendix material
+            \item Perform one more language and consistency pass
+            \item Check that the final submission package remains comfortably within handbook expectations
+        \end{itemize}
+    \end{columns}
+
+    \vspace{3mm}
+    \begin{alertblock}{Summary}
+        The holiday period was used effectively to move the project from experimental completion to final report consolidation. The main remaining work is now packaging and final consistency checking rather than substantial technical revision.
+    \end{alertblock}
+\end{frame}
+
+\end{document}
