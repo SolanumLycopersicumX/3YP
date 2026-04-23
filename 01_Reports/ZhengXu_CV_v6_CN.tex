@@ -1,0 +1,101 @@
+\documentclass[11pt, a4paper]{article}
+
+\usepackage[margin=1.8cm]{geometry}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage{hyperref}
+\usepackage{xcolor}
+% 使用 fontspec + xeCJK 支持中文 (XeLaTeX 编译)
+\usepackage{fontspec}
+\usepackage{xeCJK}
+\setCJKmainfont{Noto Serif CJK SC}
+\setCJKsansfont{Noto Sans CJK SC}
+\setCJKmonofont{Noto Sans Mono CJK SC}
+
+\pagestyle{empty}
+\setlength{\parindent}{0pt}
+
+\titleformat{\section}{\large\bfseries\scshape}{}{0em}{}[\titlerule]
+\titlespacing*{\section}{0pt}{10pt}{6pt}
+
+\newcommand{\entry}[2]{\textbf{#1} \hfill #2}
+
+\begin{document}
+
+% ========== HEADER ==========
+\begin{center}
+    {\LARGE \textbf{徐正 (Zheng XU)}} \\[4pt]
+    Email: \href{mailto:zheng.xu.tomato@gmail.com}{zheng.xu.tomato@gmail.com} \quad | \quad Mobile: +44 7436674580 \\[2pt]
+    GitHub: \href{https://github.com/SolanumLycopersicumX/3YP.git}{github.com/SolanumLycopersicumX/3YP.git}
+\end{center}
+
+% ========== EDUCATION ==========
+\section{教育背景}
+
+\entry{曼彻斯特大学 (University of Manchester)}{2023年9月 -- 至今} \\
+电子与电气工程工程学士 (BEng Hons)
+\begin{itemize}[leftmargin=*, nosep, topsep=2pt]
+    \item 成绩：一等荣誉学位 (预期)
+    \item 核心课程：控制系统 I \& II、数字信号处理、微控制器工程 I \& II、计算机系统架构、并发系统、VLSI与高速数字设计、数字系统设计 I \& II、电子电路设计 I \& II、传感器与仪器仪表、C语言编程、数值分析
+\end{itemize}
+
+% ========== RESEARCH PROJECTS ==========
+\section{科研与工程项目}
+
+\entry{基于脑机接口的机械臂控制系统 (深度强化学习)}{2025年9月 -- 至今} \\
+\textit{曼彻斯特大学 大四毕业设计 (Final Year Project)}
+\begin{itemize}[leftmargin=*, nosep, topsep=2pt]
+    \item 设计了混合CNN-Transformer架构的运动想象(MI)脑电分类网络EEGTransformer，在三大基准数据集上分别取得了73.80\% (BCI IV-2a, 4分类)、82.87\% (IV-2b, 2分类)和88.78\% (PhysioNet, 109人)的分类准确率。
+    \item 实现了两阶段迁移学习协议（跨受试者预训练 + 特定受试者微调），仅用极少的校准数据（每位用户约90次试验）便将分类准确率提升了32\%。
+    \item 面向OpenBCI实际部署进行了系统的通道消融研究，将电极从64个减少至8个；确定了C3为最关键的运动皮层电极，并在此基础上保持了72.54\%的准确率。
+    \item 通过控制变量的消融实验验证了预处理管线：证明了8-30\,Hz的带通滤波可使准确率提升18.44\%，从而论证了无需使用计算密集的ICA算法的合理性。
+    \item 设计并训练了基于Transformer的深度Q网络 (SequenceTransformerDQN) 用于连续控制，将含噪的4分类MI脑电信号映射至8方向的平面轨迹；通过构建稳健的闭环误差补偿机制，在仿真测试中达到了99\%的目标到达率。
+    \item 设计了完整的Sim2Real管线，利用一套兼容OpenAI Gym的标准接口对接了PyBullet仿真环境与真实的SO-101物理机械臂，实现了深度强化学习策略在真实硬件上的零样本(zero-shot)无缝部署。
+    \item 为多关节机械臂开发了实时串行底层控制算法，实现了多关节同步速度规划、动态轨迹插值以及软限位安全保护，确保了物理机械臂的运动平缓、连续与精准。
+\end{itemize}
+
+\vspace{4pt}
+\entry{上海交通大学 海安智能装备研究院}{2025年6月 -- 2025年7月} \\
+\textit{科研实习生 (Research Intern)}
+\begin{itemize}[leftmargin=*, nosep, topsep=2pt]
+    \item 参与机械臂控制系统研究，专注于运动精度与动态响应的优化。
+    \item 在MATLAB与嵌入式C++环境下设计并实现了用于轨迹规划及反馈调节的控制系统算法。
+    \item 撰写实验报告，并向实验室科研导师团队进行研究成果汇报。
+\end{itemize}
+
+\vspace{4pt}
+\entry{嵌入式系统项目}{2024年9月 -- 2025年4月}
+\begin{itemize}[leftmargin=*, nosep, topsep=2pt]
+    \item 基于STM32 Nucleo-F401RE微控制器，设计并实现了一款自主巡线避障机器人。
+    \item 集成多种传感器（TCRT5000红外、MPU-6050陀螺仪、HC-SR04超声波），完成对环境的实时感知。
+    \item 使用C++开发了PID控制算法，实现了精准的路径追踪与自动避障功能。
+    \item 在Altium Designer中设计了定制PCB板；执行了传感器校准与信号调理以降低系统噪声。
+    \item 整合了低功耗蓝牙 (BLE) 通信模块，用于无线数据记录与远程调试。
+\end{itemize}
+
+\vspace{4pt}
+\entry{Quanser Aero 2 控制系统项目}{2023年6月 -- 2023年7月}
+\begin{itemize}[leftmargin=*, nosep, topsep=2pt]
+    \item 使用MATLAB和Simulink对Quanser Aero 2双旋翼平台进行了数学建模与系统理论分析。
+    \item 辨识了旋翼及俯仰子系统动力学特性；估算了系统参数（增益、阻尼比、自然频率）。
+    \item 设计并整定了P、PI和PID控制器；对比并分析了仿真响应与实验物理响应。
+    \item 熟练运用QUARC软件进行系统辨识、控制理论应用及实时硬件在环(HIL)测试。
+\end{itemize}
+
+% ========== SKILLS ==========
+\section{专业技能}
+\begin{itemize}[leftmargin=*, nosep, topsep=2pt]
+    \item \textbf{编程语言：} Python (PyTorch, MNE-Python, NumPy), C/C++, MATLAB, VHDL, 汇编语言
+    \item \textbf{嵌入式系统：} STM32, PIC单片机, 实时控制, 传感器集成, PCB设计 (Altium Designer)
+    \item \textbf{仿真与建模：} MATLAB/Simulink, LabVIEW, SolidWorks, PyBullet, Sentaurus TCAD
+    \item \textbf{人工智能与算法：} 深度强化学习 (DQN), Transformer架构, 迁移学习, 脑电信号(EEG)处理
+    \item \textbf{语言能力：} 中文 (母语), 英文 (流利, TOEFL 106/120)
+\end{itemize}
+
+\vspace{4pt}
+\textbf{资格证书：}
+\begin{itemize}[leftmargin=*, nosep, topsep=2pt]
+    \item 认证MATLAB助理工程师 (Certified MATLAB Associate) -- MathWorks
+\end{itemize}
+
+\end{document}
