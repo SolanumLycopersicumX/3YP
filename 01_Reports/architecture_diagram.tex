@@ -7,22 +7,22 @@
 \begin{document}
 
     % --- DeepMind / OpenAI-style clean pastel palette ---
-    \definecolor{bgGray}{RGB}{245, 246, 250}
-    \definecolor{borderGray}{RGB}{180, 185, 195}
-    \definecolor{textMain}{RGB}{30, 35, 40}
-    \definecolor{textMuted}{RGB}{80, 90, 105}
+    \definecolor{bgGray}{RGB}{246, 247, 249}
+    \definecolor{borderGray}{RGB}{184, 188, 194}
+    \definecolor{textMain}{RGB}{42, 46, 52}
+    \definecolor{textMuted}{RGB}{93, 100, 110}
 
-    \definecolor{blueFill}{RGB}{225, 238, 255}
-    \definecolor{blueBorder}{RGB}{140, 175, 240}
+    \definecolor{blueFill}{RGB}{233, 240, 247}
+    \definecolor{blueBorder}{RGB}{160, 181, 201}
 
-    \definecolor{greenFill}{RGB}{225, 245, 230}
-    \definecolor{greenBorder}{RGB}{140, 200, 160}
+    \definecolor{greenFill}{RGB}{233, 242, 236}
+    \definecolor{greenBorder}{RGB}{160, 184, 169}
 
-    \definecolor{orangeFill}{RGB}{255, 240, 225}
-    \definecolor{orangeBorder}{RGB}{240, 180, 130}
+    \definecolor{orangeFill}{RGB}{247, 239, 231}
+    \definecolor{orangeBorder}{RGB}{205, 178, 154}
 
-    \definecolor{purpleFill}{RGB}{240, 235, 255}
-    \definecolor{purpleBorder}{RGB}{180, 160, 240}
+    \definecolor{purpleFill}{RGB}{239, 235, 244}
+    \definecolor{purpleBorder}{RGB}{176, 164, 196}
 
 \begin{tikzpicture}[
     >=latex,
@@ -46,6 +46,7 @@
     lblWhite/.style={font=\small, text=textMuted, align=center, fill=none, inner sep=3pt, midway, above=2pt, sloped},
     lblFlat/.style={font=\small, text=textMuted, align=center, fill=none, inner sep=3pt, midway, above=2pt},
     lblWhiteFlat/.style={font=\small, text=textMuted, align=center, fill=none, inner sep=3pt, midway, above=2pt},
+    lblCenter/.style={font=\small, text=textMuted, align=center, fill=none, inner sep=1pt},
     noteText/.style={font=\scriptsize, text=textMuted, align=left},
     title/.style={font=\normalsize\bfseries, text=textMain, anchor=south}
 ]
@@ -55,21 +56,25 @@
 % ==========================================
 \node[nodeBox=blue] (eeg) at (0, 0) {
     \textbf{EEG Acquisition}\\
-    \scriptsize OpenBCI (8-ch) $\vert$ PhysioNet (64-ch)
+    \footnotesize OpenBCI (8-ch) $\vert$ PhysioNet (64-ch)
 };
 \node[title, above=0.4cm of eeg] (p1_title) {1. EEG Processing};
 
 \node[nodeBox=green, below=0.8cm of eeg] (preproc) {
     \textbf{Preprocessing}\\
-    \scriptsize Bandpass (8--30\,Hz) $\to$ 4s Epochs
+    \footnotesize Bandpass (8--30\,Hz) $\to$ 4s Epochs
 };
-\draw[arr] (eeg) -- node[lblFlat] {Raw Signal} (preproc);
+\draw[arr] 
+(eeg) -- (preproc);
+\node[lblCenter] at ($(eeg.south)!0.5!(preproc.north)$) {Raw Signal};
 
-\node[rectangle, rounded corners=6pt, draw=borderGray, thick, fill=white, align=center, text=textMain, inner sep=12pt, minimum width=4.5cm, minimum height=1.5cm, below=0.8cm of preproc] (baseline) {
+\node[rectangle, rounded corners=6pt, draw=borderGray, thick, fill=white, align=center, text=textMain, inner sep=8pt, minimum width=3.7cm, minimum height=1.4cm, below=0.8cm of preproc] (baseline) {
     \textbf{Baseline Classifier}\\
-    \scriptsize OVR-CSP + LDA
+    \footnotesize OVR-CSP + LDA
 };
-\draw[arrDashed] (preproc) -- node[lblFlat] {Comparison} (baseline);
+\draw[arrDashed] 
+(preproc) -- (baseline);
+\node[lblCenter] at ($(preproc.south)!0.5!(baseline.north)$) {Comparison};
 
 \begin{scope}[on background layer]
     \node[groupBox, fit=(p1_title) (eeg) (preproc) (baseline)] (group1) {};
@@ -80,41 +85,45 @@
 % ==========================================
 
 % Convolutional Front-End
-\node[nodeBox=orange] (cnn) at (6.4, 0 |- eeg.north) [anchor=north] {
+\node[nodeBox=orange] (cnn) at (7.5, 0 |- eeg.north) [anchor=north] {
     \textbf{Convolutional Front-End}\\
-    \scriptsize Temporal $\to$ Spatial $\to$ Separable
+    \footnotesize Temporal $\to$ Spatial $\to$ Separable
 };
 \node[title, above=0.4cm of cnn] (p2_title) {2. EEGTransformer Model};
 
 % Patch Embeddings
 \node[nodeBox=orange, below=0.8cm of cnn] (patch) {
     \textbf{Patch Embeddings}\\
-    \scriptsize Spatiotemporal Tokenization
+    \footnotesize Spatiotemporal Tokenization
 };
 
 % Transformer
 \node[nodeBox=orange, below=0.8cm of patch] (trans) {
     \textbf{Transformer Encoder}\\
-    \scriptsize Multi-Head Self-Attention
+    \footnotesize Multi-Head Self-Attention
 };
 
 % Fusion & Head
 \node[nodeBox=orange, below=0.8cm of trans] (fuse) {
     \textbf{Residual Fusion}\\
-    \scriptsize CNN Features $\oplus$ Global Context
+    \footnotesize CNN Features $\oplus$ Global Context
 };
 
 % Arrows for Pillar 2
 % Filtered Epochs Arrow
-\coordinate (P1) at ($ (preproc.east) + (0.9, 0) $);
-\draw[arr] (preproc.east) -- (P1) -- node[lblWhite] {Filtered Epochs} (P1 |- cnn.west) -- (cnn.west);
+\coordinate (P1) at ($ (preproc.east) + (0.8, 0) $);
+\draw[arr] 
+(preproc.east) -- (P1)
+-- node[lblWhite, xshift=0.5cm] {Filtered Epochs}
+(P1 |- cnn.west)
+-- (cnn.west);
 
 \draw[arr] (cnn) -- (patch);
 \draw[arr] (patch) -- (trans);
 \draw[arr] (trans) -- (fuse);
 
 % Residual Arrow on the LEFT, rectangular
-\coordinate (P4) at ($ (patch.west) + (-0.9, 0) $);
+\coordinate (P4) at ($ (patch.west) + (-1.1, 0) $);
 \draw[arr] (patch.west) -- (P4) -- node[lblWhite] {Residual} (P4 |- fuse.west) -- (fuse.west);
 
 \begin{scope}[on background layer]
@@ -126,42 +135,45 @@
 % ==========================================
 
 % State
-\node[nodeBox=purple] (state) at (12.8, 0 |- eeg.north) [anchor=north] {
+\node[nodeBox=purple] (state) at (15.0, 0 |- eeg.north) [anchor=north] {
     \textbf{State Representation} $s_t$\\
-    \scriptsize Kinematics $\oplus$ Classifier Output
+    \footnotesize Kinematics $\oplus$ Classifier Output
 };
 \node[title, above=0.4cm of state] (p3_title) {3. Closed-Loop RL Control};
 
 % RL Agent
 \node[nodeBox=purple, below=0.8cm of state] (agent) {
     \textbf{DQN Agent}\\
-    \scriptsize Transformer / CNN+LSTM Q-Net
+    \footnotesize Transformer / CNN+LSTM Q-Net
 };
 
 % Environment
 \node[nodeBox=purple, below=0.8cm of agent] (env) {
     \textbf{Robotic Environment}\\
-    \scriptsize SO-101 Arm Manipulation
+    \footnotesize SO-101 Arm Manipulation
 };
 
 % Arrows for Pillar 3
-\coordinate (P2) at ($ (fuse.east) + (0.9, 0) $);
+\coordinate (P2) at ($ (fuse.east) + (1.0, 0) $);
 \draw[arr] (fuse.east) -- (P2) -- node[lblWhite] {Predicted Class\\\& Confidence} (P2 |- state.west) -- (state.west);
 
 \draw[arr] (state) -- (agent);
-\draw[arr] (agent) -- node[lblWhiteFlat] {Action $a_t$} (env);
+\draw[arr] 
+(agent) -- (env);
+\node[lblCenter] at ($(agent.south)!0.5!(env.north)$) {Action $a_t$};
+
 
 % Feedback loop
-\coordinate (P3) at ($ (env.east) + (0.9, 0) $);
+\coordinate (P3) at ($ (env.east) + (2.0, 0) $);
 \draw[arr] (env.east) -- (P3) -- node[lblWhite] {Next State $s_{t+1}$\\\& Reward $r_t$} (P3 |- state.east) -- (state.east);
 
 % Deployment notes
-\node[noteBox, below=1.0cm of env] (hardware) {
+\node[noteBox, below=0.9cm of env] (hardware) {
     \textbf{Hardware Integration}\\
     \textcolor{textMuted}{BrainFlow $\rightarrow$ OpenBCI}\\
     \textcolor{textMuted}{Serial Protocol $\rightarrow$ SO-101 (Feetech STS3215)}
 };
-\node[noteText, below=0.35cm of hardware, anchor=north] (commands) {4-class MI $\rightarrow$ 4 commands: left, right, up, down};
+\node[noteText, below=0.3cm of hardware, anchor=north] (commands) {4-class MI $\rightarrow$ 4 commands: left, right, up, down};
 
 \begin{scope}[on background layer]
     \node[groupBox, fit=(p3_title) (state) (env)] (group3) {};

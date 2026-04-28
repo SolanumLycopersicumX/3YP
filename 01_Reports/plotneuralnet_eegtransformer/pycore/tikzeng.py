@@ -10,7 +10,6 @@ def to_head( projectpath ):
 \usetikzlibrary{positioning}
 \usetikzlibrary{3d} %for including external image 
 """
-
 def to_cor():
     return r"""
 \def\ConvColor{rgb:yellow,5;red,2.5;white,5}
@@ -207,5 +206,3 @@ def to_generate( arch, pathname="file.tex" ):
             print(c)
             f.write( c )
      
-
-

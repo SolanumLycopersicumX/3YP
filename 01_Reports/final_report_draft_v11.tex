@@ -248,22 +248,22 @@ The system is organised into three visual groups that together realise four inte
     \centering
     \begin{adjustbox}{max width=1.15\textwidth,center}
                 % --- DeepMind / OpenAI-style clean pastel palette ---
-    \definecolor{bgGray}{RGB}{245, 246, 250}
-    \definecolor{borderGray}{RGB}{180, 185, 195}
-    \definecolor{textMain}{RGB}{30, 35, 40}
-    \definecolor{textMuted}{RGB}{80, 90, 105}
+    \definecolor{bgGray}{RGB}{246, 247, 249}
+    \definecolor{borderGray}{RGB}{184, 188, 194}
+    \definecolor{textMain}{RGB}{42, 46, 52}
+    \definecolor{textMuted}{RGB}{93, 100, 110}
 
-    \definecolor{blueFill}{RGB}{225, 238, 255}
-    \definecolor{blueBorder}{RGB}{140, 175, 240}
+    \definecolor{blueFill}{RGB}{233, 240, 247}
+    \definecolor{blueBorder}{RGB}{160, 181, 201}
 
-    \definecolor{greenFill}{RGB}{225, 245, 230}
-    \definecolor{greenBorder}{RGB}{140, 200, 160}
+    \definecolor{greenFill}{RGB}{233, 242, 236}
+    \definecolor{greenBorder}{RGB}{160, 184, 169}
 
-    \definecolor{orangeFill}{RGB}{255, 240, 225}
-    \definecolor{orangeBorder}{RGB}{240, 180, 130}
+    \definecolor{orangeFill}{RGB}{247, 239, 231}
+    \definecolor{orangeBorder}{RGB}{205, 178, 154}
 
-    \definecolor{purpleFill}{RGB}{240, 235, 255}
-    \definecolor{purpleBorder}{RGB}{180, 160, 240}
+    \definecolor{purpleFill}{RGB}{239, 235, 244}
+    \definecolor{purpleBorder}{RGB}{176, 164, 196}
 
 
 \begin{tikzpicture}[
@@ -288,6 +288,7 @@ The system is organised into three visual groups that together realise four inte
     lblWhite/.style={font=\normalsize, text=textMuted, align=center, fill=none, inner sep=3pt, midway, above=2pt, sloped},
     lblFlat/.style={font=\normalsize, text=textMuted, align=center, fill=none, inner sep=3pt, midway, above=2pt},
     lblWhiteFlat/.style={font=\normalsize, text=textMuted, align=center, fill=none, inner sep=3pt, midway, above=2pt},
+    lblCenter/.style={font=\normalsize, text=textMuted, align=center, fill=none, inner sep=1pt},
     noteText/.style={font=\footnotesize, text=textMuted, align=left},
     title/.style={font=\normalsize\bfseries, text=textMain, anchor=south}
 ]
@@ -306,16 +307,16 @@ The system is organised into three visual groups that together realise four inte
     \footnotesize Bandpass (8--30\,Hz) $\to$ 4s Epochs
 };
 \draw[arr] 
-(eeg) -- node[midway, inner sep=1pt] {Raw Signal} 
-(preproc);
+(eeg) -- (preproc);
+\node[lblCenter] at ($(eeg.south)!0.5!(preproc.north)$) {Raw Signal};
 
 \node[rectangle, rounded corners=6pt, draw=borderGray, thick, fill=white, align=center, text=textMain, inner sep=8pt, minimum width=3.7cm, minimum height=1.4cm, below=0.8cm of preproc] (baseline) {
     \textbf{Baseline Classifier}\\
     \footnotesize OVR-CSP + LDA
 };
 \draw[arrDashed] 
-(preproc) -- node[midway, inner sep=1pt] {Comparison} 
-(baseline);
+(preproc) -- (baseline);
+\node[lblCenter] at ($(preproc.south)!0.5!(baseline.north)$) {Comparison};
 
 \begin{scope}[on background layer]
     \node[groupBox, fit=(p1_title) (eeg) (preproc) (baseline)] (group1) {};
@@ -400,8 +401,8 @@ The system is organised into three visual groups that together realise four inte
 
 \draw[arr] (state) -- (agent);
 \draw[arr] 
-(agent) -- node[midway, inner sep=1pt] {Action $a_t$} 
-(env);
+(agent) -- (env);
+\node[lblCenter] at ($(agent.south)!0.5!(env.north)$) {Action $a_t$};
 
 
 % Feedback loop
