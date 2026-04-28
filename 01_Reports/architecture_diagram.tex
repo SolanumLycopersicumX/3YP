@@ -29,17 +29,24 @@
     % Box styles (Flat, No Shadows)
     nodeBox/.style={
         rectangle, rounded corners=6pt, draw=#1Border, fill=#1Fill, thick,
-        align=center, text=textMain, inner sep=12pt, minimum width=4.5cm, minimum height=1.5cm
+        align=center, text=textMain, inner sep=10pt, minimum width=3.8cm, minimum height=1.45cm
+    },
+    noteBox/.style={
+        rectangle, rounded corners=6pt, draw=borderGray, thick, fill=white,
+        align=left, text=textMain, inner sep=8pt, text width=4.2cm
     },
     groupBox/.style={
-        rectangle, rounded corners=12pt, draw=borderGray, thick, dashed, inner sep=18pt, fill=bgGray
+        rectangle, rounded corners=12pt, draw=borderGray, thick, dashed, inner sep=12pt, fill=bgGray
     },
     % Arrow styles
     arr/.style={->, >={Stealth[length=2.5mm, width=1.5mm]}, thick, textMain},
     arrDashed/.style={->, >={Stealth[length=2.5mm, width=1.5mm]}, thick, dashed, textMuted},
     % Text styles
-    lbl/.style={font=\scriptsize\itshape, text=textMuted, align=center, fill=bgGray, inner sep=3pt, rounded corners=2pt},
-    lblWhite/.style={font=\scriptsize\itshape, text=textMuted, align=center, fill=white, inner sep=3pt, rounded corners=2pt},
+    lbl/.style={font=\small, text=textMuted, align=center, fill=none, inner sep=3pt, midway, above=2pt, sloped},
+    lblWhite/.style={font=\small, text=textMuted, align=center, fill=none, inner sep=3pt, midway, above=2pt, sloped},
+    lblFlat/.style={font=\small, text=textMuted, align=center, fill=none, inner sep=3pt, midway, above=2pt},
+    lblWhiteFlat/.style={font=\small, text=textMuted, align=center, fill=none, inner sep=3pt, midway, above=2pt},
+    noteText/.style={font=\scriptsize, text=textMuted, align=left},
     title/.style={font=\normalsize\bfseries, text=textMain, anchor=south}
 ]
 
@@ -56,13 +63,13 @@
     \textbf{Preprocessing}\\
     \scriptsize Bandpass (8--30\,Hz) $\to$ 4s Epochs
 };
-\draw[arr] (eeg) -- node[lbl, right=0.1cm] {Raw Signal} (preproc);
+\draw[arr] (eeg) -- node[lblFlat] {Raw Signal} (preproc);
 
 \node[rectangle, rounded corners=6pt, draw=borderGray, thick, fill=white, align=center, text=textMain, inner sep=12pt, minimum width=4.5cm, minimum height=1.5cm, below=0.8cm of preproc] (baseline) {
     \textbf{Baseline Classifier}\\
     \scriptsize OVR-CSP + LDA
 };
-\draw[arrDashed] (preproc) -- node[lbl, right=0.1cm] {Comparison} (baseline);
+\draw[arrDashed] (preproc) -- node[lblFlat] {Comparison} (baseline);
 
 \begin{scope}[on background layer]
     \node[groupBox, fit=(p1_title) (eeg) (preproc) (baseline)] (group1) {};
@@ -73,7 +80,7 @@
 % ==========================================
 
 % Convolutional Front-End
-\node[nodeBox=orange] (cnn) at (8.5, 0 |- eeg.north) [anchor=north] {
+\node[nodeBox=orange] (cnn) at (6.4, 0 |- eeg.north) [anchor=north] {
     \textbf{Convolutional Front-End}\\
     \scriptsize Temporal $\to$ Spatial $\to$ Separable
 };
@@ -99,7 +106,7 @@
 
 % Arrows for Pillar 2
 % Filtered Epochs Arrow
-\coordinate (P1) at ($ (preproc.east) + (1.5, 0) $);
+\coordinate (P1) at ($ (preproc.east) + (0.9, 0) $);
 \draw[arr] (preproc.east) -- (P1) -- node[lblWhite] {Filtered Epochs} (P1 |- cnn.west) -- (cnn.west);
 
 \draw[arr] (cnn) -- (patch);
@@ -107,7 +114,7 @@
 \draw[arr] (trans) -- (fuse);
 
 % Residual Arrow on the LEFT, rectangular
-\coordinate (P4) at ($ (patch.west) + (-1.5, 0) $);
+\coordinate (P4) at ($ (patch.west) + (-0.9, 0) $);
 \draw[arr] (patch.west) -- (P4) -- node[lblWhite] {Residual} (P4 |- fuse.west) -- (fuse.west);
 
 \begin{scope}[on background layer]
@@ -119,7 +126,7 @@
 % ==========================================
 
 % State
-\node[nodeBox=purple] (state) at (17.0, 0 |- eeg.north) [anchor=north] {
+\node[nodeBox=purple] (state) at (12.8, 0 |- eeg.north) [anchor=north] {
     \textbf{State Representation} $s_t$\\
     \scriptsize Kinematics $\oplus$ Classifier Output
 };
@@ -138,15 +145,23 @@
 };
 
 % Arrows for Pillar 3
-\coordinate (P2) at ($ (fuse.east) + (1.5, 0) $);
-\draw[arr] (fuse.east) -- (P2) -- node[lblWhite] {Predicted Class \& Confidence} (P2 |- state.west) -- (state.west);
+\coordinate (P2) at ($ (fuse.east) + (0.9, 0) $);
+\draw[arr] (fuse.east) -- (P2) -- node[lblWhite] {Predicted Class\\\& Confidence} (P2 |- state.west) -- (state.west);
 
-\draw[arr] (state) -- node[lblWhite, right=0.1cm] {Action $a_t$} (agent);
-\draw[arr] (agent) -- (env);
+\draw[arr] (state) -- (agent);
+\draw[arr] (agent) -- node[lblWhiteFlat] {Action $a_t$} (env);
 
 % Feedback loop
-\coordinate (P3) at ($ (env.east) + (1.5, 0) $);
-\draw[arr] (env.east) -- (P3) -- node[lblWhite] {Next State $s_{t+1}$ \& Reward $r_t$} (P3 |- state.east) -- (state.east);
+\coordinate (P3) at ($ (env.east) + (0.9, 0) $);
+\draw[arr] (env.east) -- (P3) -- node[lblWhite] {Next State $s_{t+1}$\\\& Reward $r_t$} (P3 |- state.east) -- (state.east);
+
+% Deployment notes
+\node[noteBox, below=1.0cm of env] (hardware) {
+    \textbf{Hardware Integration}\\
+    \textcolor{textMuted}{BrainFlow $\rightarrow$ OpenBCI}\\
+    \textcolor{textMuted}{Serial Protocol $\rightarrow$ SO-101 (Feetech STS3215)}
+};
+\node[noteText, below=0.35cm of hardware, anchor=north] (commands) {4-class MI $\rightarrow$ 4 commands: left, right, up, down};
 
 \begin{scope}[on background layer]
     \node[groupBox, fit=(p3_title) (state) (env)] (group3) {};

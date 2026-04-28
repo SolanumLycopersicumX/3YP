@@ -246,7 +246,7 @@ The system is organised into three visual groups that together realise four inte
 
 \begin{figure}[htbp]
     \centering
-    \begin{adjustbox}{max width=\textwidth,center}
+    \begin{adjustbox}{max width=1.15\textwidth,center}
                 % --- DeepMind / OpenAI-style clean pastel palette ---
     \definecolor{bgGray}{RGB}{245, 246, 250}
     \definecolor{borderGray}{RGB}{180, 185, 195}
@@ -284,8 +284,10 @@ The system is organised into three visual groups that together realise four inte
     arr/.style={->, >={Stealth[length=2.5mm, width=1.5mm]}, thick, textMain},
     arrDashed/.style={->, >={Stealth[length=2.5mm, width=1.5mm]}, thick, dashed, textMuted},
     % Text styles
-    lbl/.style={font=\small, text=textMuted, align=center, fill=bgGray, inner sep=3pt, rounded corners=2pt},
-    lblWhite/.style={font=\small, text=textMuted, align=center, fill=white, inner sep=3pt, rounded corners=2pt},
+    lbl/.style={font=\normalsize, text=textMuted, align=center, fill=none, inner sep=3pt, midway, above=2pt, sloped},
+    lblWhite/.style={font=\normalsize, text=textMuted, align=center, fill=none, inner sep=3pt, midway, above=2pt, sloped},
+    lblFlat/.style={font=\normalsize, text=textMuted, align=center, fill=none, inner sep=3pt, midway, above=2pt},
+    lblWhiteFlat/.style={font=\normalsize, text=textMuted, align=center, fill=none, inner sep=3pt, midway, above=2pt},
     noteText/.style={font=\footnotesize, text=textMuted, align=left},
     title/.style={font=\normalsize\bfseries, text=textMain, anchor=south}
 ]
@@ -303,13 +305,17 @@ The system is organised into three visual groups that together realise four inte
     \textbf{Preprocessing}\\
     \footnotesize Bandpass (8--30\,Hz) $\to$ 4s Epochs
 };
-\draw[arr] (eeg) -- node[lbl, right=0.1cm] {Raw Signal} (preproc);
+\draw[arr] 
+(eeg) -- node[midway, inner sep=1pt] {Raw Signal} 
+(preproc);
 
 \node[rectangle, rounded corners=6pt, draw=borderGray, thick, fill=white, align=center, text=textMain, inner sep=8pt, minimum width=3.7cm, minimum height=1.4cm, below=0.8cm of preproc] (baseline) {
     \textbf{Baseline Classifier}\\
     \footnotesize OVR-CSP + LDA
 };
-\draw[arrDashed] (preproc) -- node[lbl, right=0.1cm] {Comparison} (baseline);
+\draw[arrDashed] 
+(preproc) -- node[midway, inner sep=1pt] {Comparison} 
+(baseline);
 
 \begin{scope}[on background layer]
     \node[groupBox, fit=(p1_title) (eeg) (preproc) (baseline)] (group1) {};
@@ -320,7 +326,7 @@ The system is organised into three visual groups that together realise four inte
 % ==========================================
 
 % Convolutional Front-End
-\node[nodeBox=orange] (cnn) at (5.8, 0 |- eeg.north) [anchor=north] {
+\node[nodeBox=orange] (cnn) at (7.5, 0 |- eeg.north) [anchor=north] {
     \textbf{Convolutional Front-End}\\
     \footnotesize Temporal $\to$ Spatial $\to$ Separable
 };
@@ -346,15 +352,19 @@ The system is organised into three visual groups that together realise four inte
 
 % Arrows for Pillar 2
 % Filtered Epochs Arrow
-\coordinate (P1) at ($ (preproc.east) + (0.65, 0) $);
-\draw[arr] (preproc.east) -- (P1) -- node[lblWhite] {Filtered Epochs} (P1 |- cnn.west) -- (cnn.west);
+\coordinate (P1) at ($ (preproc.east) + (0.8, 0) $);
+\draw[arr] 
+(preproc.east) -- (P1)
+-- node[lblWhite, xshift=0.5cm] {Filtered Epochs}
+(P1 |- cnn.west)
+-- (cnn.west);
 
 \draw[arr] (cnn) -- (patch);
 \draw[arr] (patch) -- (trans);
 \draw[arr] (trans) -- (fuse);
 
 % Residual Arrow on the LEFT, rectangular
-\coordinate (P4) at ($ (patch.west) + (-0.65, 0) $);
+\coordinate (P4) at ($ (patch.west) + (-1.1, 0) $);
 \draw[arr] (patch.west) -- (P4) -- node[lblWhite] {Residual} (P4 |- fuse.west) -- (fuse.west);
 
 \begin{scope}[on background layer]
@@ -366,7 +376,7 @@ The system is organised into three visual groups that together realise four inte
 % ==========================================
 
 % State
-\node[nodeBox=purple] (state) at (11.6, 0 |- eeg.north) [anchor=north] {
+\node[nodeBox=purple] (state) at (15.0, 0 |- eeg.north) [anchor=north] {
     \textbf{State Representation} $s_t$\\
     \footnotesize Kinematics $\oplus$ Classifier Output
 };
@@ -385,14 +395,17 @@ The system is organised into three visual groups that together realise four inte
 };
 
 % Arrows for Pillar 3
-\coordinate (P2) at ($ (fuse.east) + (0.65, 0) $);
+\coordinate (P2) at ($ (fuse.east) + (1.0, 0) $);
 \draw[arr] (fuse.east) -- (P2) -- node[lblWhite] {Predicted Class\\\& Confidence} (P2 |- state.west) -- (state.west);
 
 \draw[arr] (state) -- (agent);
-\draw[arr] (agent) -- node[lblWhite, right=0.1cm] {Action $a_t$} (env);
+\draw[arr] 
+(agent) -- node[midway, inner sep=1pt] {Action $a_t$} 
+(env);
+
 
 % Feedback loop
-\coordinate (P3) at ($ (env.east) + (0.7, 0) $);
+\coordinate (P3) at ($ (env.east) + (2.0, 0) $);
 \draw[arr] (env.east) -- (P3) -- node[lblWhite] {Next State $s_{t+1}$\\\& Reward $r_t$} (P3 |- state.east) -- (state.east);
 
 % Deployment notes
@@ -458,31 +471,8 @@ The main classifier is an EEGNet-inspired CNN--Transformer hybrid referred to in
 
 \begin{figure}[htbp]
 \centering
-\begin{tikzpicture}[
-    >=latex,
-    box/.style={rectangle, rounded corners=4pt, draw=black!55, fill=black!3, thick, align=center, minimum width=4.2cm, minimum height=0.95cm},
-    arr/.style={->, thick}
-]
-\node[box] (input) {Input trial\\$1 \times C \times 1000$};
-\node[box, below=0.8cm of input] (temp) {Temporal convolution\\kernel $64$, $F_1$ filters};
-\node[box, below=0.8cm of temp] (spat) {Depthwise spatial convolution\\across all EEG channels};
-\node[box, below=0.8cm of spat] (sep) {Separable temporal refinement\\kernel $16$ + average pooling};
-\node[box, below=0.8cm of sep] (token) {Patch/token sequence\\embedding dimension $D \times F_1$};
-\node[box, below=0.8cm of token] (transf) {Transformer encoder\\positional encoding + self-attention};
-\node[box, below=0.8cm of transf] (head) {Residual fusion + classification head\\flatten + linear logits};
-
-\draw[arr] (input) -- (temp);
-\draw[arr] (temp) -- (spat);
-\draw[arr] (spat) -- (sep);
-\draw[arr] (sep) -- (token);
-\draw[arr] (token) -- (transf);
-\draw[arr] (transf) -- (head);
-\coordinate (R1) at ([xshift=2.2cm]token.east);
-\coordinate (R2) at ([xshift=2.2cm]head.east);
-\draw[arr] (token.east) -- (R1) -- (R2) -- (head.east);
-\node[right=0.15cm of R1, anchor=north west] {\small residual path};
-\end{tikzpicture}
-\caption{Per-trial EEGTransformer pipeline used for the main PhysioNet experiments. The same architectural pattern was retained across datasets, with the input-channel count adapted to each montage.}
+\includegraphics[width=\textwidth]{plotneuralnet_eegtransformer/eegtransformer_plotnn.pdf}
+\caption{Per-trial EEGTransformer pipeline used for the main PhysioNet experiments. Front-edge labels denote feature-map / embedding width or classifier size, and side labels denote temporal samples or token count. The rendered architecture matches the implemented PhysioNet configuration used in code: input $1 \times 64 \times 1000$, temporal kernel $64$ with $F_1 = 20$, depth multiplier $D = 2$, second temporal kernel $16$, average pooling $(8, 8)$, $15$ tokens of width $40$, $2$ attention heads across $6$ encoder blocks, residual fusion, and a $600 \rightarrow 4$ linear head.}
 \label{fig:eegtransformer_arch_v10}
 \end{figure}
 
@@ -498,26 +488,29 @@ Temporal convolution & kernel $64$, $F_1 = 8$ & kernel $64$, $F_1 = 20$ \\
 Depth multiplier $D$ & 2 & 2 \\
 Second temporal kernel & 16 & 16 \\
 Average pooling & $(8, 8)$ & $(8, 8)$ \\
+Token count after pooling & 15 & 15 \\
 Transformer heads & 2 & 2 \\
 Transformer depth & 6 encoder blocks & 6 encoder blocks \\
 Token / embedding size & 16 & 40 \\
+Flattened fused feature length & 240 ($15 \times 16$) & 600 ($15 \times 40$) \\
 Dropout & 0.25--0.50 depending on protocol & 0.30 \\
 Input channels & 22 or 3, dataset-dependent & 64 (or reduced-channel subsets in ablations) \\
+Output classes & 4 (IV-2a) or 2 (IV-2b) & 4 \\
 \bottomrule
 \end{tabular}
 \end{table}
 
 \subsubsection{Convolutional Front-End}
 
-The first stage follows an EEGNet-style factorisation~\cite{lawhern2018eegnet}. A temporal convolution is applied independently across time within each channel to capture narrow-band oscillatory structure. A depthwise spatial convolution is then applied over the full electrode dimension, so each learned temporal filter produces a spatially weighted sensor combination. In practical terms, this stage plays a role analogous to data-driven spatial filtering, but without hand-engineered CSP features. A second temporal convolution and average-pooling stack reduce the sequence length while preserving the within-trial temporal ordering required by the Transformer.
+The first stage follows an EEGNet-style factorisation~\cite{lawhern2018eegnet}. A temporal convolution is applied independently across time within each channel to capture narrow-band oscillatory structure. A depthwise spatial convolution is then applied over the full electrode dimension, so each learned temporal filter produces a spatially weighted sensor combination. In practical terms, this stage plays a role analogous to data-driven spatial filtering, but without hand-engineered CSP features. A second temporal convolution and average-pooling stack reduce the sequence length while preserving the within-trial temporal ordering required by the Transformer. With a 1000-sample input and pooling sizes $(8, 8)$, the temporal axis is reduced from 1000 to 125 and then to 15 positions.
 
 \subsubsection{Transformer Encoder}
 
-The pooled convolutional output is rearranged into a sequence of tokens and augmented with positional encoding before entering a stack of Transformer encoder blocks. Each block contains multi-head self-attention, a feed-forward network, residual connections, and layer normalisation. In this context, ``long-range temporal dependencies'' refers to relationships spanning different parts of the same 4-second imagery trial: early cue-aligned activity, sustained ERD during imagined movement, and later within-trial recovery. These dependencies extend well beyond the local receptive field of a short convolution.
+The pooled convolutional output is rearranged into a sequence of tokens and augmented with positional encoding before entering a stack of Transformer encoder blocks. In the main PhysioNet configuration this produces 15 tokens of width 40, processed by 2-head self-attention repeated across 6 encoder blocks. Each block contains multi-head self-attention, a feed-forward network, residual connections, and layer normalisation. In this context, ``long-range temporal dependencies'' refers to relationships spanning different parts of the same 4-second imagery trial: early cue-aligned activity, sustained ERD during imagined movement, and later within-trial recovery. These dependencies extend well beyond the local receptive field of a short convolution.
 
 \subsubsection{Residual Fusion and Classification}
 
-The Transformer output is added back to the original token sequence through a residual fusion path before classification. This preserves local information from the convolutional front-end while augmenting it with global temporal context. The fused representation is flattened and mapped to class logits by a linear classification head. The full training code, including the exact layer dimensions used in the reported experiments, is implemented in \texttt{CTNet\_model.py}, \texttt{train\_physionet\_ctnet.py}, and the associated fine-tuning scripts.
+The Transformer output is added back to the original token sequence through a residual fusion path before classification. This preserves local information from the convolutional front-end while augmenting it with global temporal context. For the main PhysioNet model, the fused $15 \times 40$ representation is flattened to 600 features and mapped to 4 class logits by a linear classification head. The full training code, including the exact layer dimensions used in the reported experiments, is implemented in \texttt{CTNet\_model.py}, \texttt{train\_physionet\_ctnet.py}, and the associated fine-tuning scripts.
 
 %-----------------------------------------------------------------------------
 \subsection{Training Strategy}

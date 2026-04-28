@@ -1,0 +1,344 @@
+\documentclass[UTF8,aspectratio=169,11pt]{ctexbeamer}
+
+% ========== Theme ==========
+\usetheme{Madrid}
+\usecolortheme{whale}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}[frame number]
+
+% ========== Packages ==========
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta, positioning, shapes.geometric, calc, fit, backgrounds}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{xcolor}
+\usepackage{array}
+
+% ========== Colours ==========
+\definecolor{highlight}{RGB}{220, 70, 70}
+\definecolor{completed}{RGB}{80, 185, 100}
+\definecolor{pending}{RGB}{180, 180, 180}
+\definecolor{inprogress}{RGB}{90, 140, 240}
+
+% ========== Title ==========
+\title{基于深度学习的脑机接口机械臂闭环控制系统}
+\author{}
+\institute{BCI Control System Project}
+\date{2026年4月25日}
+
+\begin{document}
+
+\begin{frame}
+    \titlepage
+\end{frame}
+
+\begin{frame}[shrink=7]{1. 目前还有什么问题没有解决}
+
+    \begin{block}{当前仍未解决的核心问题}
+        传统 MI-BCI 机械臂控制距离真实落地还有明显差距，主要体现在：
+        \begin{itemize}
+            \item \textbf{信号非平稳}：不同用户、不同会话之间 EEG 差异很大
+            \item \textbf{开环控制脆弱}：单次分类错误会直接带偏机械臂动作
+            \item \textbf{硬件部署困难}：实验室常用 64 通道，实际更需要 8 通道设备
+        \end{itemize}
+    \end{block}
+
+    \vspace{2mm}
+    \begin{exampleblock}{项目目标}
+        构建一个\textbf{闭环控制系统}，把有噪声的运动想象 EEG 转化为稳定的机械臂控制动作，并保留面向 OpenBCI 的部署可能性。
+    \end{exampleblock}
+
+    \vspace{2mm}
+    \begin{alertblock}{和机器人岗位的关系}
+        这个项目本质上不是单纯做 EEG 分类，而是在做\textbf{感知有噪声时的决策与控制鲁棒性}，这和机器人决策算法的核心问题高度一致。
+    \end{alertblock}
+\end{frame}
+
+\begin{frame}[shrink=7]{2. 其他人做了什么，我做了什么，我的更好在哪里}
+    \begin{columns}[T]
+        \column{0.32\textwidth}
+        \textbf{已有工作}
+        \begin{itemize}
+            \item 大多数方法重点放在 \textbf{离线 EEG 分类}
+            \item 常见方法包括 CSP、EEGNet、CNN、Transformer
+            \item 很多工作默认 \textbf{分类结果直接映射成动作}
+            \item 高精度结果通常依赖 \textbf{64 通道实验室设备}
+        \end{itemize}
+
+        \column{0.32\textwidth}
+        \textbf{我做的工作}
+        \begin{itemize}
+            \item 设计 EEGTransformer 做分类
+            \item 用迁移学习解决跨被试泛化
+            \item 用 Transformer DQN 做 \textbf{闭环控制纠错}
+            \item 做 8 通道压缩和 OpenBCI 部署设计
+        \end{itemize}
+
+        \column{0.32\textwidth}
+        \textbf{我的改进}
+        \begin{itemize}
+            \item 不再停留在分类，而是构建 \textbf{感知-决策-执行闭环}
+            \item 不要求分类绝对正确，也能保持稳定控制
+            \item 同时考虑 \textbf{精度、鲁棒性、部署可行性}
+            \item 在 82.22\% 分类精度下仍实现 99\% 控制成功率
+        \end{itemize}
+    \end{columns}
+
+    \vspace{2mm}
+    \begin{alertblock}{一句话概括}
+        其他方法更多是在回答“能不能分对类别”，我的工作更进一步回答了“在分类不完美的情况下，系统能不能仍然稳定完成控制任务”。
+    \end{alertblock}
+\end{frame}
+
+\begin{frame}{3. 系统整体架构}
+    \begin{center}
+        \includegraphics[width=0.96\textwidth]{architecture_diagram.pdf}
+    \end{center}
+
+    \vspace{1mm}
+    \begin{center}
+        \small
+        从 EEG 预处理、EEGTransformer 分类，到闭环 DQN 控制与机械臂执行，构成完整系统链路
+    \end{center}
+\end{frame}
+
+\begin{frame}[shrink=7]{4. EEGTransformer 与迁移学习}
+
+    \begin{columns}[T]
+        \column{0.5\textwidth}
+        \textbf{分类器设计}
+        \begin{itemize}
+            \item \textbf{CNN 前端}：提取运动皮层相关空间模式
+            \item \textbf{Transformer 编码器}：建模 4 秒 EEG 序列的长时依赖
+            \item \textbf{迁移学习}：先跨被试预训练，再做个体微调
+        \end{itemize}
+
+        \vspace{2mm}
+        \begin{exampleblock}{设计动机}
+            CNN 提供 EEG 所需的空间归纳偏置，Transformer 提供更强的时序建模能力，两者结合比单一范式更适合这个任务。
+        \end{exampleblock}
+
+        \column{0.48\textwidth}
+        \textbf{关键结果}
+        \begin{itemize}
+            \item BCI IV-2a（22 通道，4 分类）：\textbf{73.80\%}
+            \item BCI IV-2b（3 通道，2 分类）：\textbf{82.87\%}
+            \item PhysioNet 跨被试训练：\textbf{56.54\%}
+            \item PhysioNet 微调后：\textbf{88.78\%}
+        \end{itemize}
+
+        \vspace{2mm}
+        \begin{alertblock}{核心结论}
+            个体微调弥补了\textbf{32 个百分点}的性能差距，说明预训练模型学到的是可迁移的运动想象表征，而不是只记住了单个被试的数据分布。
+        \end{alertblock}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[shrink=8]{5. 关键量化结果（来自 Final Report）}
+    \begin{columns}[T]
+        \column{0.48\textwidth}
+        \textbf{PhysioNet 分类结果}
+        \begin{table}
+            \centering
+            \scriptsize
+            \begin{tabular}{p{2.9cm}cc}
+                \toprule
+                训练方式 & 精度(\%) & 备注 \\
+                \midrule
+                跨被试训练 & 56.54 & 109人 pooled \\
+                个体微调 & \textbf{88.78} & 10人, 5-fold CV \\
+                \bottomrule
+            \end{tabular}
+        \end{table}
+
+        \vspace{2mm}
+        \begin{exampleblock}{含义}
+            这说明预训练模型具备可迁移表征，经过少量个体校准后可以显著提升性能。
+        \end{exampleblock}
+
+        \column{0.48\textwidth}
+        \textbf{DQN 架构对比}
+        \begin{table}
+            \centering
+            \scriptsize
+            \begin{tabular}{lccc}
+                \toprule
+                架构 & 时间(s) & 到达率 & Reward \\
+                \midrule
+                CNN+LSTM & 111.7 & 97\% & 8.79 \\
+                Light Trans. & 134.0 & 99\% & 10.07 \\
+                \textbf{Transformer DQN} & \textbf{177.8} & \textbf{100\%} & \textbf{10.39} \\
+                \bottomrule
+            \end{tabular}
+        \end{table}
+
+        \vspace{2mm}
+        \begin{alertblock}{含义}
+            Transformer DQN 在最终控制表现上最好，证明时序建模对闭环决策是有效的。
+        \end{alertblock}
+    \end{columns}
+\end{frame}
+
+\begin{frame}{6. 迁移学习效果}
+    \begin{center}
+        \includegraphics[width=0.84\textwidth]{../03_Experiments/physionet_ctnet_finetune/finetune_comparison.png}
+    \end{center}
+
+    \vspace{1mm}
+    \begin{exampleblock}{意义}
+        对真实系统来说，这意味着新用户不需要从零训练模型，只需要较少的校准数据，就可以快速得到较高的个体化分类性能。
+    \end{exampleblock}
+\end{frame}
+
+\begin{frame}[shrink=8]{7. 8 通道部署与预处理取舍}
+
+    \begin{columns}[T]
+        \column{0.48\textwidth}
+        \textbf{通道压缩策略}
+        \begin{itemize}
+            \item 通过 leave-one-channel-out 消融评估各电极重要性
+            \item 结果表明 \textbf{C3} 是最关键通道
+            \item 构造 OpenBCI 兼容的 8 通道集合：
+            \item \texttt{C3, C4, FC3, FC4, CP3, CP4, Cz, FCz}
+        \end{itemize}
+
+        \vspace{2mm}
+        \textbf{预处理取舍}
+        \begin{itemize}
+            \item 8--30 Hz 带通滤波平均提升：\textbf{+18.44\%}
+            \item ICA 额外增益只有：\textbf{+1.51\%}
+            \item 最终主流程保留 \textbf{bandpass-only}
+        \end{itemize}
+
+        \column{0.48\textwidth}
+        \begin{center}
+            \includegraphics[width=\textwidth]{../03_Experiments/Channel_Reduction/channel_reduction/channel_reduction_comparison.png}
+        \end{center}
+
+        \vspace{1mm}
+        \begin{alertblock}{部署结果}
+            即使降到 8 通道，经过个体微调后平均精度仍达到 \textbf{72.54\%}，说明该方案在消费级硬件上仍具有可用性。
+        \end{alertblock}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[shrink=8]{8. 闭环决策层：Transformer DQN}
+
+    \begin{columns}[T]
+        \column{0.5\textwidth}
+        \textbf{MDP 建模}
+        \begin{itemize}
+            \item 状态：末端位置、目标位置、距离
+            \item 可选增强状态：EEG 预测类别 + 置信度
+            \item 动作：左 / 右 / 上 / 下
+            \item 奖励：到达目标奖励、距离改善奖励、步数惩罚、震荡和越界惩罚
+        \end{itemize}
+
+        \vspace{2mm}
+        \begin{exampleblock}{关键思想}
+            分类器只提供有噪声的方向线索，真正的动作选择由\textbf{闭环决策模块}完成，它会在连续状态下学习如何纠错。
+        \end{exampleblock}
+
+        \column{0.48\textwidth}
+        \begin{center}
+            \includegraphics[width=\textwidth]{../03_Experiments/comparison_dqn_vs_transformer.png}
+        \end{center}
+
+        \vspace{1mm}
+        \textbf{结构对比}
+        \begin{itemize}
+            \item CNN+LSTM: 97\% reach rate
+            \item Light Transformer: 99\%
+            \item \textbf{Transformer DQN}: 100\%
+        \end{itemize}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[shrink=8]{9. 端到端结果：分类有噪声，控制仍然稳定}
+
+    \begin{columns}[T]
+        \column{0.5\textwidth}
+        \begin{center}
+            \includegraphics[width=\textwidth]{../03_Experiments/E2E_Evaluation/rl_control_test/overall_performance.png}
+        \end{center}
+
+        \column{0.48\textwidth}
+        \textbf{报告中的原始结果表}
+        \begin{table}
+            \centering
+            \scriptsize
+            \begin{tabular}{lcccc}
+                \toprule
+                Agent State & 维度 & 到达率 & Reward & 时间(s) \\
+                \midrule
+                Arm only & 5 & 99.0\% & 8.71 & 1130 \\
+                Arm + EEG & 7 & 98.7\% & 8.59 & \textbf{668} \\
+                \bottomrule
+            \end{tabular}
+        \end{table}
+
+        \vspace{1mm}
+        \textbf{分类精度：} \textbf{82.22\%}
+
+        \vspace{2mm}
+        \begin{alertblock}{核心结论}
+            闭环强化学习能够吸收分类误差，而不是机械执行分类结果。这说明该系统更像一个鲁棒决策系统，而不是简单的“分类即动作”映射器。
+        \end{alertblock}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[shrink=7]{10. 工程实现范围与验证边界}
+
+    \begin{columns}[T]
+        \column{0.48\textwidth}
+        \textbf{我实际完成的部分}
+        \begin{itemize}
+            \item MNE / PyTorch 的预处理、训练、微调和评估
+            \item PyBullet 仿真环境与强化学习训练
+            \item BrainFlow 接入 OpenBCI 实时 EEG 流
+            \item SO-101 机械臂串口控制链路
+        \end{itemize}
+
+        \column{0.5\textwidth}
+        \textbf{当前验证边界}
+        \begin{itemize}
+            \item 完整软件链路已实现
+            \item 端到端仿真验证已完成
+            \item OpenBCI 流接口已实现
+            \item SO-101 控制接口已实现
+            \item 由于伦理审批限制，尚未进行真人在线闭环实验
+        \end{itemize}
+
+        \vspace{2mm}
+        \begin{exampleblock}{面试时的表述方式}
+            这项工作应当被表述为\textbf{仿真已验证、面向部署的系统}，而不是已经完成真人实测的最终产品。
+        \end{exampleblock}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[shrink=6]{11. 如何映射到机器人决策算法岗位}
+
+    \begin{table}
+        \centering
+        \small
+        \begin{tabular}{p{4.2cm}p{6.7cm}}
+            \toprule
+            \textbf{岗位关注点} & \textbf{我的项目对应证据} \\
+            \midrule
+            不确定感知下的决策 & DQN 在 EEG 噪声下持续纠错并完成目标到达 \\
+            仿真到部署 & 先在 PyBullet 验证，再对接 OpenBCI 与 SO-101 接口 \\
+            算法工程能力 & EEGTransformer、微调流程、RL 环境与评估脚本均由我实现 \\
+            系统联调能力 & 数据处理、分类、控制、通信链路完整打通 \\
+            工程取舍能力 & 通道压缩、预处理消融、部署成本与性能平衡 \\
+            \bottomrule
+        \end{tabular}
+    \end{table}
+
+    \vspace{2mm}
+    \begin{alertblock}{一句话总结}
+        这个项目最适合被概括为：\textbf{一个在不完美感知条件下仍能稳定完成控制任务的闭环决策系统}。
+    \end{alertblock}
+\end{frame}
+
+\end{document}
