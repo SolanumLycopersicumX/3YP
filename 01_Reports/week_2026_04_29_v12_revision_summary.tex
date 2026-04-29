@@ -54,6 +54,45 @@
 
 \end{frame}
 
+\begin{frame}[t]{Text Comparison: Literature and System Context}
+\scriptsize
+
+    \begin{columns}[T,onlytextwidth]
+        \begin{column}{0.49\textwidth}
+            \begin{alertblock}{Draft v11}
+                The system is organised into three visual groups that together realise four integrated functions: EEG preprocessing, deep learning classification, reinforcement learning control, and hardware integration.
+            \end{alertblock}
+        \end{column}
+        \begin{column}{0.49\textwidth}
+            \begin{block}{Draft v12}
+                The system is organised into three visual groups that correspond to four functions: EEG preprocessing, deep learning classification, reinforcement learning control, and hardware integration.
+            \end{block}
+        \end{column}
+    \end{columns}
+
+    \vspace{0.5em}
+
+    \begin{columns}[T,onlytextwidth]
+        \begin{column}{0.49\textwidth}
+            \begin{alertblock}{Draft v11}
+                The figure was introduced directly in Methods, so the reader had to infer how the literature review connected to the architecture diagram.
+            \end{alertblock}
+        \end{column}
+        \begin{column}{0.49\textwidth}
+            \begin{block}{Draft v12}
+                The new Literature Review bridge explains that the architecture diagram connects preprocessing literature, hybrid CNN--Transformer decoding, and RL-based decision making into one BCI-to-control pipeline.
+            \end{block}
+        \end{column}
+    \end{columns}
+
+    \vfill
+
+    \begin{block}{Why this is clearer}
+        The comparison shows that v12 did not just add background text; it changed the report flow so the architecture diagram is motivated before it appears.
+    \end{block}
+
+\end{frame}
+
 \begin{frame}[t]{Methods: Reproducibility and Code-Level Detail}
 \footnotesize
 
@@ -66,6 +105,45 @@
     \begin{alertblock}{Rationale}
         The previous draft described the models at a higher level, which made the work harder to reproduce and easier to question. Listing the parameters makes clear that the report corresponds to the implemented code rather than to a generic CNN--Transformer description. The code-level notes also help the examiner connect the written methodology to the repository without needing to infer which scripts produced which results.
     \end{alertblock}
+
+\end{frame}
+
+\begin{frame}[t]{Text Comparison: Methods Reproducibility}
+\scriptsize
+
+    \begin{columns}[T,onlytextwidth]
+        \begin{column}{0.49\textwidth}
+            \begin{alertblock}{Draft v11}
+                The architecture table listed the main layers, but did not explicitly state input shape, spatial feature maps after depthwise convolution, positional encoding, feed-forward expansion, classifier head, or residual fusion.
+            \end{alertblock}
+        \end{column}
+        \begin{column}{0.49\textwidth}
+            \begin{block}{Draft v12}
+                Added rows include: input shape $1 \times 64 \times 1000$, $F_2 = 40$, learnable positional encoding, $4 \times$ feed-forward expansion, Dropout 0.5 + Linear $600 \rightarrow 4$, and residual fusion.
+            \end{block}
+        \end{column}
+    \end{columns}
+
+    \vspace{0.5em}
+
+    \begin{columns}[T,onlytextwidth]
+        \begin{column}{0.49\textwidth}
+            \begin{alertblock}{Draft v11}
+                The main PhysioNet script pools all available training participants and applies a stratified 80/20 split at the epoch level.
+            \end{alertblock}
+        \end{column}
+        \begin{column}{0.49\textwidth}
+            \begin{block}{Draft v12}
+                For the reported 109-participant PhysioNet experiment, the pooling script was run with an explicit full-subject list rather than its default \texttt{--subjects 1 2 ... 10} setting.
+            \end{block}
+        \end{column}
+    \end{columns}
+
+    \vfill
+
+    \begin{block}{Why this is clearer}
+        The revised text makes the method reproducible from the report itself, rather than requiring the examiner to reconstruct key parameters from code or figures.
+    \end{block}
 
 \end{frame}
 
@@ -84,6 +162,45 @@
 
 \end{frame}
 
+\begin{frame}[t]{Text Comparison: Offline and Online Windows}
+\scriptsize
+
+    \begin{columns}[T,onlytextwidth]
+        \begin{column}{0.49\textwidth}
+            \begin{alertblock}{Draft v11}
+                In this context, ``long-range temporal dependencies'' refers to relationships spanning different parts of the same 4-second imagery trial.
+            \end{alertblock}
+        \end{column}
+        \begin{column}{0.49\textwidth}
+            \begin{block}{Draft v12}
+                In this context, ``long-range temporal dependencies'' refers to relationships spanning different parts of the same offline PhysioNet epoch, extracted from $-0.5$\,s to $4.0$\,s relative to cue onset (4.5\,s total).
+            \end{block}
+        \end{column}
+    \end{columns}
+
+    \vspace{0.5em}
+
+    \begin{columns}[T,onlytextwidth]
+        \begin{column}{0.49\textwidth}
+            \begin{alertblock}{Draft v11}
+                BrainFlow streams EEG from the OpenBCI board, a 4-second sliding window is filtered and normalised online, the personalised EEGTransformer predicts class and confidence.
+            \end{alertblock}
+        \end{column}
+        \begin{column}{0.49\textwidth}
+            \begin{block}{Draft v12}
+                This 4.0\,s online decision window is a deployment-oriented design choice and should be distinguished from the 4.5\,s offline PhysioNet epochs.
+            \end{block}
+        \end{column}
+    \end{columns}
+
+    \vfill
+
+    \begin{block}{Why this is clearer}
+        The before/after wording makes the correction visible: v12 prevents the offline model-development window and online decision window from being read as the same setting.
+    \end{block}
+
+\end{frame}
+
 \begin{frame}[t]{Channel Reduction and OpenBCI Deployment Claims}
 \footnotesize
 
@@ -99,6 +216,45 @@
 
 \end{frame}
 
+\begin{frame}[t]{Text Comparison: 8-Channel Claim Scope}
+\scriptsize
+
+    \begin{columns}[T,onlytextwidth]
+        \begin{column}{0.49\textwidth}
+            \begin{alertblock}{Draft v11}
+                The 8-channel motor cortex configuration (C3, C4, FC3, FC4, CP3, CP4, Cz, FCz), designed for OpenBCI Cyton compatibility, achieved 40.7\% in cross-subject mode.
+            \end{alertblock}
+        \end{column}
+        \begin{column}{0.49\textwidth}
+            \begin{block}{Draft v12}
+                The 8-channel motor cortex configuration (C3, C4, FC3, FC4, CP3, CP4, Cz, FCz), designed as an OpenBCI Cyton-compatible electrode set for offline evaluation, achieved 40.7\% in cross-subject mode.
+            \end{block}
+        \end{column}
+    \end{columns}
+
+    \vspace{0.5em}
+
+    \begin{columns}[T,onlytextwidth]
+        \begin{column}{0.49\textwidth}
+            \begin{alertblock}{Draft v11}
+                These results suggest that the 8-channel configuration remains a plausible option for closed-loop control, although that claim still needs to be verified with real-time OpenBCI recordings.
+            \end{alertblock}
+        \end{column}
+        \begin{column}{0.49\textwidth}
+            \begin{block}{Draft v12}
+                These results suggest that the 8-channel electrode set remains a plausible offline foundation for closed-loop control, although real-time OpenBCI validation and a native low-channel online inference path remain future work.
+            \end{block}
+        \end{column}
+    \end{columns}
+
+    \vfill
+
+    \begin{block}{Why this is clearer}
+        The revised phrasing keeps the useful 8-channel evidence, but removes the implication that a complete native 8-channel online deployment has already been validated.
+    \end{block}
+
+\end{frame}
+
 \begin{frame}[t]{Hardware Validation and Architecture Diagram}
 \footnotesize
 
@@ -111,6 +267,45 @@
     \begin{alertblock}{Rationale}
         The available evidence supports software-interface validation and simulation-level integration, not live testing with a real OpenBCI headset and new human subjects. The revised wording therefore matches the saved evidence files and the ethical-approval limitation. Updating the standalone architecture diagram avoids a second source of inconsistency, since figures are often inspected more quickly than the surrounding text.
     \end{alertblock}
+
+\end{frame}
+
+\begin{frame}[t]{Text Comparison: Hardware Validation}
+\scriptsize
+
+    \begin{columns}[T,onlytextwidth]
+        \begin{column}{0.49\textwidth}
+            \begin{alertblock}{Draft v11}
+                The BrainFlow API integration was implemented and tested for real-time EEG streaming from OpenBCI boards.
+            \end{alertblock}
+        \end{column}
+        \begin{column}{0.49\textwidth}
+            \begin{block}{Draft v12}
+                The BrainFlow acquisition interface and online control loop were exercised with synthetic-board streaming and archived EEG-driven simulation runs.
+            \end{block}
+        \end{column}
+    \end{columns}
+
+    \vspace{0.5em}
+
+    \begin{columns}[T,onlytextwidth]
+        \begin{column}{0.49\textwidth}
+            \begin{alertblock}{Draft v11}
+                All evaluation in this project was conducted in simulation using pre-recorded EEG datasets.
+            \end{alertblock}
+        \end{column}
+        \begin{column}{0.49\textwidth}
+            \begin{block}{Draft v12}
+                EEG classification, preprocessing, and channel-reduction experiments were evaluated offline using pre-recorded public datasets. The end-to-end control evaluation therefore simulates real-time use.
+            \end{block}
+        \end{column}
+    \end{columns}
+
+    \vfill
+
+    \begin{block}{Why this is clearer}
+        The revised text now matches the available evidence: software-interface and simulation validation are supported, while live OpenBCI human-subject validation is left as future work.
+    \end{block}
 
 \end{frame}
 

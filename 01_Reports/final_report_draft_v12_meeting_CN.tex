@@ -1,0 +1,230 @@
+\documentclass[UTF8,12pt,a4paper]{ctexart}
+
+\usepackage[margin=2cm]{geometry}
+\usepackage{setspace}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{hyperref}
+
+\onehalfspacing
+\raggedright
+
+\definecolor{noteBlue}{RGB}{226,239,255}
+\definecolor{noteBorder}{RGB}{70,105,170}
+\definecolor{hlYellow}{RGB}{255,244,150}
+\newcommand{\keypoint}[1]{\colorbox{hlYellow}{#1}}
+\newcommand{\meetingnote}[1]{%
+  \par\smallskip
+  \noindent\fcolorbox{noteBorder}{noteBlue}{%
+    \parbox{0.96\linewidth}{\small\textbf{会议解释：}#1}%
+  }%
+  \par\smallskip
+}
+
+\title{\textbf{Final Report Draft v12 会议版中文速读}\\
+\large 黄色标注与注释说明}
+\author{Student ID: 11314389}
+\date{April 29, 2026}
+
+\begin{document}
+\maketitle
+
+\section*{1. 这份会议版的用途}
+
+这份中文速读版用于快速理解英文 \texttt{final\_report\_draft\_v12\_meeting.pdf} 中的黄色标注和蓝色注释。它不是最终报告正文的中文译文，而是会议讨论用说明稿：帮助快速回答“这次 v12 改了什么、为什么改、对评审有什么帮助”。
+
+\section*{2. 总体修订逻辑}
+
+v12 的核心不是单纯润色，而是一次\keypoint{证据边界、可复现性和报告结构}的修订。主要目标有四个：
+
+\begin{enumerate}
+    \item 把过强的表述改成与证据匹配的表述，避免 overclaim。
+    \item 补充 Methods 里的实现细节，让模型参数、训练设置和代码路径更容易复现。
+    \item 明确区分 offline EEG 实验、PyBullet simulation 和 online OpenBCI 设计，避免读者误以为已经做了 live human-subject OpenBCI 验证。
+    \item 扩展 Project Management，说明范围变化、风险控制和 simulation-first 策略是有计划的工程取舍。
+\end{enumerate}
+
+\section*{3. Abstract：先把证据范围说清楚}
+
+\subsection*{3.1 控制部分的措辞收敛}
+
+英文标注重点是：
+\begin{quote}
+``aggregating classifier evidence over time'' 和 ``showed limited benefit''
+\end{quote}
+
+中文理解：DQN 不是被描述成“直接证明了某种生物学意义上的整合机制”，而是更谨慎地说它在控制过程中\keypoint{聚合分类器输出的证据}。ICA 的结果也从较强的“demonstrated”改成“showed”，因为实验只能说明在当前协议下 ICA 收益有限。
+
+\meetingnote{会议上可以说：这里主要是避免把实验结果写得过满。DQN 的贡献是控制层面对 noisy classifier output 的利用；ICA 的结论是当前数据和协议下收益不稳定，所以采用 bandpass-only pipeline 更稳妥。}
+
+\subsection*{3.2 明确 offline / simulation 边界}
+
+英文标注重点是：
+\begin{quote}
+EEG classification was evaluated offline using pre-recorded datasets, while control evaluation was conducted in simulation.
+\end{quote}
+
+中文理解：EEG 分类是在公开数据集上离线评估的；控制是在 PyBullet simulation 中评估的。这句话放在 Abstract 中，是为了让读者一开始就知道项目没有声称进行了 live human-subject OpenBCI 测试。
+
+\meetingnote{会议上可以说：因为本科项目没有伦理审批，不能做新的人体 EEG 实验。所以报告把验证范围写清楚：classification 是 offline，control 是 simulation。}
+
+\section*{4. Literature Review：解释为什么选这些数据集和系统结构}
+
+\subsection*{4.1 数据集选择理由}
+
+v12 新增了“为什么选择 BCI IV-2a、IV-2b 和 PhysioNet，而不是更多公开 EEG 数据集”的解释。
+
+\begin{itemize}
+    \item BCI IV-2a：标准 4-class MI benchmark，便于和已有方法比较。
+    \item BCI IV-2b：3-channel binary task，用来测试极低通道设置。
+    \item PhysioNet EEGMMIDB：109 subjects，规模足够支持 cross-subject pre-training 和 transfer learning。
+\end{itemize}
+
+\meetingnote{会议上可以说：这三个数据集不是随机拼在一起的，而是互补的。IV-2a 提供标准多分类 benchmark，IV-2b 提供低通道压力测试，PhysioNet 提供大规模跨被试训练。}
+
+\subsection*{4.2 从文献过渡到系统架构}
+
+v12 新增 “From Literature to System Structure”。核心意思是：本项目不是只做 MI classifier，而是把 EEG preprocessing、MI decoding 和 RL control 连接成一个 BCI-to-control pipeline。
+
+\meetingnote{会议上可以说：以前文献综述和 Methods 里的系统图之间连接不够明显。现在新增桥接段落，让读者在看到架构图之前就知道每个模块来自什么研究问题。}
+
+\section*{5. Methods：补足可复现细节}
+
+\subsection*{5.1 模型参数表扩展}
+
+v12 对 EEGTransformer 配置表增加了更多实现参数，包括：
+
+\begin{itemize}
+    \item input shape：主 PhysioNet 模型为 $1 \times 64 \times 1000$；
+    \item depthwise convolution 后的 feature maps：$F_2 = 40$；
+    \item positional encoding：learnable，dropout 0.1；
+    \item feed-forward expansion：$4 \times$ embedding width；
+    \item classification head：Dropout 0.5 + Linear $600 \rightarrow 4$；
+    \item residual fusion：CNN tokens + Transformer output。
+\end{itemize}
+
+\meetingnote{会议上可以说：这些不是新实验，而是把已经在代码里实现的关键参数写进报告，降低 examiner 复现和核对代码的成本。}
+
+\subsection*{5.2 offline 4.5 s 与 online 4.0 s 的区别}
+
+v12 明确写出：PhysioNet 离线训练 epoch 是从 cue onset 前 $-0.5$\,s 到 $4.0$\,s，总共 4.5\,s；而 online control 设计中使用的是 4.0\,s sliding decision window。
+
+\meetingnote{会议上可以说：这是两个不同设置。4.5 s 是 offline dataset loader 的 epoch 定义；4.0 s 是在线控制设计中的 decision window。这样写可以避免读者认为报告和代码互相矛盾。}
+
+\subsection*{5.3 代码级可追踪性}
+
+v12 增加了代码路径说明：
+
+\begin{itemize}
+    \item \texttt{CTNet\_model.py}：EEGTransformer 模型定义；
+    \item \texttt{train\_physionet\_ctnet.py}：PhysioNet pooled training；
+    \item \texttt{finetune\_physionet\_ctnet.py}：subject-specific fine-tuning；
+    \item \texttt{channel\_reduction\_study.py}：reduced-channel experiments；
+    \item RL 相关脚本：DQN model、training、environment 和 evaluation。
+\end{itemize}
+
+\meetingnote{会议上可以说：这是为了把报告中的方法描述和 repository 对应起来，避免 examiner 需要自己猜哪些脚本支持哪些结果。}
+
+\subsection*{5.4 109-subject 训练配置}
+
+v12 明确：最终报告中的 PhysioNet 109-subject run 使用了显式 full-subject list，而不是脚本默认的 \texttt{--subjects 1 2 ... 10}。
+
+\meetingnote{会议上可以说：这修正了一个可复现性歧义。脚本默认参数和最终实验配置不一样，所以报告必须说明最终运行时使用的是完整 subject list。}
+
+\section*{6. Channel Reduction 与 OpenBCI：收窄部署声明}
+
+\subsection*{6.1 写出具体 8-channel electrodes}
+
+v12 明确列出两套 8-channel 设置：
+
+\begin{itemize}
+    \item Ablation-ranked subset：\{C3, CP3, Fpz, Pz, O1, F8, FCz, FC2\}
+    \item Domain-guided OpenBCI-oriented subset：\{C3, C4, FC3, FC4, CP3, CP4, Cz, FCz\}
+\end{itemize}
+
+\meetingnote{会议上可以说：仅说“8 channels”不够，因为不同 8-channel 组合代表不同硬件和神经生理含义。列出 electrode names 才能复现和讨论 OpenBCI montage。}
+
+\subsection*{6.2 8-channel 结果是 offline evidence}
+
+v12 把 8-channel 结果描述为\keypoint{offline evaluation}，并明确它不是 native end-to-end 8-channel online deployment 的证明。
+
+\meetingnote{会议上可以说：8-channel fine-tuning accuracy 支持 OpenBCI-compatible montage 的可行性，但目前在线 BrainFlow path 仍然需要适配 legacy CTNet input shape，所以不能声称已经完成原生 8-channel 在线部署。}
+
+\section*{7. Hardware Validation：证据支持到哪里}
+
+v12 把硬件验证表述改成：
+
+\begin{itemize}
+    \item classifier：公开数据集 offline evaluation；
+    \item DQN control：PyBullet simulation；
+    \item BrainFlow/online loop：synthetic-board streaming 和 archived EEG-driven simulation runs；
+    \item SO-101 arm：serial protocol 和 basic motion commands 验证。
+\end{itemize}
+
+\meetingnote{会议上可以说：这里不是削弱项目，而是把证据说准确。项目已经验证了 software-interface 和 simulation-level integration，但没有伦理审批下的新真人 OpenBCI EEG 验证。}
+
+\section*{8. Limitations：主动说明未来工作}
+
+v12 在 limitations 中把两个关键限制写得更具体：
+
+\begin{itemize}
+    \item 8-channel OpenBCI claim 需要 live OpenBCI headset + new subjects 才能做更强部署声明；
+    \item online control 使用 4.0 s decision window，而 offline PhysioNet epoch 是 4.5 s；未来需要探索更短窗口或 asynchronous MI。
+\end{itemize}
+
+\meetingnote{会议上可以说：把 limitation 写清楚能降低评审风险。与其让 examiner 指出 overclaim，不如主动说明当前证据边界和 future work。}
+
+\section*{9. Project Management：解释工程取舍}
+
+v12 扩展了 Project Management，重点不是“我做了很多事”，而是说明项目如何管理范围和风险：
+
+\begin{itemize}
+    \item 先做 dataset preparation 和 baseline，再做 EEGTransformer；
+    \item classifier 接口稳定后再推进 RL；
+    \item 因为伦理限制，hardware-oriented work 不作为主要验证路线；
+    \item 从 9-subject benchmark 扩展到 109-subject PhysioNet，是为了支撑 cross-subject argument；
+    \item planar reaching environment 是为了让 RL comparison 在时间内可控完成。
+\end{itemize}
+
+\meetingnote{会议上可以说：simulation-first 不是退而求其次，而是在伦理、时间和硬件风险下的合理项目管理策略。}
+
+\section*{10. Conclusion：保留贡献，但避免过度声明}
+
+v12 结论中保留了主要贡献：
+
+\begin{itemize}
+    \item EEGTransformer 在三组数据集上取得 competitive results；
+    \item subject-specific fine-tuning 缩小 cross-subject gap；
+    \item offline 8-channel OpenBCI-compatible configuration 保留 72.54\% accuracy；
+    \item Transformer DQN 在 imperfect classification 下仍能实现高 reach rate；
+    \item ICA 收益有限，因此采用 bandpass-only pipeline。
+\end{itemize}
+
+但关键是：结论中再次明确 \keypoint{EEG 分类组件是离线评估的，控制组件是在 PyBullet 仿真中评估的}。
+
+\meetingnote{会议上可以说：结论现在既保留技术贡献，也把验证边界写清楚。这样比泛泛说“complete system validated”更稳。}
+
+\section*{11. 会议中可直接使用的简短回答}
+
+\subsection*{如果问：v12 最大变化是什么？}
+
+最大变化是把报告从“结果展示”改成更可审查的版本：补了方法细节、代码路径、数据集选择理由，并且明确 offline、simulation 和 future live validation 的边界。
+
+\subsection*{如果问：为什么要弱化 OpenBCI 相关表述？}
+
+因为当前证据支持 offline 8-channel montage feasibility 和 BrainFlow software-interface testing，但还没有伦理审批下的新真人 OpenBCI EEG 验证。弱化表述是为了让 claim 与证据一致。
+
+\subsection*{如果问：4.0 s 和 4.5 s 为什么同时出现？}
+
+4.5 s 是 PhysioNet offline epoch：$-0.5$\,s 到 $4.0$\,s。4.0 s 是 online control sliding window。它们属于不同阶段，不是矛盾。
+
+\subsection*{如果问：为什么只用三个数据集？}
+
+因为三个数据集角色互补：IV-2a 是标准 4-class benchmark，IV-2b 是 low-channel stress test，PhysioNet 是 large-scale cross-subject training source。继续加数据集会增加复杂度，但不一定强化核心论证。
+
+\subsection*{如果问：simulation-first 会不会削弱项目？}
+
+不会。对于没有人体实验伦理审批的本科项目，simulation-first 是合理策略。它能验证软件链路、控制逻辑和安全性；live human-subject validation 被明确放在 future work。
+
+\end{document}
