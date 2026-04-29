@@ -1,0 +1,147 @@
+\documentclass[UTF8,aspectratio=169,11pt]{ctexbeamer}
+
+% ========== Theme ==========
+\usetheme{Madrid}
+\usecolortheme{whale}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}[frame number]
+
+% ========== Packages ==========
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{xcolor}
+
+% ========== Colours ==========
+\definecolor{highlight}{RGB}{220, 70, 70}
+\definecolor{completed}{RGB}{80, 185, 100}
+\definecolor{inprogress}{RGB}{90, 140, 240}
+
+\title{Weekly Progress Report}
+\subtitle{Final Report Draft v12 Revision Summary}
+\author{Student ID: 11314389}
+\institute{BCI Control System Project}
+\date{April 29, 2026}
+
+\begin{document}
+
+\begin{frame}[t]{Draft v12 Revision Scope}
+\footnotesize
+
+    \begin{block}{Revision made}
+        The revision focused on substantive report corrections requested after the latest supervision meeting: strengthening the Literature Review, adding missing implementation detail, correcting wording that was stronger than the available evidence, separating offline and online experimental settings, and improving repository traceability. Language-polishing work is not counted here as a technical revision.
+    \end{block}
+
+    \vfill
+
+    \begin{alertblock}{Rationale}
+        This structure makes the revision auditable. If the supervisor or examiner compares versions, Draft v12 can be explained as a targeted correction pass rather than an uncontrolled rewrite. Keeping the focus on evidence, reproducibility, and scope also reduces the risk that the final report overclaims beyond what the project files and experiment outputs can support.
+    \end{alertblock}
+
+\end{frame}
+
+\begin{frame}[t]{Literature Review: Context and Dataset Choice}
+\footnotesize
+
+    \begin{block}{Revision made}
+        The Literature Review was expanded to explain the system structure before the architecture diagram appears in the Methods chapter. A new discussion links preprocessing, MI decoding, and RL-based control as connected parts of the same BCI-to-control pipeline. The dataset section was also expanded to explain why BCI IV-2a, BCI IV-2b, and PhysioNet EEGMMIDB were selected instead of adding further public EEG datasets.
+    \end{block}
+
+    \vfill
+
+    \begin{alertblock}{Rationale}
+        This change addresses two likely reader questions before they become problems: what the architecture diagram represents, and why these datasets are sufficient for the project aims. BCI IV-2a gives a standard 4-class benchmark, BCI IV-2b tests minimal-channel decoding, and PhysioNet provides the scale needed for cross-subject pre-training. The review now supports the methodological choices rather than simply listing background work.
+    \end{alertblock}
+
+\end{frame}
+
+\begin{frame}[t]{Methods: Reproducibility and Code-Level Detail}
+\footnotesize
+
+    \begin{block}{Revision made}
+        The Methods chapter now gives concrete implementation parameters for the EEGTransformer and the DQN control models. The report specifies input shapes, convolution settings, embedding size, token count, Transformer depth and heads, classifier head dimensions, optimiser settings, augmentation settings, and DQN replay/training parameters. It also adds code-level notes identifying the main project scripts for CTNet modelling, PhysioNet training, fine-tuning, channel reduction, and RL control.
+    \end{block}
+
+    \vfill
+
+    \begin{alertblock}{Rationale}
+        The previous draft described the models at a higher level, which made the work harder to reproduce and easier to question. Listing the parameters makes clear that the report corresponds to the implemented code rather than to a generic CNN--Transformer description. The code-level notes also help the examiner connect the written methodology to the repository without needing to infer which scripts produced which results.
+    \end{alertblock}
+
+\end{frame}
+
+\begin{frame}[t]{Experimental Consistency: Time Windows and Training Setup}
+\footnotesize
+
+    \begin{block}{Revision made}
+        Draft v12 separates the offline PhysioNet epoch definition from the intended online control window. The offline PhysioNet loader is now described as extracting epochs from $-0.5$\,s to $4.0$\,s around cue onset, giving 4.5\,s total before resampling to 1000 samples. The real-time control design is separately described as using a 4.0\,s sliding decision window. The PhysioNet pooled pre-training description was also corrected to state that the reported 109-subject run used an explicit full-subject list rather than relying on the script default.
+    \end{block}
+
+    \vfill
+
+    \begin{alertblock}{Rationale}
+        This avoids mixing two different experimental settings. The 4.5\,s offline window belongs to model development on PhysioNet, while the 4.0\,s window belongs to the online-control design. Separating them prevents a reviewer from thinking that the report contradicts the loader code. Clarifying the explicit 109-subject run also distinguishes final experimental configuration from script defaults, which is important for reproducibility.
+    \end{alertblock}
+
+\end{frame}
+
+\begin{frame}[t]{Channel Reduction and OpenBCI Deployment Claims}
+\footnotesize
+
+    \begin{block}{Revision made}
+        The channel-reduction section now lists the exact retained electrodes. The ablation-ranked 8-channel subset is reported as \{C3, CP3, Fpz, Pz, O1, F8, FCz, FC2\}, while the domain-guided OpenBCI-oriented subset is reported as \{C3, C4, FC3, FC4, CP3, CP4, Cz, FCz\}. The discussion was also narrowed so that the reported 8-channel result is presented as offline evidence, while the current online BrainFlow path is described as adapting low-channel streams to the legacy CTNet input shape.
+    \end{block}
+
+    \vfill
+
+    \begin{alertblock}{Rationale}
+        Naming the channels is necessary because ``reduced to 8 channels'' is not enough for replication or hardware planning. The wording is also more defensible: the offline 8-channel model supports the feasibility of an OpenBCI-compatible montage, but it does not prove a native end-to-end 8-channel online deployment. This distinction prevents the report from overstating the maturity of the hardware path.
+    \end{alertblock}
+
+\end{frame}
+
+\begin{frame}[t]{Hardware Validation and Architecture Diagram}
+\footnotesize
+
+    \begin{block}{Revision made}
+        Hardware validation wording was revised to state that the BrainFlow acquisition interface and online control loop were exercised with synthetic-board streaming and archived EEG-driven simulation runs. Claims of verified live OpenBCI EEG streaming were removed. The architecture diagram source was also updated so the preprocessing block refers to fixed-length epochs rather than a universal 4\,s epoch, keeping the figure consistent with the distinction between offline and online windows.
+    \end{block}
+
+    \vfill
+
+    \begin{alertblock}{Rationale}
+        The available evidence supports software-interface validation and simulation-level integration, not live testing with a real OpenBCI headset and new human subjects. The revised wording therefore matches the saved evidence files and the ethical-approval limitation. Updating the standalone architecture diagram avoids a second source of inconsistency, since figures are often inspected more quickly than the surrounding text.
+    \end{alertblock}
+
+\end{frame}
+
+\begin{frame}[t]{Experiment Evidence and Repository Traceability}
+\footnotesize
+
+    \begin{block}{Revision made}
+        Missing experiment outputs from the older CTNet workspace were migrated into \texttt{03\_Experiments/}. This includes the authoritative architecture-comparison results, dataset-comparison logs, BrainFlow physical-control outputs, and real-time EEG-control outputs. A new \texttt{03\_Experiments/README.md} was added to identify which files support the report and to reduce confusion caused by older or alternative result folders.
+    \end{block}
+
+    \vfill
+
+    \begin{alertblock}{Rationale}
+        This change improves traceability. The report now points to result files that exist inside the submitted repository rather than relying on paths left in an older working directory. The README is also useful because several versions of experiment outputs remain in the repository; without an index, a reviewer could open an older summary file and think the report numbers are unsupported or inconsistent.
+    \end{alertblock}
+
+\end{frame}
+
+\begin{frame}[t]{Project Management and GitHub Documentation}
+\footnotesize
+
+    \begin{block}{Revision made}
+        The Project Management section was expanded to describe planning, scope control, risk management, supervision checkpoints, and the reason for using simulation-first validation. The GitHub README and supporting repository descriptions were also updated so that the main project structure, report location, experiment outputs, and documentation folders have English explanations suitable for external inspection.
+    \end{block}
+
+    \vfill
+
+    \begin{alertblock}{Rationale}
+        This addresses assessment criteria beyond model accuracy. The expanded management section shows how technical risk was handled during the project, especially the decision to avoid unsupported live-subject claims and to keep hardware work as software-interface validation. The README updates make the repository easier for the supervisor or examiner to navigate, which supports the report's claim that the implementation is reproducible and inspectable.
+    \end{alertblock}
+
+\end{frame}
+
+\end{document}

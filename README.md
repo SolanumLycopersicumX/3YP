@@ -11,7 +11,7 @@
 
 中文快速链接：
 - [项目索引](05_Documentation/PROJECT_INDEX.md)
-- [最终报告草稿](01_Reports/final_report_draft_v10.pdf)
+- [最终报告草稿](01_Reports/final_report_draft_v12.pdf)
 - [周报](01_Reports/week_2026_04_22_feedback.pdf)
 - [代码目录](02_Code/)
 - [实验结果目录](03_Experiments/)
@@ -25,7 +25,7 @@ This repository is kept separate from the original CTNet GitHub project and focu
 
 Quick links:
 - [Project Index](05_Documentation/PROJECT_INDEX.md)
-- [Final Report Draft](01_Reports/final_report_draft_v10.pdf)
+- [Final Report Draft](01_Reports/final_report_draft_v12.pdf)
 - [Weekly Report](01_Reports/week_2026_04_22_feedback.pdf)
 - [Code Directory](02_Code/)
 - [Experiment Outputs](03_Experiments/)
@@ -35,10 +35,12 @@ Quick links:
 
 ## 📁 文件夹结构
 
+English note: the repository tree below is kept in its original Chinese-labeled form for my own project workflow, but the surrounding sections now include English explanations so external readers can still understand the purpose of each directory.
+
 ```
 3YP/
 ├── 01_Reports/                    # 报告与文档
-│   ├── final_report_draft_v7.*    # 最终报告 (最新版)
+│   ├── final_report_draft_v12.*   # 最终报告 (最新版)
 │   ├── week_2026_03_24.*          # 周报
 │   ├── ZhengXu_CV_v5.*            # 简历 (英文/中文)
 │   ├── architecture_diagram.*     # 系统架构图
@@ -99,67 +101,95 @@ Quick links:
     └── true_labels/               # 标签文件
 ```
 
+English summary of key folders:
+- `01_Reports/`: report drafts, weekly reports, and formal submission materials.
+- `02_Code/`: the main authored source code for EEG classification, RL, simulation, and hardware control.
+- `03_Experiments/`: saved outputs from channel reduction, filtering ablations, DQN training, and end-to-end evaluation.
+- `04_Trained_Models/`: trained checkpoints used by the experiments.
+- `05_Documentation/`: supporting documents, demos, and media.
+- `06_Data/`: locally stored benchmark datasets used during the project.
+
 ---
 
 ## 🔬 主要贡献 (我自己的工作)
 
+English note: the following items summarise the parts of the project that I personally implemented, evaluated, or integrated, rather than the third-party reference material preserved elsewhere in the repository.
+
 ### 1. EEG分类 (基于原CTNet改进)
 - **PhysioNet数据集适配**: 109人跨被试预训练，达到88.78%准确率
+  English: I adapted the CTNet-style classifier to the 109-subject PhysioNet motor imagery dataset and used it for large-scale cross-subject and fine-tuning experiments.
 - **两阶段迁移学习**: 预训练+微调，提升32个百分点
+  English: The workflow first pretrains on pooled data and then fine-tunes on individual subjects, recovering a large amount of subject-specific performance.
 - **通道消融研究**: 64→8通道，保持72.54%准确率，识别C3为关键通道
+  English: This study identifies which electrodes remain most useful when moving toward an OpenBCI-compatible low-channel setup.
 - **滤波消融实验**: 证明8-30Hz带通滤波提升+18.44%准确率
+  English: The default preprocessing choice is supported by an explicit ablation rather than by assumption.
 
 ### 2. 强化学习控制
 - **Transformer-based DQN**: 设计用于序列决策的DQN架构
+  English: I implemented and compared a Transformer-based Q-network for sequential control.
 - **EEG-aware RL**: 将EEG分类结果作为状态输入
+  English: The RL controller can consume predicted class and confidence from the EEG classifier.
 - **闭环误差补偿**: 82%分类准确率下达到99%目标到达率
+  English: This shows that closed-loop control can still succeed even when neural decoding is imperfect.
 
 ### 3. 物理机械臂集成
 - **SO-101串口控制**: 实现多关节同步运动、速度规划
+  English: Serial communication and motion control were implemented for the physical robotic arm.
 - **Sim2Real管线**: PyBullet仿真→物理臂零样本迁移
+  English: Simulation was used as the main safe development path before hardware deployment.
 - **OpenBCI集成**: BrainFlow API实时脑电采集
+  English: BrainFlow is used as the intended real-time EEG acquisition interface.
 
 ### 4. 实验与评估
 - 系统的消融实验设计
 - 完整的端到端离线评估管线
 - 详细的实验报告和可视化
+English: The repository includes ablation studies, end-to-end offline evaluation, and preserved visualisations so the software contribution can be inspected rather than only described.
 
 ---
 
 ## ⚠️ 注意事项
 
+English note: the points below clarify repository boundaries, included datasets, and the current validation status of the hardware side of the project.
+
 1. **原始CTNet项目文件**保留在 `CTNet/` 文件夹中，包括：
+   English: the original CTNet material is kept separately for reference and comparison.
    - 原始Jupyter notebooks
    - BCI IV-2a/2b数据集和标签
    - 原始README和LICENSE
 
 2. **数据集**已包含在 `06_Data/` 文件夹中：
+   English: the main public datasets used in this project are already stored locally in the repository workspace.
    - PhysioNet: `06_Data/physionet_raw/` (1.8GB, 109人)
    - BCI IV-2a: `06_Data/BCICIV_2a_gdf/` (575MB, 9人, 4分类)
    - BCI IV-2b: `06_Data/BCICIV_2b_gdf/` (272MB, 9人, 2分类)
 
 3. **硬件验证状态**：由于NHS伦理审批限制，所有评估均为仿真/离线，真人被试测试待完成。
+   English: live-subject hardware validation has not yet been completed, so the current evidence is limited to offline data and simulation.
 
 ---
 
 ## 🚀 快速开始
 
+English note: these commands cover the main software path for reproducing the project workflow at a high level.
+
 ```bash
-# 安装依赖
+# Install dependencies
 pip install -r 02_Code/Utils/requirements.txt
 
-# 运行PhysioNet CTNet训练
+# Train the PhysioNet EEG classifier
 python 02_Code/EEG_Classification/train_physionet_ctnet.py
 
-# 运行通道消融实验
+# Run the channel reduction study
 python 02_Code/EEG_Classification/channel_reduction_study.py
 
-# 运行仿真控制
+# Run the simulation controller
 python 02_Code/Simulation/gym_control.py
 ```
 
 ---
 
-**作者**: 徐正 (Zheng XU)  
-**项目**: 曼彻斯特大学 Final Year Project  
-**日期**: 2025-2026学年
+**作者 / Author**: 徐正 (Zheng XU)  
+**项目 / Project**: 曼彻斯特大学 Final Year Project  
+**日期 / Date**: 2025-2026学年

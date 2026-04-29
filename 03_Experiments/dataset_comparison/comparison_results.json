@@ -1,0 +1,92 @@
+{
+  "A": {
+    "subjects": [
+      {
+        "subject": 1,
+        "dataset": "A",
+        "n_classes": 4,
+        "n_channels": 22,
+        "accuracy": 0.7604166666666666,
+        "precision": 0.7768164410663161,
+        "recall": 0.7604166666666666,
+        "f1": 0.746901816517984,
+        "kappa": 0.6805555555555556,
+        "best_epoch": 45,
+        "train_time": 15.211721897125244
+      },
+      {
+        "subject": 2,
+        "dataset": "A",
+        "n_classes": 4,
+        "n_channels": 22,
+        "accuracy": 0.5520833333333334,
+        "precision": 0.6258276037687802,
+        "recall": 0.5520833333333333,
+        "f1": 0.555410122164049,
+        "kappa": 0.4027777777777778,
+        "best_epoch": 48,
+        "train_time": 15.03171992301941
+      },
+      {
+        "subject": 3,
+        "dataset": "A",
+        "n_classes": 4,
+        "n_channels": 22,
+        "accuracy": 0.8611111111111112,
+        "precision": 0.8659689752332728,
+        "recall": 0.861111111111111,
+        "f1": 0.8611045702316988,
+        "kappa": 0.8148148148148149,
+        "best_epoch": 48,
+        "train_time": 15.024021863937378
+      }
+    ],
+    "mean_acc": 0.7245370370370371,
+    "std_acc": 0.12868580011365524
+  },
+  "B": {
+    "subjects": [
+      {
+        "subject": 1,
+        "dataset": "B",
+        "n_classes": 2,
+        "n_channels": 3,
+        "accuracy": 0.696875,
+        "precision": 0.6265060240963856,
+        "recall": 0.975,
+        "f1": 0.7628361858190709,
+        "kappa": 0.39375000000000004,
+        "best_epoch": 49,
+        "train_time": 7.6793928146362305
+      },
+      {
+        "subject": 2,
+        "dataset": "B",
+        "n_classes": 2,
+        "n_channels": 3,
+        "accuracy": 0.6607142857142857,
+        "precision": 0.6717557251908397,
+        "recall": 0.6285714285714286,
+        "f1": 0.6494464944649446,
+        "kappa": 0.3214285714285714,
+        "best_epoch": 45,
+        "train_time": 7.594407558441162
+      },
+      {
+        "subject": 3,
+        "dataset": "B",
+        "n_classes": 2,
+        "n_channels": 3,
+        "accuracy": 0.85625,
+        "precision": 0.8392857142857143,
+        "recall": 0.88125,
+        "f1": 0.8597560975609756,
+        "kappa": 0.7125,
+        "best_epoch": 40,
+        "train_time": 7.503526926040649
+      }
+    ],
+    "mean_acc": 0.7379464285714286,
+    "std_acc": 0.0849458673665356
+  }
+}

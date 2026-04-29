@@ -1,0 +1,40 @@
+{
+  "config": {
+    "episodes": 1000,
+    "seed": 42,
+    "version": "v2"
+  },
+  "improvements": [
+    "Double DQN",
+    "Soft Update",
+    "Linear \u03b5 decay",
+    "Cosine LR",
+    "Best weights restore"
+  ],
+  "results": [
+    {
+      "name": "CNN+LSTM",
+      "params": 129732,
+      "training_time": 111.71165871620178,
+      "final_reward": 8.792286012775797,
+      "final_reach_rate": 97.0,
+      "best_reach_rate": 100.0
+    },
+    {
+      "name": "LightTransformer",
+      "params": 50628,
+      "training_time": 134.00281524658203,
+      "final_reward": 10.069735961514448,
+      "final_reach_rate": 99.0,
+      "best_reach_rate": 99.0
+    },
+    {
+      "name": "Transformer",
+      "params": 104900,
+      "training_time": 177.77057480812073,
+      "final_reward": 10.393052614264302,
+      "final_reach_rate": 100.0,
+      "best_reach_rate": 100.0
+    }
+  ]
+}
