@@ -11,7 +11,7 @@
 
 中文快速链接：
 - [项目索引](05_Documentation/PROJECT_INDEX.md)
-- [最终报告草稿](01_Reports/final_report_draft_v12.pdf)
+- [最终报告草稿](01_Reports/final_report_draft_v13.pdf)
 - [周报](01_Reports/week_2026_04_22_feedback.pdf)
 - [代码目录](02_Code/)
 - [实验结果目录](03_Experiments/)
@@ -25,7 +25,7 @@ This repository is kept separate from the original CTNet GitHub project and focu
 
 Quick links:
 - [Project Index](05_Documentation/PROJECT_INDEX.md)
-- [Final Report Draft](01_Reports/final_report_draft_v12.pdf)
+- [Final Report Draft](01_Reports/final_report_draft_v13.pdf)
 - [Weekly Report](01_Reports/week_2026_04_22_feedback.pdf)
 - [Code Directory](02_Code/)
 - [Experiment Outputs](03_Experiments/)
@@ -40,7 +40,7 @@ English note: the repository tree below is kept in its original Chinese-labeled 
 ```
 3YP/
 ├── 01_Reports/                    # 报告与文档
-│   ├── final_report_draft_v12.*   # 最终报告 (最新版)
+│   ├── final_report_draft_v13.*   # 最终报告 (最新版)
 │   ├── week_2026_03_24.*          # 周报
 │   ├── ZhengXu_CV_v5.*            # 简历 (英文/中文)
 │   ├── architecture_diagram.*     # 系统架构图
