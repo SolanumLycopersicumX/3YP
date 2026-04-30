@@ -31,8 +31,9 @@ def color_preamble():
 \def\SumColor{SumFill}
 \tikzset{
     stage/.style={font=\bfseries\normalsize, text=black!80, fill=none, inner sep=1pt},
-    annot/.style={font=\footnotesize, text=black!82, align=left, fill=none, inner sep=1pt},
-    edgeannot/.style={font=\footnotesize, text=black!86, fill=none, inner sep=1pt},
+    annot/.style={font=\small, text=black!82, align=left, fill=none, inner sep=1pt},
+    edgeannot/.style={font=\small, text=black!86, fill=none, inner sep=1pt},
+    legendannot/.style={font=\normalsize, text=black!82, align=left, fill=none, inner sep=1pt},
     group/.style={draw=black!35, dashed, rounded corners=6pt, inner sep=10pt}
 }
 \pgfdeclarelayer{stage0}
@@ -337,7 +338,7 @@ arch = [
 \node[stage, anchor=north] at (fc-xlabel |- title-row) {FC};
 \node[stage, anchor=north] at (out-xlabel |- title-row) {Out};
 
-\node[annot, anchor=west] at ($(input-west |- title-row)+(-0.2,-0.95,0)$) {Legend: $F$ feature maps, $E$ embedding width, $L$ flattened length, $K$ classes};
+\node[legendannot, anchor=west] at ($(input-west |- title-row)+(-0.2,-0.95,0)$) {Legend: $F$ feature maps, $E$ embedding width, $L$ flattened length, $K$ classes};
 
 \begin{pgfonlayer}{flow0}
 \draw[-Stealth, line width=0.9pt, draw=black!90] ($(input-east)+(0.10,0,0)$) -- ($(temp-west)+(-0.10,0,0)$);
@@ -389,7 +390,7 @@ arch = [
 
 \node[edgeannot, rotate=45, anchor=south west] at ($(input-northwest)+(-0.04,0.26,0)$) {Input: $1 \times 64 \times 1000$};
 \node[edgeannot, rotate=45, anchor=south west] at ($(temp-northwest)+(-0.02,0.26,0)$) {kernel $64$, $F_1=20$};
-\node[edgeannot, rotate=45, anchor=south west] at ($(spatial-northwest)+(-0.02,0.24,0)$) {\shortstack[l]{depthwise spatial conv\\[-0.35ex]over 64 channels, $D=2$}};
+\node[edgeannot, rotate=45, anchor=south west] at ($(spatial-northwest)+(-0.02,0.24,0)$) {\shortstack[l]{depthwise spatial conv\\[-0.15ex]over 64 channels, $D=2$}};
 \node[edgeannot, rotate=45, anchor=south west] at ($(sep-northwest)+(-0.02,0.24,0)$) {kernel $16$ + avg pool/dropout};
 \node[edgeannot, rotate=45, anchor=south west] at ($(tokens-northwest)+(-0.02,0.24,0)$) {$15$ tokens, embed dim $40$};
 \node[edgeannot, rotate=45, anchor=south west] at ($(pos-northwest)+(-0.02,0.24,0)$) {learned positional encoding};

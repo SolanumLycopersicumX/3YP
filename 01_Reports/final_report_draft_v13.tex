@@ -18,8 +18,18 @@
         \setmainfont{Calibri}
         \setsansfont{Calibri}
     }{
-        \setmainfont{Carlito}
-        \setsansfont{Carlito}
+        \IfFontExistsTF{Carlito}{
+            \setmainfont{Carlito}
+            \setsansfont{Carlito}
+        }{
+            \IfFontExistsTF{Liberation Sans}{
+                \setmainfont{Liberation Sans}
+                \setsansfont{Liberation Sans}
+            }{
+                \setmainfont{Noto Sans}
+                \setsansfont{Noto Sans}
+            }
+        }
     }
 \fi
 
@@ -30,10 +40,21 @@
 \usetikzlibrary{arrows.meta, positioning, shapes.geometric, calc, fit, backgrounds, decorations.pathreplacing, shadows.blur}
 \usepackage{caption}
 \usepackage{booktabs}
+\usepackage{longtable}
 \usepackage{multirow}
+\usepackage{pdfpages}
+\usepackage{titlesec}
 \usepackage{hyperref}
 \usepackage{array}
 \usepackage{xcolor}
+
+\captionsetup{skip=4pt}
+\setlength{\textfloatsep}{8pt plus 2pt minus 2pt}
+\setlength{\floatsep}{6pt plus 2pt minus 2pt}
+\setlength{\intextsep}{8pt plus 2pt minus 2pt}
+\titlespacing*{\section}{0pt}{1.2ex plus .2ex minus .2ex}{0.7ex plus .1ex}
+\titlespacing*{\subsection}{0pt}{0.9ex plus .2ex minus .2ex}{0.45ex plus .1ex}
+\titlespacing*{\subsubsection}{0pt}{0.7ex plus .2ex minus .2ex}{0.35ex plus .1ex}
 
 \begin{document}
 
@@ -122,6 +143,8 @@ MI-based BCIs are particularly attractive because they require no external stimu
 %-----------------------------------------------------------------------------
 
 The overall aim of this project is to \textbf{design, implement, and validate a closed-loop Brain-Computer Interface control system} that translates motor imagery EEG signals into robotic arm commands using deep learning and reinforcement learning, while remaining deployable on consumer-grade hardware.
+
+The project builds on the general BCI-to-robot-control theme of earlier departmental work~\cite{prev_student2024}, but shifts the technical emphasis toward large-scale PhysioNet validation, transfer learning, channel reduction, and closed-loop reinforcement-learning control.
 
 To achieve this aim, five objectives are pursued. On the classification side, the project develops a hybrid CNN-Transformer architecture (EEGTransformer) that combines convolutional spatial filtering with Transformer-based temporal modelling, evaluated across BCI Competition IV-2a, IV-2b, and PhysioNet EEGMMIDB to assess generalisation across electrode densities, class counts, and subject populations. A two-stage transfer learning strategy, comprising cross-subject pre-training followed by subject-specific fine-tuning, is implemented to bridge the cross-subject generalisation gap while minimising per-user calibration burden. A systematic channel reduction study uses ablation-based importance analysis to identify an 8-channel electrode subset compatible with the OpenBCI Cyton and quantify the trade-off between channel count and classification accuracy.
 
@@ -260,182 +283,8 @@ Before reading the figure, it is useful to state explicitly what each group repr
 
 \begin{figure}[htbp]
     \centering
-    \begin{adjustbox}{max width=1.15\textwidth,center}
-                % --- DeepMind / OpenAI-style clean pastel palette ---
-    \definecolor{bgGray}{RGB}{246, 247, 249}
-    \definecolor{borderGray}{RGB}{184, 188, 194}
-    \definecolor{textMain}{RGB}{42, 46, 52}
-    \definecolor{textMuted}{RGB}{93, 100, 110}
-
-    \definecolor{blueFill}{RGB}{233, 240, 247}
-    \definecolor{blueBorder}{RGB}{160, 181, 201}
-
-    \definecolor{greenFill}{RGB}{233, 242, 236}
-    \definecolor{greenBorder}{RGB}{160, 184, 169}
-
-    \definecolor{orangeFill}{RGB}{247, 239, 231}
-    \definecolor{orangeBorder}{RGB}{205, 178, 154}
-
-    \definecolor{purpleFill}{RGB}{239, 235, 244}
-    \definecolor{purpleBorder}{RGB}{176, 164, 196}
-
-
-\begin{tikzpicture}[
-    >=latex,
-    % Box styles (Flat, No Shadows)
-    nodeBox/.style={
-        rectangle, rounded corners=6pt, draw=#1Border, fill=#1Fill, thick,
-        align=center, text=textMain, inner sep=7pt, minimum width=3.0cm, minimum height=1.3cm
-    },
-    noteBox/.style={
-        rectangle, rounded corners=6pt, draw=borderGray, thick, fill=white,
-        align=left, text=textMain, inner sep=6pt, text width=3.4cm
-    },
-    groupBox/.style={
-        rectangle, rounded corners=12pt, draw=borderGray, thick, dashed, inner sep=10pt, fill=bgGray
-    },
-    % Arrow styles
-    arr/.style={->, >={Stealth[length=2.5mm, width=1.5mm]}, thick, textMain},
-    arrDashed/.style={->, >={Stealth[length=2.5mm, width=1.5mm]}, thick, dashed, textMuted},
-    % Text styles
-    lbl/.style={font=\normalsize, text=textMuted, align=center, fill=none, inner sep=3pt, midway, above=2pt, sloped},
-    lblWhite/.style={font=\normalsize, text=textMuted, align=center, fill=none, inner sep=3pt, midway, above=2pt, sloped},
-    lblFlat/.style={font=\normalsize, text=textMuted, align=center, fill=none, inner sep=3pt, midway, above=2pt},
-    lblWhiteFlat/.style={font=\normalsize, text=textMuted, align=center, fill=none, inner sep=3pt, midway, above=2pt},
-    lblCenter/.style={font=\normalsize, text=textMuted, align=center, fill=none, inner sep=1pt},
-    noteText/.style={font=\footnotesize, text=textMuted, align=left},
-    title/.style={font=\normalsize\bfseries, text=textMain, anchor=south}
-]
-
-% ==========================================
-% PILLAR 1: Signal Pipeline
-% ==========================================
-\node[nodeBox=blue] (eeg) at (0, 0) {
-    \textbf{EEG Acquisition}\\
-    \footnotesize OpenBCI (8-ch) $\vert$ PhysioNet (64-ch)
-};
-\node[title, above=0.4cm of eeg] (p1_title) {1. EEG Processing};
-
-\node[nodeBox=green, below=0.8cm of eeg] (preproc) {
-    \textbf{Preprocessing}\\
-    \footnotesize Bandpass (8--30\,Hz) $\to$ Fixed-Length Epochs
-};
-\draw[arr]
-(eeg) -- (preproc);
-\node[lblCenter] at ($(eeg.south)!0.5!(preproc.north)$) {Raw Signal};
-
-\node[rectangle, rounded corners=6pt, draw=borderGray, thick, fill=white, align=center, text=textMain, inner sep=8pt, minimum width=3.7cm, minimum height=1.4cm, below=0.8cm of preproc] (baseline) {
-    \textbf{Baseline Classifier}\\
-    \footnotesize OVR-CSP + LDA
-};
-\draw[arrDashed]
-(preproc) -- (baseline);
-\node[lblCenter] at ($(preproc.south)!0.5!(baseline.north)$) {Comparison};
-
-\begin{scope}[on background layer]
-    \node[groupBox, fit=(p1_title) (eeg) (preproc) (baseline)] (group1) {};
-\end{scope}
-
-% ==========================================
-% PILLAR 2: EEGTransformer
-% ==========================================
-
-% Convolutional Front-End
-\node[nodeBox=orange] (cnn) at (7.5, 0 |- eeg.north) [anchor=north] {
-    \textbf{Convolutional Front-End}\\
-    \footnotesize Temporal $\to$ Spatial $\to$ Separable
-};
-\node[title, above=0.4cm of cnn] (p2_title) {2. EEGTransformer Model};
-
-% Patch Embeddings
-\node[nodeBox=orange, below=0.8cm of cnn] (patch) {
-    \textbf{Patch Embeddings}\\
-    \footnotesize Spatiotemporal Tokenization
-};
-
-% Transformer
-\node[nodeBox=orange, below=0.8cm of patch] (trans) {
-    \textbf{Transformer Encoder}\\
-    \footnotesize Multi-Head Self-Attention
-};
-
-% Fusion & Head
-\node[nodeBox=orange, below=0.8cm of trans] (fuse) {
-    \textbf{Residual Fusion}\\
-    \footnotesize CNN Features $\oplus$ Global Context
-};
-
-% Arrows for Pillar 2
-% Filtered Epochs Arrow
-\coordinate (P1) at ($ (preproc.east) + (0.8, 0) $);
-\draw[arr]
-(preproc.east) -- (P1)
--- node[lblWhite, xshift=0.5cm] {Filtered Epochs}
-(P1 |- cnn.west)
--- (cnn.west);
-
-\draw[arr] (cnn) -- (patch);
-\draw[arr] (patch) -- (trans);
-\draw[arr] (trans) -- (fuse);
-
-% Residual Arrow on the LEFT, rectangular
-\coordinate (P4) at ($ (patch.west) + (-1.1, 0) $);
-\draw[arr] (patch.west) -- (P4) -- node[lblWhite] {Residual} (P4 |- fuse.west) -- (fuse.west);
-
-\begin{scope}[on background layer]
-    \node[groupBox, fit=(p2_title) (cnn) (fuse)] (group2) {};
-\end{scope}
-
-% ==========================================
-% PILLAR 3: RL Control
-% ==========================================
-
-% State
-\node[nodeBox=purple] (state) at (15.0, 0 |- eeg.north) [anchor=north] {
-    \textbf{State Representation} $s_t$\\
-    \footnotesize Kinematics $\oplus$ Classifier Output
-};
-\node[title, above=0.4cm of state] (p3_title) {3. Closed-Loop RL Control};
-
-% RL Agent
-\node[nodeBox=purple, below=0.8cm of state] (agent) {
-    \textbf{DQN Agent}\\
-    \footnotesize Transformer / CNN+LSTM Q-Net
-};
-
-% Environment
-\node[nodeBox=purple, below=0.8cm of agent] (env) {
-    \textbf{Robotic Environment}\\
-    \footnotesize SO-101 Arm Manipulation
-};
-
-% Arrows for Pillar 3
-\coordinate (P2) at ($ (fuse.east) + (1.0, 0) $);
-\draw[arr] (fuse.east) -- (P2) -- node[lblWhite] {Predicted Class\\\& Confidence} (P2 |- state.west) -- (state.west);
-
-\draw[arr] (state) -- (agent);
-\draw[arr]
-(agent) -- (env);
-\node[lblCenter] at ($(agent.south)!0.5!(env.north)$) {Action $a_t$};
-
-
-% Feedback loop
-\coordinate (P3) at ($ (env.east) + (2.0, 0) $);
-\draw[arr] (env.east) -- (P3) -- node[lblWhite] {Next State $s_{t+1}$\\\& Reward $r_t$} (P3 |- state.east) -- (state.east);
-
-% Deployment notes
-\node[noteBox, below=0.9cm of env] (hardware) {
-    \textbf{Hardware Integration}\\
-    \textcolor{textMuted}{BrainFlow $\rightarrow$ OpenBCI}\\
-    \textcolor{textMuted}{Serial Protocol $\rightarrow$ SO-101 (Feetech STS3215)}
-};
-\node[noteText, below=0.3cm of hardware, anchor=north] (commands) {4-class MI $\rightarrow$ 4 commands: left, right, up, down};
-
-\begin{scope}[on background layer]
-    \node[groupBox, fit=(p3_title) (state) (env)] (group3) {};
-\end{scope}
-
-\end{tikzpicture}
+    \begin{adjustbox}{max width=1.15\textwidth,max totalheight=0.72\textheight,center}
+        \includegraphics{architecture_diagram.pdf}
     \end{adjustbox}
     \caption{\textbf{System Architecture Overview.} The pipeline is shown as three visual groups spanning four functions: EEG processing, deep learning classification, reinforcement learning control, and hardware integration. Raw EEG is preprocessed, then classified by the EEGTransformer. The predicted MI class and confidence form part of the state observed by a DQN agent, whose action $a_t$ drives the robotic environment. In the control setting used here, 4-class MI predictions are mapped to four directional commands (left, right, up, down), while hardware integration is handled through the BrainFlow/OpenBCI acquisition interface and the serial SO-101 control interface.}
     \label{fig:system_overview}
@@ -1131,22 +980,123 @@ A.~L.~Goldberger \emph{et al.}, ``PhysioBank, PhysioToolkit, and PhysioNet: Comp
 
 \section{Preliminary Project Proposal}
 
-Appendix~A contains the preliminary project proposal submitted earlier in the academic year. The repository copy is stored as \texttt{05\_Documentation/11314389\_v4.pdf}. It is included in the final submission package as the original approved proposal document and is referenced here to show the initial scope against which the completed project can be compared.
+The following pages include the preliminary project proposal submitted earlier in the academic year. This artefact shows the original approved scope against which the completed project can be compared.
+\includepdf[pages=-,pagecommand={\thispagestyle{plain}}]{../05_Documentation/11314389_v4.pdf}
 
 \section{Project Plan and Gantt Chart}
 
-Appendix~B contains the final updated project plan and Gantt chart used at the end of the project. The repository copy is stored as \texttt{05\_Documentation/gantt\_chart\_v3.pdf}. This artefact provides supporting evidence for the planning decisions summarised in Chapter~5. Dated weekly progress material is also available in the repository, for example \texttt{01\_Reports/week\_2026\_03\_24.tex} and the corresponding PDF export.
+The following page includes the final updated project plan and Gantt chart used at the end of the project. The chart records planned and actual timing, percentage completion, and the remaining final demonstration activity. It provides supporting evidence for the planning decisions summarised in Chapter~5.
+\includepdf[pages=-,pagecommand={\thispagestyle{plain}}]{../05_Documentation/gantt_chart_v3.pdf}
 
-\section{Risk Register and Health \& Safety Artefact}
+\section{Risk Register}
 
-Appendix~C contains the maintained risk register together with the formal health-and-safety documentation for the project. The repository copies of the risk and health-and-safety assessment are stored as \texttt{05\_Documentation/Risk assessment form-11314389\_v3.docx} and \texttt{05\_Documentation/Risk assessment form-11314389\_v3.pdf}. These materials support the risk-management discussion in Chapter~5.
+Table~\ref{tab:appendix_risk_register} records the final technical risk register used to manage project delivery. The separate formal Health \& Safety Risk Assessment is included in Appendix~D.
+
+\begingroup
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.2}
+\begin{longtable}{@{}p{2.8cm}p{3.2cm}p{3.4cm}p{4.0cm}p{1.9cm}@{}}
+\caption{Final technical risk register.}
+\label{tab:appendix_risk_register}\\
+\toprule
+\textbf{Risk} & \textbf{Cause / trigger} & \textbf{Impact} & \textbf{Mitigation / response} & \textbf{Final status} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Risk} & \textbf{Cause / trigger} & \textbf{Impact} & \textbf{Mitigation / response} & \textbf{Final status} \\
+\midrule
+\endhead
+RL training instability & Sparse rewards, noisy EEG-derived command evidence, or unstable Q-learning updates. & Controller may fail to learn reliable target-reaching behaviour. & Used a simplified planar reaching environment, shaped rewards, Double DQN updates, replay buffer, target-network updates, and architecture comparison before final evaluation. & Controlled \\
+Weak cross-subject EEG generalisation & High inter-subject variability in MI-EEG patterns and electrode responses. & Classifier accuracy may not support meaningful control claims. & Added large-scale PhysioNet pooled training and participant-specific fine-tuning; reported both cross-subject and fine-tuned results. & Controlled \\
+Reduced-channel performance loss & Moving from 64-channel laboratory data toward an 8-channel OpenBCI-compatible montage. & Low-cost deployment claim could be unsupported. & Ran leave-one-channel-out importance analysis, progressive channel reduction, and 8-channel fine-tuning before selecting the deployment-oriented montage. & Controlled \\
+Preprocessing overclaim & Assuming ICA or filtering choices help without controlled evidence. & Report conclusions could be methodologically weak. & Added controlled filter/no-filter and filter/ICA comparisons; retained the bandpass-only pipeline because the measured ICA gain was small. & Controlled \\
+Simulation-to-real mismatch & PyBullet and offline EEG data cannot reproduce all physical-arm and live-user conditions. & Physical deployment claims could be overstated. & Explicitly limited claims to offline and simulation validation; kept live-user and full physical validation as future work requiring ethical approval. & Controlled \\
+Human-subject ethics constraint & No approval for collecting live EEG from participants. & Live BCI validation cannot be performed within the project. & Used public datasets, synthetic BrainFlow tests, and simulation-based control evaluation; stated the limitation in the abstract, discussion, and conclusion. & Controlled \\
+Reproducibility and data-loss risk & Multiple scripts, checkpoints, plots, and report versions could diverge or be lost. & Markers may be unable to inspect the software contribution or verify results. & Preserved code in Git, maintained saved experiment outputs, organised the repository, and provided README and repository links in Appendix~F. & Controlled \\
+Hardware safety risk during arm tests & Unexpected arm motion, pinch points, workspace collision, or electrical faults. & Injury or equipment damage during physical testing. & Used simulation-first development, velocity/workspace limits, home/return poses, operating-zone controls, and a formal H\&S assessment. & Controlled \\
+\bottomrule
+\end{longtable}
+\endgroup
+
+\section{Health \& Safety Risk Assessment}
+
+The following pages include the formal Health \& Safety Risk Assessment for software development, simulation work, and limited robotic-arm setup/testing.
+\includepdf[pages=-,pagecommand={\thispagestyle{plain}}]{../05_Documentation/Risk assessment form-11314389_v3.pdf}
 
 \section{Continuing Professional Development (CPD) Log}
 
-Appendix~D contains the CPD log maintained during the project. It records the self-directed learning activities that supported the implementation work, including study in MNE-Python, PyTorch, Transformer models, reinforcement learning, and BrainFlow integration. The repository also contains dated progress material that complements the CPD record, including \texttt{01\_Reports/week\_2026\_03\_24.tex}.
+The following tables reproduce the CPD log maintained during the project. They record the planned and executed self-learning that supported the implementation work.
+
+\begingroup
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.18}
+\begin{longtable}{@{}p{3.1cm}p{8.4cm}p{2.4cm}p{1.2cm}@{}}
+\caption{Current and recent CPD activity.}
+\label{tab:appendix_cpd_current}\\
+\toprule
+\textbf{CPD activity title} & \textbf{Description} & \textbf{Dates} & \textbf{Hours} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{CPD activity title} & \textbf{Description} & \textbf{Dates} & \textbf{Hours} \\
+\midrule
+\endhead
+Project planning and CPD setup & Reviewed the EEEN30330 handbook requirements for weekly project meetings, progress review meetings, project-logbook evidence, self-directed learning, and skill development. Set up the project plan, risk tracking, and a habit of recording supervisor actions and technical progress. & 06 Oct--20 Oct 2025 & 6 \\
+MI-BCI literature review & Studied motor imagery BCI literature, CTNet/EEGTransformer approaches, EEGNet, CSP-based baselines, and reinforcement-learning BCI work. This developed the background needed to justify the hybrid classifier and closed-loop controller choices in the report. & Oct--Nov 2025 & 16 \\
+EEG preprocessing with MNE-Python & Learned how to load PhysioNet and BCI Competition data, map labels, epoch motor-imagery trials, apply the 8--30\,Hz bandpass filter, normalise data, and maintain participant-wise train/test splits. & Nov--Dec 2025 & 18 \\
+PyTorch CTNet and benchmark evaluation & Implemented and adapted the CTNet/EEGTransformer model in PyTorch, including training loops, evaluation reports, and saved checkpoints. Benchmarks were run on BCI IV-2a, BCI IV-2b, and the larger PhysioNet motor-imagery dataset. & Dec 2025--Jan 2026 & 24 \\
+Transfer learning and channel reduction & Developed subject-specific fine-tuning, filter/ICA comparisons, and channel-reduction experiments. The work linked technical decisions to deployment constraints, including an OpenBCI-oriented 8-channel setup and the observed importance of motor-cortex channels such as C3. & Feb--Mar 2026 & 28 \\
+RL control and simulation demos & Studied DQN control, reward shaping, Gym/PyBullet simulation, and trajectory diagnostics. Reviewed the available demonstration media: \texttt{gym\_arm.gif} as a 500x500, 10-frame, 5\,s simulation demo, and \texttt{rl\_arm.gif} in both experiment and documentation folders as identical 500x500, 20-frame, 10\,s RL trajectory animations. & Mar--Apr 2026 & 22 \\
+BrainFlow, OpenBCI and SO-101 integration & Learned the BrainFlow acquisition workflow, synthetic-board testing, online buffer handling, classifier-to-policy action mapping, and serial control of the SO-101 arm. Safety-related learning included workspace limits, velocity limiting, clear operating zones, and immediate power-off access. & Apr 2026 & 16 \\
+Report, repository and presentation preparation & Prepared final-report evidence, repository structure, README material, figures, and appendices. This activity focused on academic integrity, clear referencing, traceable software artefacts, and a concise technical narrative for the final demonstration/presentation. & Apr--May 2026 & 14 \\
+\bottomrule
+\end{longtable}
+
+\begin{longtable}{@{}p{3.1cm}p{6.7cm}p{3.5cm}p{2.1cm}@{}}
+\caption{Planned and future CPD activity.}
+\label{tab:appendix_cpd_future}\\
+\toprule
+\textbf{CPD activity title} & \textbf{Description} & \textbf{Skills addressed} & \textbf{Dates} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{CPD activity title} & \textbf{Description} & \textbf{Skills addressed} & \textbf{Dates} \\
+\midrule
+\endhead
+Final demonstration rehearsal & Practise the 15-minute final presentation and rehearse responses to questions about classifier accuracy, simulation-only validation, ethical constraints, and the RL demonstration media. & Technical communication; evidence-based explanation; time management. & 05 May--15 May 2026 \\
+Repository release and reproducibility check & Clean the public repository evidence so that a technically competent reader can inspect the code structure, run key scripts, and understand which artefacts are authored work versus third-party reference material. & Version control; reproducible research; professional software documentation. & May 2026 \\
+Ethically approved OpenBCI user study & Prepare a live-user validation plan with participant information, consent, risk controls, and a small 8-channel calibration protocol before collecting any new human EEG data. & Research ethics; participant protocol design; EEG acquisition practice. & Summer--Autumn 2026 \\
+Real-time 8-channel inference path & Build and test a native low-channel online decoder using the exact OpenBCI channel order, sampling rate, filtering, and normalisation expected during deployment. Compare shorter decision windows to reduce command latency. & Online signal processing; model adaptation; latency analysis. & Summer 2026 \\
+Extended SO-101 closed-loop manipulation & Extend the present planar reaching controller toward richer SO-101 tasks only after validating live decoding and emergency-stop controls. Use the current 4-direction policy as the safety baseline. & Robotics control; reinforcement-learning generalisation; safety validation. & Future MEng / research work \\
+\bottomrule
+\end{longtable}
+\endgroup
 
 \section{Code Repository and README}
 
 The software developed in this project is maintained in the version-controlled GitHub repository \url{https://github.com/SolanumLycopersicumX/3YP.git}. The repository README is available at \url{https://github.com/SolanumLycopersicumX/3YP/blob/main/README.md}. The repository contains the project code, experiment outputs, and supporting documentation needed to inspect the software contribution. The main authored software is organised under \texttt{02\_Code/}, experimental outputs are stored under \texttt{03\_Experiments/}, and supporting documents are stored under \texttt{05\_Documentation/}. Third-party or reference material is kept separate from the main authored codebase.
+
+\clearpage
+\section{Additional Experimental Evidence}
+
+This appendix collects selected software-interface plots that were not placed in the main body because the main report focuses on aggregate findings. The figures below provide additional engineering evidence that the BrainFlow acquisition wrapper, classifier interface, command mapping, and simulated robot-control loop can execute interpretable guided trajectories. These plots do not represent live human EEG validation.
+
+\subsection{Additional Software-Interface Control Trajectories}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\textwidth,height=0.72\textheight,keepaspectratio]{../03_Experiments/brainflow_physical_control/a_horizontal.png}
+\caption{Guided BrainFlow-to-CTNet-to-robot software-interface validation for a horizontal left--right--centre trajectory. The plot records position over time, the 2D path, classifier confidence traces, and the command distribution for a successful guided run.}
+\label{fig:appendix_brainflow_horizontal}
+\end{figure}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\textwidth,height=0.72\textheight,keepaspectratio]{../03_Experiments/brainflow_physical_control/e_square_cw.png}
+\caption{Guided BrainFlow-to-CTNet-to-robot software-interface validation for a clockwise square trajectory. This figure is included as engineering evidence for the acquisition/classifier/control interface only; it does not represent live human EEG validation.}
+\label{fig:appendix_brainflow_square}
+\end{figure}
 
 \end{document}
