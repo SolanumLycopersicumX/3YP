@@ -32,6 +32,7 @@
 \usepackage{booktabs}
 \usepackage{multirow}
 \usepackage{hyperref}
+\usepackage{pdfpages}
 \usepackage{array}
 \usepackage{xcolor}
 
@@ -260,6 +261,8 @@ Before reading the figure, it is useful to state explicitly what each group repr
 
 \begin{figure}[htbp]
     \centering
+    \includegraphics[width=\textwidth]{architecture_diagram.pdf}
+    \iffalse
     \begin{adjustbox}{max width=1.15\textwidth,center}
                 % --- DeepMind / OpenAI-style clean pastel palette ---
     \definecolor{bgGray}{RGB}{246, 247, 249}
@@ -437,6 +440,7 @@ Before reading the figure, it is useful to state explicitly what each group repr
 
 \end{tikzpicture}
     \end{adjustbox}
+    \fi
     \caption{\textbf{System Architecture Overview.} The pipeline is shown as three visual groups spanning four functions: EEG processing, deep learning classification, reinforcement learning control, and hardware integration. Raw EEG is preprocessed, then classified by the EEGTransformer. The predicted MI class and confidence form part of the state observed by a DQN agent, whose action $a_t$ drives the robotic environment. In the control setting used here, 4-class MI predictions are mapped to four directional commands (left, right, up, down), while hardware integration is handled through the BrainFlow/OpenBCI acquisition interface and the serial SO-101 control interface.}
     \label{fig:system_overview}
 \end{figure}
@@ -1131,19 +1135,27 @@ A.~L.~Goldberger \emph{et al.}, ``PhysioBank, PhysioToolkit, and PhysioNet: Comp
 
 \section{Preliminary Project Proposal}
 
-Appendix~A contains the preliminary project proposal submitted earlier in the academic year. The repository copy is stored as \texttt{05\_Documentation/11314389\_v4.pdf}. It is included in the final submission package as the original approved proposal document and is referenced here to show the initial scope against which the completed project can be compared.
+Appendix~A contains the preliminary project proposal submitted earlier in the academic year. The repository copy is stored as \texttt{05\_Documentation/11314389\_v4.pdf}. It is included here as the original approved proposal document and shows the initial scope against which the completed project can be compared.
+
+\includepdf[pages=-,pagecommand={}]{../05_Documentation/11314389_v4.pdf}
 
 \section{Project Plan and Gantt Chart}
 
-Appendix~B contains the final updated project plan and Gantt chart used at the end of the project. The repository copy is stored as \texttt{05\_Documentation/gantt\_chart\_v3.pdf}. This artefact provides supporting evidence for the planning decisions summarised in Chapter~5. Dated weekly progress material is also available in the repository, for example \texttt{01\_Reports/week\_2026\_03\_24.tex} and the corresponding PDF export.
+Appendix~B contains the final updated project plan and Gantt chart used at the end of the project. The repository copy is stored as \texttt{05\_Documentation/gantt\_chart\_v3.pdf}. This artefact provides supporting evidence for the planning decisions summarised in Chapter~5.
+
+\includepdf[pages=-,pagecommand={}]{../05_Documentation/gantt_chart_v3.pdf}
 
 \section{Risk Register and Health \& Safety Artefact}
 
 Appendix~C contains the maintained risk register together with the formal health-and-safety documentation for the project. The repository copies of the risk and health-and-safety assessment are stored as \texttt{05\_Documentation/Risk assessment form-11314389\_v3.docx} and \texttt{05\_Documentation/Risk assessment form-11314389\_v3.pdf}. These materials support the risk-management discussion in Chapter~5.
 
+\includepdf[pages=-,pagecommand={}]{../05_Documentation/Risk assessment form-11314389_v3.pdf}
+
 \section{Continuing Professional Development (CPD) Log}
 
-Appendix~D contains the CPD log maintained during the project. It records the self-directed learning activities that supported the implementation work, including study in MNE-Python, PyTorch, Transformer models, reinforcement learning, and BrainFlow integration. The repository also contains dated progress material that complements the CPD record, including \texttt{01\_Reports/week\_2026\_03\_24.tex}.
+Appendix~D contains the CPD log maintained during the project. It records the self-directed learning activities that supported the implementation work, including study in MNE-Python, PyTorch, Transformer models, reinforcement learning, and BrainFlow integration. The repository also contains dated progress material that complements this record, including \texttt{01\_Reports/week\_2026\_03\_24.tex}.
+
+\includepdf[pages=-,pagecommand={}]{../05_Documentation/Zheng_Xu_11314389_CPD_Log.pdf}
 
 \section{Code Repository and README}
 
