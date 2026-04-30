@@ -732,7 +732,7 @@ def _print_summary(all_results, output_dir):
         json.dump(all_results, f, indent=2)
 
     # Comparison bar chart
-    fig, ax = plt.subplots(figsize=(12, 6))
+    fig, ax = plt.subplots(figsize=(14, 7.5))
     names = [r['name'] for r in all_results]
     accs = [r['accuracy'] * 100 for r in all_results]
     n_chs = [r['n_channels'] for r in all_results]
@@ -744,19 +744,19 @@ def _print_summary(all_results, output_dir):
     bars = ax.bar(range(len(names)), accs, color=colors, alpha=0.85)
     for bar, a in zip(bars, accs):
         ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.5,
-                f'{a:.1f}%', ha='center', fontweight='bold', fontsize=9)
+                f'{a:.1f}%', ha='center', fontweight='bold', fontsize=10)
 
     ax.set_xticks(range(len(names)))
     ax.set_xticklabels([f"{n}\n({c}ch)" for n, c in zip(names, n_chs)],
-                       rotation=45, ha='right', fontsize=8)
-    ax.set_ylabel('Accuracy (%)')
-    ax.set_title('CTNet Accuracy vs Channel Count', fontweight='bold', fontsize=13)
+                       rotation=35, ha='right', fontsize=12)
+    ax.set_ylabel('Accuracy (%)', fontsize=12)
+    ax.set_title('CTNet Accuracy vs Channel Count', fontweight='bold', fontsize=15)
     ax.axhline(y=25, color='gray', ls=':', alpha=0.4, label='Chance (25%)')
-    ax.legend()
+    ax.legend(fontsize=11)
     ax.grid(True, axis='y', alpha=0.3)
     ax.set_ylim(0, max(accs) + 10)
 
-    plt.tight_layout()
+    plt.tight_layout(pad=1.2)
     plt.savefig(output_dir / "channel_reduction_comparison.png", dpi=200, bbox_inches='tight')
     plt.close()
     print(f"\n  Comparison plot saved: {output_dir / 'channel_reduction_comparison.png'}")
