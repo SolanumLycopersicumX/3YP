@@ -190,6 +190,18 @@ python 02_Code/Simulation/gym_control.py
 
 ---
 
+## Known issues and future improvements
+
+English note: this section records the main limitations of the current software release and the most useful next engineering steps.
+
+- **Live human-subject validation is not included.** Current EEG evaluation uses public pre-recorded datasets, and control evaluation is offline or simulation-based because this undergraduate project does not have ethical approval for live EEG collection.
+- **The real-time 8-channel path still needs native validation.** The report identifies an OpenBCI-oriented 8-channel montage, but a future version should train and calibrate directly with the exact OpenBCI channel order, sampling rate, filtering, and normalisation used during deployment.
+- **Command latency remains high.** The current online-control design uses a 4-second EEG window. Future work should compare shorter overlapping windows and confidence-based rejection to quantify the accuracy-latency trade-off.
+- **Physical SO-101 testing is limited.** Serial control and basic motion commands are implemented, but richer closed-loop manipulation should only be extended after emergency-stop controls, workspace limits, and live-decoder behaviour have been validated.
+- **Repository size and data handling can be improved.** Large datasets and generated experiment artefacts are preserved locally for inspection, but a public release should document which files are required for reproduction and which are archival outputs.
+
+---
+
 **作者 / Author**: 徐正 (Zheng XU)  
 **项目 / Project**: 曼彻斯特大学 Final Year Project  
 **日期 / Date**: 2025-2026学年
