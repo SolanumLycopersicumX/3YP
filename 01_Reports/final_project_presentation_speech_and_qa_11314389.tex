@@ -1,0 +1,264 @@
+\documentclass[11pt]{article}
+\usepackage[a4paper,margin=18mm]{geometry}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{longtable}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,linkcolor=black,urlcolor=blue}
+\definecolor{uomPurple}{HTML}{660099}
+\definecolor{lightPanel}{HTML}{F7F7F7}
+\definecolor{warnPanel}{HTML}{FFF7D6}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+\setlist[itemize]{leftmargin=*,itemsep=2pt,topsep=2pt}
+\begin{document}
+\begin{center}
+{\Large\bfseries Final Project Presentation Speaker Script and Q\&A}\\
+\vspace{2mm}
+{A Brain-Computer Interface Control System Design Based on Deep Learning}\\
+\vspace{1mm}
+{Zheng Xu | Student ID: 11314389}
+\end{center}
+
+\section*{Timing Summary}
+Planned spoken time: 14:02. This leaves 0:58 under a 15:00 limit, so it satisfies the requirement to keep at least 30 seconds of safety buffer. All content slides are designed to be spoken in one minute or less.
+
+
+\begin{longtable}{p{12mm}p{32mm}p{18mm}p{96mm}}
+\textbf{Slide} & \textbf{Title} & \textbf{Target} & \textbf{Speaking focus}\\\hline
+1 & Title & 0:12 & Make the system-level framing clear immediately.\\
+2 & Objective of This Presentation & 0:35 & Do not spend time reading every item; give the audience the route map.\\
+3 & Project Aim and Problem & 0:55 & If asked, say the final task metric is control success, not only offline accuracy.\\
+4 & Background: Motor-Imagery BCI & 0:45 & Key terms: MI, Mu/Beta, ERD/ERS, noisy single-trial classification.\\
+5 & Literature Review: Method Gap & 0:55 & Do not claim state of the art classification; claim system integration.\\
+6 & Dataset and Method Choice & 1:00 & Dataset choice was focused coverage, not maximum dataset count; IV-2b is not used for the 4-command control loop because it has only two classes.\\
+7 & Overall System Architecture & 1:00 & If asked about hardware: BrainFlow/OpenBCI and SO-101 interfaces were software/interface validated, not live EEG controlled.\\
+8 & Preprocessing and Evidence & 1:00 & Say ICA was limited in this project, not universally useless.\\
+9 & EEGTransformer Design & 0:50 & CNN handles spatial/local temporal structure; Transformer handles within-trial temporal context.\\
+10 & Training and Transfer Learning & 0:50 & Fine-tuning helps, but full-cohort validation and online adaptation are future work.\\
+11 & Classification Results & 1:00 & Best answer if challenged: competitive and system-oriented, not leaderboard-leading.\\
+12 & OpenBCI-Oriented Channel Reduction & 1:00 & Boundary: offline 8-channel evidence, not native live hardware validation.\\
+13 & Robotic Control and RL Method & 1:00 & Quantitative RL results are from simulated reaching, not physical closed-loop EEG control.\\
+14 & RL Results & 1:00 & Full Transformer is best result; Light Transformer is the practical trade-off.\\
+15 & End-to-End Results & 1:00 & This page is likely to be challenged; be precise about training speed vs final reach rate.\\
+16 & Discussion, Conclusion, and Next Steps & 1:00 & End by showing technical confidence and honesty about validation limits.\\
+\end{longtable}
+\newpage
+\section*{Slide-by-Slide Speaker Script}
+\subsection*{Slide 1: Title (0:12)}
+Good morning. My project is titled A Brain-Computer Interface Control System Design Based on Deep Learning. The main point is that this is not only an EEG classification project. It is a system design project that links motor-imagery EEG decoding, closed-loop reinforcement-learning control, and deployment-oriented channel reduction.
+
+
+\textbf{If asked:} Make the system-level framing clear immediately.
+
+\subsection*{Slide 2: Objective of This Presentation (0:35)}
+I will cover six points. First, why MI-BCI robotic control is difficult. Second, which datasets and methods I used. Third, how the EEGTransformer decoder works. Fourth, why channel reduction matters for OpenBCI-style hardware. Fifth, how the DQN closes the control loop. Finally, I will explain what the results prove, what they do not prove, and what the next steps should be.
+
+
+\textbf{If asked:} Do not spend time reading every item; give the audience the route map.
+
+\subsection*{Slide 3: Project Aim and Problem (0:55)}
+The project aim is to translate motor-imagery EEG into robotic arm commands using deep learning and reinforcement learning. The difficulty is not just classification. There are three connected problems: EEG is non-stationary across users and sessions, open-loop control is fragile because one wrong class can become one wrong command, and many strong EEG systems rely on high-density lab equipment. My project treats this as a pipeline problem: perception, decision-making, and deployability.
+
+
+\textbf{If asked:} If asked, say the final task metric is control success, not only offline accuracy.
+
+\subsection*{Slide 4: Background: Motor-Imagery BCI (0:45)}
+Motor imagery means the user imagines movement without physically moving. In EEG, this changes Mu and Beta rhythms, especially in the 8 to 30 Hz range over the sensorimotor cortex. A basic BCI pipeline records EEG, extracts these patterns, classifies the imagined action, and maps the result to a command. The problem is that single-trial EEG is noisy, so a robot needs feedback and correction rather than blindly following every label.
+
+
+\textbf{If asked:} Key terms: MI, Mu/Beta, ERD/ERS, noisy single-trial classification.
+
+\subsection*{Slide 5: Literature Review: Method Gap (0:55)}
+Classical CSP methods are interpretable, while CNN and CNN-attention models often improve offline classification. However, many studies still stop at trial-level decoding. RL has also been explored in EEG pipelines, but often for feature selection or adaptation rather than controlling a robotic actuator. My gap is therefore a system gap: previous work often treats EEG decoding, robotic control, and low-channel deployment separately. This project connects them in one pipeline.
+
+
+\textbf{If asked:} Do not claim state of the art classification; claim system integration.
+
+\subsection*{Slide 6: Dataset and Method Choice (1:00)}
+I selected these datasets because they are open, motor-imagery focused, established enough for comparison, and complementary. BCI IV-2a gives a standard 22-channel, 4-class benchmark. BCI IV-2b gives an extreme 3-channel binary stress test, which is useful for low-channel deployment thinking. PhysioNet gives 109 subjects and 64 channels, so it supports cross-subject pre-training, fine-tuning, and channel reduction. I did not add datasets such as OpenBMI, High-Gamma, BNCI, or Jeong because they either duplicate a role already covered here, emphasise a different paradigm, or add extra preprocessing and comparison factors beyond this project scope.
+
+
+\textbf{If asked:} Dataset choice was focused coverage, not maximum dataset count; IV-2b is not used for the 4-command control loop because it has only two classes.
+
+\subsection*{Slide 7: Overall System Architecture (1:00)}
+The system has four main parts. First, EEG is filtered, segmented, normalised, and passed to the EEGTransformer. Second, the classifier outputs a motor-imagery class and confidence. Third, the DQN receives robot state, target information, and optionally the classifier evidence. Fourth, the selected action drives the simulated robotic environment or the software interface. The important design choice is that the EEG class is a noisy observation for the controller, not the final action.
+
+
+\textbf{If asked:} If asked about hardware: BrainFlow/OpenBCI and SO-101 interfaces were software/interface validated, not live EEG controlled.
+
+\subsection*{Slide 8: Preprocessing and Evidence (1:00)}
+The final preprocessing choice is intentionally simple: standard loading, 8 to 30 Hz bandpass filtering, epoching or resampling, and normalisation using training statistics. This is justified by the ablations. The bandpass filter improved PhysioNet fine-tuning by 18.44 percentage points on average in the five-subject test. ICA gave only a small and inconsistent 1.51 percentage-point average gain on three BCI IV-2a subjects, so I reported it as tested but did not make it the default.
+
+
+\textbf{If asked:} Say ICA was limited in this project, not universally useless.
+
+\subsection*{Slide 9: EEGTransformer Design (0:50)}
+The EEGTransformer combines two useful biases. The CNN front-end learns local temporal filters and data-driven spatial filters across electrodes, which is appropriate for EEG. The Transformer encoder then models longer relationships across the motor-imagery trial, for example cue-aligned activity, sustained ERD, and recovery. In the main PhysioNet configuration, the input is 64 channels by 1000 samples, which is reduced to 15 tokens before 4-class classification.
+
+
+\textbf{If asked:} CNN handles spatial/local temporal structure; Transformer handles within-trial temporal context.
+
+\subsection*{Slide 10: Training and Transfer Learning (0:50)}
+Cross-subject generalisation is a major weakness in EEG. The pooled PhysioNet model achieved 56.54 percent accuracy, showing that one general model does not fully handle inter-user variability. Subject-specific fine-tuning increased the mean result to 88.78 percent on the evaluated subjects. My interpretation is that the pooled model learns transferable MI structure, but each user still needs calibration because EEG depends on anatomy, electrode placement, and imagery strategy.
+
+
+\textbf{If asked:} Fine-tuning helps, but full-cohort validation and online adaptation are future work.
+
+\subsection*{Slide 11: Classification Results (1:00)}
+The classifier achieved 73.80 percent on BCI IV-2a, 82.87 percent on BCI IV-2b, and 88.78 percent on fine-tuned PhysioNet. These results show that the decoder is usable and competitive with classical or compact CNN baselines. I would not claim it is state of the art, because methods such as EEG-Conformer and ATCNet report higher results under their own protocols. For this project, the classifier is strong enough to support the closed-loop control study.
+
+
+\textbf{If asked:} Best answer if challenged: competitive and system-oriented, not leaderboard-leading.
+
+\subsection*{Slide 12: OpenBCI-Oriented Channel Reduction (1:00)}
+The channel reduction study asks whether a 64-channel laboratory montage can move toward an 8-channel OpenBCI-compatible setup. The final set is C3, C4, FC3, FC4, CP3, CP4, Cz, and FCz. C3 was especially important, which is neurophysiologically plausible because it lies over left sensorimotor cortex. After fine-tuning, the 8-channel setup reached 72.54 percent. This supports offline feasibility, but it does not prove live OpenBCI control.
+
+
+\textbf{If asked:} Boundary: offline 8-channel evidence, not native live hardware validation.
+
+\subsection*{Slide 13: Robotic Control and RL Method (1:00)}
+The controller is formulated as a DQN problem. The base state contains end-effector position, target position, and distance to the target. In the EEG-augmented version, the predicted MI class and confidence are added. The four actions are left, right, up, and down. The reward combines target reaching, distance improvement, a step cost, and penalties for boundary or unstable movement. This lets the controller learn corrective actions rather than directly executing every EEG class.
+
+
+\textbf{If asked:} Quantitative RL results are from simulated reaching, not physical closed-loop EEG control.
+
+\subsection*{Slide 14: RL Results (1:00)}
+I compared three DQN architectures under the same simulated 2D reaching protocol. CNN+LSTM reached 97 percent final evaluation reach rate. Light Transformer reached 99 percent with fewer parameters. The full Transformer DQN reached 100 percent and the highest final reward, 10.39. I interpret this as evidence that sequential Transformer-style policies can learn strong reaching behaviour. For deployment, Light Transformer remains attractive because it gives nearly the same reach rate with lower model complexity.
+
+
+\textbf{If asked:} Full Transformer is best result; Light Transformer is the practical trade-off.
+
+\subsection*{Slide 15: End-to-End Results (1:00)}
+This is the central result. The EEGTransformer classified 630 PhysioNet trials at 82.22 percent accuracy. In the control loop, the EEG-aware DQN reached 98.7 percent, while the state-only DQN reached 99.0 percent. This means control success is not capped by instantaneous EEG accuracy, because the DQN can recover across steps. EEG evidence helped mainly by accelerating learning: training took 668 seconds with EEG evidence and 1130 seconds without it. So the honest conclusion is useful learning signal, not proof that EEG was essential in this simplified task.
+
+
+\textbf{If asked:} This page is likely to be challenged; be precise about training speed vs final reach rate.
+
+\subsection*{Slide 16: Discussion, Conclusion, and Next Steps (1:00)}
+To conclude, the project shows a feasible integrated MI-BCI pipeline: a competitive EEGTransformer decoder, subject-specific adaptation, offline 8-channel reduction, and simulated closed-loop DQN control. The main boundary is equally important: EEG classification is offline, control is simulated, and BrainFlow validation used a synthetic board. Live human OpenBCI control was not performed because ethical approval was not available. The next steps are an ethics-approved live-user study, native 8-channel real-time inference, shorter windows, and richer SO-101 manipulation.
+
+
+\textbf{If asked:} End by showing technical confidence and honesty about validation limits.
+
+\newpage
+\section*{Q\&A: Slide-Pointing Detail Questions}
+\subsection*{Q1. Slide 2: What does an integrated pipeline mean?}
+It means EEG decoding, DQN control, channel reduction, and hardware-oriented interfaces are evaluated together rather than treating classification as the endpoint.
+
+
+\subsection*{Q2. Slide 3: Why is open-loop control fragile?}
+Because a wrong EEG class maps directly to a wrong command. Closed-loop control can recover from transient mistakes using feedback.
+
+
+\subsection*{Q3. Slide 4: Why use 8 to 30 Hz?}
+Motor imagery is strongly associated with Mu and Beta rhythms in this band, especially over sensorimotor cortex.
+
+
+\subsection*{Q4. Slide 5: Is the classifier state of the art?}
+No. It is competitive and sufficient for the system study, but some recent methods report higher IV-2a accuracy.
+
+
+\subsection*{Q5. Slide 6: Why these datasets rather than others?}
+They are open, MI-focused, established, and complementary across channel count, class difficulty, and subject scale. OpenBMI, High-Gamma, BNCI, and Jeong-style datasets are valuable, but they either duplicate one selected role, use a less matched paradigm, or add extra comparison factors beyond the project scope.
+
+
+\subsection*{Q6. Slide 6: Why not merge all datasets?}
+They differ in channels, classes, sampling rates, subjects, and protocols, so independent evaluation avoids misleading comparisons.
+
+
+\subsection*{Q7. Slide 6: Why is IV-2b not used for the control mapping?}
+It has only two classes, while the final control task uses four directions mapped from four MI classes.
+
+
+\subsection*{Q8. Slide 7: Why is the EEG class not the final action?}
+Because the classifier is noisy. The DQN treats class and confidence as evidence alongside robot state and target feedback.
+
+
+\subsection*{Q9. Slide 8: Why not use ICA by default?}
+ICA gave only a small, inconsistent average gain in the tested subjects and sometimes reduced accuracy, so bandpass-only was safer for the main pipeline.
+
+
+\subsection*{Q10. Slide 9: Why CNN plus Transformer?}
+The CNN gives EEG-specific spatial and local temporal filtering, while the Transformer models longer within-trial temporal relationships.
+
+
+\subsection*{Q11. Slide 10: What does 56.54\% to 88.78\% show?}
+It shows that cross-subject generalisation is hard, but subject-specific fine-tuning can adapt the pooled representation effectively.
+
+
+\subsection*{Q12. Slide 11: How should the three classifier numbers be interpreted?}
+73.80\%, 82.87\%, and 88.78\% show usable decoding across complementary settings, not a single unified leaderboard.
+
+
+\subsection*{Q13. Slide 12: What is the final 8-channel subset?}
+C3, C4, FC3, FC4, CP3, CP4, Cz, and FCz.
+
+
+\subsection*{Q14. Slide 12: Why is C3 important?}
+C3 lies over left sensorimotor cortex and is informative for contralateral right-hand motor imagery; its ablation caused the largest drop.
+
+
+\subsection*{Q15. Slide 13: What are the DQN state, action, and reward?}
+State is arm position, target, distance, and optionally EEG class/confidence. Actions are four directions. Reward encourages reaching and distance improvement while penalising inefficient or unsafe movement.
+
+
+\subsection*{Q16. Slide 14: Which DQN architecture performed best?}
+Transformer DQN achieved the best evaluation reach rate at 100\% and the highest reward. Light Transformer is the practical lightweight trade-off.
+
+
+\subsection*{Q17. Slide 15: Why can 82.22\% EEG accuracy still give about 99\% reach rate?}
+Because the DQN uses closed-loop sequential feedback, so one wrong class does not force task failure.
+
+
+\subsection*{Q18. Slide 15: Did EEG actually help the DQN?}
+Yes, but mainly in training speed. The EEG-aware model trained in 668 s versus 1130 s, while final reach rates were similar.
+
+
+\subsection*{Q19. Slide 16: What exactly was not validated?}
+Live human OpenBCI closed-loop control was not validated. The project used offline EEG datasets, PyBullet simulation, and synthetic-board BrainFlow tests.
+
+
+\newpage
+\section*{Q\&A: Reflective and Critical Questions}
+\subsection*{R1. What was the most challenging part of the project?}
+The hardest part was integrating offline EEG decoding with a closed-loop control task while keeping the validation claims honest. It was easy to make a classifier or a controller in isolation, but harder to connect them without overclaiming live BCI performance.
+
+
+\subsection*{R2. What is the best part of the project?}
+The strongest part is the system-level integration. The end-to-end result shows why closing the loop matters: imperfect EEG classification can still support high simulated control success because the controller can correct errors.
+
+
+\subsection*{R3. What is the weakest part of the project?}
+The weakest part is the lack of live human-subject OpenBCI validation. The project supports feasibility and integration readiness, but it does not prove a working real-time human-controlled robot.
+
+
+\subsection*{R4. Which result would you trust least?}
+I would treat the 8-channel result cautiously because it is offline and user-dependent. It is promising, but real hardware, electrode placement, and live artefacts may change performance.
+
+
+\subsection*{R5. What would you do next?}
+First, obtain ethical approval and run a live-user OpenBCI study using the 8-channel montage. Second, build a native 8-channel real-time inference path instead of adapting from the 64-channel pipeline.
+
+
+\subsection*{R6. What would you improve technically?}
+I would reduce latency by testing shorter and overlapping windows, add confidence rejection, and explore asynchronous MI detection so the system is less dependent on a fixed 4-second window.
+
+
+\subsection*{R7. If you restarted the project, what would you do differently?}
+I would define the live-hardware validation route earlier and benchmark native 8-channel training sooner. That would reduce the gap between offline feasibility and deployment validation.
+
+
+\subsection*{R8. What is the main risk of overclaiming?}
+The main risk is saying the system proves real-time human BCI robotic control. The correct claim is offline decoding, simulated closed-loop control, and software-interface readiness.
+
+
+\subsection*{R9. Why is the project still valuable without live testing?}
+Because it identifies and tests the main system components needed for deployment: transferable decoding, channel reduction, controller robustness, and software integration boundaries.
+
+
+\subsection*{R10. What is the one-sentence conclusion?}
+The project shows that EEGTransformer decoding, subject adaptation, OpenBCI-oriented channel reduction, and DQN closed-loop control can form a feasible MI-BCI robotic-control pipeline, but live OpenBCI validation remains future work.
+
+
+\end{document}

@@ -1,0 +1,498 @@
+\documentclass[aspectratio=169,10pt]{beamer}
+\usepackage{fontspec}
+\usepackage{xcolor}
+\usepackage{ragged2e}
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\setmainfont{TeX Gyre Heros}
+\setsansfont{TeX Gyre Heros}
+\definecolor{uomPurple}{HTML}{660099}
+\definecolor{uomGold}{HTML}{FFCC33}
+\definecolor{textDark}{HTML}{222222}
+\definecolor{panelGrey}{HTML}{F7F7F7}
+\definecolor{noteCream}{HTML}{FFF7D6}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}{}
+\setbeamercolor{normal text}{fg=textDark,bg=white}
+\begin{document}
+\begin{frame}[plain]
+\vspace*{0.16cm}
+\begin{columns}[T,totalwidth=\textwidth]
+\begin{column}{0.72\textwidth}
+{\fontsize{17}{18.5}\selectfont\bfseries Slide 1: Title}
+\end{column}
+\begin{column}{0.25\textwidth}
+\raggedleft
+\colorbox{noteCream}{\parbox{0.88\linewidth}{\centering\bfseries Target: 0:12}}
+\end{column}
+\end{columns}
+\vspace{0.10cm}
+{\color{uomPurple}\rule{\textwidth}{1.2pt}}
+\vspace{0.18cm}
+{\color{uomPurple}\bfseries Speaker script}
+\vspace{0.06cm}
+\setlength{\fboxsep}{6pt}
+\noindent\colorbox{panelGrey}{\begin{minipage}{0.94\textwidth}
+\justifying\fontsize{11.0}{13.4}\selectfont
+Good morning. My project is titled A Brain-Computer Interface Control System Design Based on Deep Learning. The main point is that this is not only an EEG classification project. It is a system design project that links motor-imagery EEG decoding, closed-loop reinforcement-learning control, and deployment-oriented channel reduction.
+\end{minipage}}
+\vspace{0.22cm}
+\noindent\colorbox{noteCream}{\begin{minipage}{0.94\textwidth}
+\fontsize{9.6}{11.6}\selectfont
+{\bfseries If asked:} Make the system-level framing clear immediately.
+\end{minipage}}
+\vfill
+\hfill{\color{textDark}\scriptsize 1 / 16}
+\end{frame}
+
+\begin{frame}[plain]
+\vspace*{0.16cm}
+\begin{columns}[T,totalwidth=\textwidth]
+\begin{column}{0.72\textwidth}
+{\fontsize{17}{18.5}\selectfont\bfseries Slide 2: Objective of This Presentation}
+\end{column}
+\begin{column}{0.25\textwidth}
+\raggedleft
+\colorbox{noteCream}{\parbox{0.88\linewidth}{\centering\bfseries Target: 0:35}}
+\end{column}
+\end{columns}
+\vspace{0.10cm}
+{\color{uomPurple}\rule{\textwidth}{1.2pt}}
+\vspace{0.18cm}
+{\color{uomPurple}\bfseries Speaker script}
+\vspace{0.06cm}
+\setlength{\fboxsep}{6pt}
+\noindent\colorbox{panelGrey}{\begin{minipage}{0.94\textwidth}
+\justifying\fontsize{11.0}{13.4}\selectfont
+I will cover six points. First, why MI-BCI robotic control is difficult. Second, which datasets and methods I used. Third, how the EEGTransformer decoder works. Fourth, why channel reduction matters for OpenBCI-style hardware. Fifth, how the DQN closes the control loop. Finally, I will explain what the results prove, what they do not prove, and what the next steps should be.
+\end{minipage}}
+\vspace{0.22cm}
+\noindent\colorbox{noteCream}{\begin{minipage}{0.94\textwidth}
+\fontsize{9.6}{11.6}\selectfont
+{\bfseries If asked:} Do not spend time reading every item; give the audience the route map.
+\end{minipage}}
+\vfill
+\hfill{\color{textDark}\scriptsize 2 / 16}
+\end{frame}
+
+\begin{frame}[plain]
+\vspace*{0.16cm}
+\begin{columns}[T,totalwidth=\textwidth]
+\begin{column}{0.72\textwidth}
+{\fontsize{17}{18.5}\selectfont\bfseries Slide 3: Project Aim and Problem}
+\end{column}
+\begin{column}{0.25\textwidth}
+\raggedleft
+\colorbox{noteCream}{\parbox{0.88\linewidth}{\centering\bfseries Target: 0:55}}
+\end{column}
+\end{columns}
+\vspace{0.10cm}
+{\color{uomPurple}\rule{\textwidth}{1.2pt}}
+\vspace{0.18cm}
+{\color{uomPurple}\bfseries Speaker script}
+\vspace{0.06cm}
+\setlength{\fboxsep}{6pt}
+\noindent\colorbox{panelGrey}{\begin{minipage}{0.94\textwidth}
+\justifying\fontsize{11.0}{13.4}\selectfont
+The project aim is to translate motor-imagery EEG into robotic arm commands using deep learning and reinforcement learning. The difficulty is not just classification. There are three connected problems: EEG is non-stationary across users and sessions, open-loop control is fragile because one wrong class can become one wrong command, and many strong EEG systems rely on high-density lab equipment. My project treats this as a pipeline problem: perception, decision-making, and deployability.
+\end{minipage}}
+\vspace{0.22cm}
+\noindent\colorbox{noteCream}{\begin{minipage}{0.94\textwidth}
+\fontsize{9.6}{11.6}\selectfont
+{\bfseries If asked:} If asked, say the final task metric is control success, not only offline accuracy.
+\end{minipage}}
+\vfill
+\hfill{\color{textDark}\scriptsize 3 / 16}
+\end{frame}
+
+\begin{frame}[plain]
+\vspace*{0.16cm}
+\begin{columns}[T,totalwidth=\textwidth]
+\begin{column}{0.72\textwidth}
+{\fontsize{17}{18.5}\selectfont\bfseries Slide 4: Background: Motor-Imagery BCI}
+\end{column}
+\begin{column}{0.25\textwidth}
+\raggedleft
+\colorbox{noteCream}{\parbox{0.88\linewidth}{\centering\bfseries Target: 0:45}}
+\end{column}
+\end{columns}
+\vspace{0.10cm}
+{\color{uomPurple}\rule{\textwidth}{1.2pt}}
+\vspace{0.18cm}
+{\color{uomPurple}\bfseries Speaker script}
+\vspace{0.06cm}
+\setlength{\fboxsep}{6pt}
+\noindent\colorbox{panelGrey}{\begin{minipage}{0.94\textwidth}
+\justifying\fontsize{11.0}{13.4}\selectfont
+Motor imagery means the user imagines movement without physically moving. In EEG, this changes Mu and Beta rhythms, especially in the 8 to 30 Hz range over the sensorimotor cortex. A basic BCI pipeline records EEG, extracts these patterns, classifies the imagined action, and maps the result to a command. The problem is that single-trial EEG is noisy, so a robot needs feedback and correction rather than blindly following every label.
+\end{minipage}}
+\vspace{0.22cm}
+\noindent\colorbox{noteCream}{\begin{minipage}{0.94\textwidth}
+\fontsize{9.6}{11.6}\selectfont
+{\bfseries If asked:} Key terms: MI, Mu/Beta, ERD/ERS, noisy single-trial classification.
+\end{minipage}}
+\vfill
+\hfill{\color{textDark}\scriptsize 4 / 16}
+\end{frame}
+
+\begin{frame}[plain]
+\vspace*{0.16cm}
+\begin{columns}[T,totalwidth=\textwidth]
+\begin{column}{0.72\textwidth}
+{\fontsize{17}{18.5}\selectfont\bfseries Slide 5: Literature Review: Method Gap}
+\end{column}
+\begin{column}{0.25\textwidth}
+\raggedleft
+\colorbox{noteCream}{\parbox{0.88\linewidth}{\centering\bfseries Target: 0:55}}
+\end{column}
+\end{columns}
+\vspace{0.10cm}
+{\color{uomPurple}\rule{\textwidth}{1.2pt}}
+\vspace{0.18cm}
+{\color{uomPurple}\bfseries Speaker script}
+\vspace{0.06cm}
+\setlength{\fboxsep}{6pt}
+\noindent\colorbox{panelGrey}{\begin{minipage}{0.94\textwidth}
+\justifying\fontsize{11.0}{13.4}\selectfont
+Classical CSP methods are interpretable, while CNN and CNN-attention models often improve offline classification. However, many studies still stop at trial-level decoding. RL has also been explored in EEG pipelines, but often for feature selection or adaptation rather than controlling a robotic actuator. My gap is therefore a system gap: previous work often treats EEG decoding, robotic control, and low-channel deployment separately. This project connects them in one pipeline.
+\end{minipage}}
+\vspace{0.22cm}
+\noindent\colorbox{noteCream}{\begin{minipage}{0.94\textwidth}
+\fontsize{9.6}{11.6}\selectfont
+{\bfseries If asked:} Do not claim state of the art classification; claim system integration.
+\end{minipage}}
+\vfill
+\hfill{\color{textDark}\scriptsize 5 / 16}
+\end{frame}
+
+\begin{frame}[plain]
+\vspace*{0.16cm}
+\begin{columns}[T,totalwidth=\textwidth]
+\begin{column}{0.72\textwidth}
+{\fontsize{17}{18.5}\selectfont\bfseries Slide 6: Dataset and Method Choice}
+\end{column}
+\begin{column}{0.25\textwidth}
+\raggedleft
+\colorbox{noteCream}{\parbox{0.88\linewidth}{\centering\bfseries Target: 1:00}}
+\end{column}
+\end{columns}
+\vspace{0.10cm}
+{\color{uomPurple}\rule{\textwidth}{1.2pt}}
+\vspace{0.18cm}
+{\color{uomPurple}\bfseries Speaker script}
+\vspace{0.06cm}
+\setlength{\fboxsep}{6pt}
+\noindent\colorbox{panelGrey}{\begin{minipage}{0.94\textwidth}
+\justifying\fontsize{11.0}{13.4}\selectfont
+I selected these datasets because they are open, motor-imagery focused, established enough for comparison, and complementary. BCI IV-2a gives a standard 22-channel, 4-class benchmark. BCI IV-2b gives an extreme 3-channel binary stress test, which is useful for low-channel deployment thinking. PhysioNet gives 109 subjects and 64 channels, so it supports cross-subject pre-training, fine-tuning, and channel reduction. I did not add datasets such as OpenBMI, High-Gamma, BNCI, or Jeong because they either duplicate a role already covered here, emphasise a different paradigm, or add extra preprocessing and comparison factors beyond this project scope.
+\end{minipage}}
+\vspace{0.22cm}
+\noindent\colorbox{noteCream}{\begin{minipage}{0.94\textwidth}
+\fontsize{9.6}{11.6}\selectfont
+{\bfseries If asked:} Dataset choice was focused coverage, not maximum dataset count; IV-2b is not used for the 4-command control loop because it has only two classes.
+\end{minipage}}
+\vfill
+\hfill{\color{textDark}\scriptsize 6 / 16}
+\end{frame}
+
+\begin{frame}[plain]
+\vspace*{0.16cm}
+\begin{columns}[T,totalwidth=\textwidth]
+\begin{column}{0.72\textwidth}
+{\fontsize{17}{18.5}\selectfont\bfseries Slide 7: Overall System Architecture}
+\end{column}
+\begin{column}{0.25\textwidth}
+\raggedleft
+\colorbox{noteCream}{\parbox{0.88\linewidth}{\centering\bfseries Target: 1:00}}
+\end{column}
+\end{columns}
+\vspace{0.10cm}
+{\color{uomPurple}\rule{\textwidth}{1.2pt}}
+\vspace{0.18cm}
+{\color{uomPurple}\bfseries Speaker script}
+\vspace{0.06cm}
+\setlength{\fboxsep}{6pt}
+\noindent\colorbox{panelGrey}{\begin{minipage}{0.94\textwidth}
+\justifying\fontsize{11.0}{13.4}\selectfont
+The system has four main parts. First, EEG is filtered, segmented, normalised, and passed to the EEGTransformer. Second, the classifier outputs a motor-imagery class and confidence. Third, the DQN receives robot state, target information, and optionally the classifier evidence. Fourth, the selected action drives the simulated robotic environment or the software interface. The important design choice is that the EEG class is a noisy observation for the controller, not the final action.
+\end{minipage}}
+\vspace{0.22cm}
+\noindent\colorbox{noteCream}{\begin{minipage}{0.94\textwidth}
+\fontsize{9.6}{11.6}\selectfont
+{\bfseries If asked:} If asked about hardware: BrainFlow/OpenBCI and SO-101 interfaces were software/interface validated, not live EEG controlled.
+\end{minipage}}
+\vfill
+\hfill{\color{textDark}\scriptsize 7 / 16}
+\end{frame}
+
+\begin{frame}[plain]
+\vspace*{0.16cm}
+\begin{columns}[T,totalwidth=\textwidth]
+\begin{column}{0.72\textwidth}
+{\fontsize{17}{18.5}\selectfont\bfseries Slide 8: Preprocessing and Evidence}
+\end{column}
+\begin{column}{0.25\textwidth}
+\raggedleft
+\colorbox{noteCream}{\parbox{0.88\linewidth}{\centering\bfseries Target: 1:00}}
+\end{column}
+\end{columns}
+\vspace{0.10cm}
+{\color{uomPurple}\rule{\textwidth}{1.2pt}}
+\vspace{0.18cm}
+{\color{uomPurple}\bfseries Speaker script}
+\vspace{0.06cm}
+\setlength{\fboxsep}{6pt}
+\noindent\colorbox{panelGrey}{\begin{minipage}{0.94\textwidth}
+\justifying\fontsize{11.0}{13.4}\selectfont
+The final preprocessing choice is intentionally simple: standard loading, 8 to 30 Hz bandpass filtering, epoching or resampling, and normalisation using training statistics. This is justified by the ablations. The bandpass filter improved PhysioNet fine-tuning by 18.44 percentage points on average in the five-subject test. ICA gave only a small and inconsistent 1.51 percentage-point average gain on three BCI IV-2a subjects, so I reported it as tested but did not make it the default.
+\end{minipage}}
+\vspace{0.22cm}
+\noindent\colorbox{noteCream}{\begin{minipage}{0.94\textwidth}
+\fontsize{9.6}{11.6}\selectfont
+{\bfseries If asked:} Say ICA was limited in this project, not universally useless.
+\end{minipage}}
+\vfill
+\hfill{\color{textDark}\scriptsize 8 / 16}
+\end{frame}
+
+\begin{frame}[plain]
+\vspace*{0.16cm}
+\begin{columns}[T,totalwidth=\textwidth]
+\begin{column}{0.72\textwidth}
+{\fontsize{17}{18.5}\selectfont\bfseries Slide 9: EEGTransformer Design}
+\end{column}
+\begin{column}{0.25\textwidth}
+\raggedleft
+\colorbox{noteCream}{\parbox{0.88\linewidth}{\centering\bfseries Target: 0:50}}
+\end{column}
+\end{columns}
+\vspace{0.10cm}
+{\color{uomPurple}\rule{\textwidth}{1.2pt}}
+\vspace{0.18cm}
+{\color{uomPurple}\bfseries Speaker script}
+\vspace{0.06cm}
+\setlength{\fboxsep}{6pt}
+\noindent\colorbox{panelGrey}{\begin{minipage}{0.94\textwidth}
+\justifying\fontsize{11.0}{13.4}\selectfont
+The EEGTransformer combines two useful biases. The CNN front-end learns local temporal filters and data-driven spatial filters across electrodes, which is appropriate for EEG. The Transformer encoder then models longer relationships across the motor-imagery trial, for example cue-aligned activity, sustained ERD, and recovery. In the main PhysioNet configuration, the input is 64 channels by 1000 samples, which is reduced to 15 tokens before 4-class classification.
+\end{minipage}}
+\vspace{0.22cm}
+\noindent\colorbox{noteCream}{\begin{minipage}{0.94\textwidth}
+\fontsize{9.6}{11.6}\selectfont
+{\bfseries If asked:} CNN handles spatial/local temporal structure; Transformer handles within-trial temporal context.
+\end{minipage}}
+\vfill
+\hfill{\color{textDark}\scriptsize 9 / 16}
+\end{frame}
+
+\begin{frame}[plain]
+\vspace*{0.16cm}
+\begin{columns}[T,totalwidth=\textwidth]
+\begin{column}{0.72\textwidth}
+{\fontsize{17}{18.5}\selectfont\bfseries Slide 10: Training and Transfer Learning}
+\end{column}
+\begin{column}{0.25\textwidth}
+\raggedleft
+\colorbox{noteCream}{\parbox{0.88\linewidth}{\centering\bfseries Target: 0:50}}
+\end{column}
+\end{columns}
+\vspace{0.10cm}
+{\color{uomPurple}\rule{\textwidth}{1.2pt}}
+\vspace{0.18cm}
+{\color{uomPurple}\bfseries Speaker script}
+\vspace{0.06cm}
+\setlength{\fboxsep}{6pt}
+\noindent\colorbox{panelGrey}{\begin{minipage}{0.94\textwidth}
+\justifying\fontsize{11.0}{13.4}\selectfont
+Cross-subject generalisation is a major weakness in EEG. The pooled PhysioNet model achieved 56.54 percent accuracy, showing that one general model does not fully handle inter-user variability. Subject-specific fine-tuning increased the mean result to 88.78 percent on the evaluated subjects. My interpretation is that the pooled model learns transferable MI structure, but each user still needs calibration because EEG depends on anatomy, electrode placement, and imagery strategy.
+\end{minipage}}
+\vspace{0.22cm}
+\noindent\colorbox{noteCream}{\begin{minipage}{0.94\textwidth}
+\fontsize{9.6}{11.6}\selectfont
+{\bfseries If asked:} Fine-tuning helps, but full-cohort validation and online adaptation are future work.
+\end{minipage}}
+\vfill
+\hfill{\color{textDark}\scriptsize 10 / 16}
+\end{frame}
+
+\begin{frame}[plain]
+\vspace*{0.16cm}
+\begin{columns}[T,totalwidth=\textwidth]
+\begin{column}{0.72\textwidth}
+{\fontsize{17}{18.5}\selectfont\bfseries Slide 11: Classification Results}
+\end{column}
+\begin{column}{0.25\textwidth}
+\raggedleft
+\colorbox{noteCream}{\parbox{0.88\linewidth}{\centering\bfseries Target: 1:00}}
+\end{column}
+\end{columns}
+\vspace{0.10cm}
+{\color{uomPurple}\rule{\textwidth}{1.2pt}}
+\vspace{0.18cm}
+{\color{uomPurple}\bfseries Speaker script}
+\vspace{0.06cm}
+\setlength{\fboxsep}{6pt}
+\noindent\colorbox{panelGrey}{\begin{minipage}{0.94\textwidth}
+\justifying\fontsize{11.0}{13.4}\selectfont
+The classifier achieved 73.80 percent on BCI IV-2a, 82.87 percent on BCI IV-2b, and 88.78 percent on fine-tuned PhysioNet. These results show that the decoder is usable and competitive with classical or compact CNN baselines. I would not claim it is state of the art, because methods such as EEG-Conformer and ATCNet report higher results under their own protocols. For this project, the classifier is strong enough to support the closed-loop control study.
+\end{minipage}}
+\vspace{0.22cm}
+\noindent\colorbox{noteCream}{\begin{minipage}{0.94\textwidth}
+\fontsize{9.6}{11.6}\selectfont
+{\bfseries If asked:} Best answer if challenged: competitive and system-oriented, not leaderboard-leading.
+\end{minipage}}
+\vfill
+\hfill{\color{textDark}\scriptsize 11 / 16}
+\end{frame}
+
+\begin{frame}[plain]
+\vspace*{0.16cm}
+\begin{columns}[T,totalwidth=\textwidth]
+\begin{column}{0.72\textwidth}
+{\fontsize{17}{18.5}\selectfont\bfseries Slide 12: OpenBCI-Oriented Channel Reduction}
+\end{column}
+\begin{column}{0.25\textwidth}
+\raggedleft
+\colorbox{noteCream}{\parbox{0.88\linewidth}{\centering\bfseries Target: 1:00}}
+\end{column}
+\end{columns}
+\vspace{0.10cm}
+{\color{uomPurple}\rule{\textwidth}{1.2pt}}
+\vspace{0.18cm}
+{\color{uomPurple}\bfseries Speaker script}
+\vspace{0.06cm}
+\setlength{\fboxsep}{6pt}
+\noindent\colorbox{panelGrey}{\begin{minipage}{0.94\textwidth}
+\justifying\fontsize{11.0}{13.4}\selectfont
+The channel reduction study asks whether a 64-channel laboratory montage can move toward an 8-channel OpenBCI-compatible setup. The final set is C3, C4, FC3, FC4, CP3, CP4, Cz, and FCz. C3 was especially important, which is neurophysiologically plausible because it lies over left sensorimotor cortex. After fine-tuning, the 8-channel setup reached 72.54 percent. This supports offline feasibility, but it does not prove live OpenBCI control.
+\end{minipage}}
+\vspace{0.22cm}
+\noindent\colorbox{noteCream}{\begin{minipage}{0.94\textwidth}
+\fontsize{9.6}{11.6}\selectfont
+{\bfseries If asked:} Boundary: offline 8-channel evidence, not native live hardware validation.
+\end{minipage}}
+\vfill
+\hfill{\color{textDark}\scriptsize 12 / 16}
+\end{frame}
+
+\begin{frame}[plain]
+\vspace*{0.16cm}
+\begin{columns}[T,totalwidth=\textwidth]
+\begin{column}{0.72\textwidth}
+{\fontsize{17}{18.5}\selectfont\bfseries Slide 13: Robotic Control and RL Method}
+\end{column}
+\begin{column}{0.25\textwidth}
+\raggedleft
+\colorbox{noteCream}{\parbox{0.88\linewidth}{\centering\bfseries Target: 1:00}}
+\end{column}
+\end{columns}
+\vspace{0.10cm}
+{\color{uomPurple}\rule{\textwidth}{1.2pt}}
+\vspace{0.18cm}
+{\color{uomPurple}\bfseries Speaker script}
+\vspace{0.06cm}
+\setlength{\fboxsep}{6pt}
+\noindent\colorbox{panelGrey}{\begin{minipage}{0.94\textwidth}
+\justifying\fontsize{11.0}{13.4}\selectfont
+The controller is formulated as a DQN problem. The base state contains end-effector position, target position, and distance to the target. In the EEG-augmented version, the predicted MI class and confidence are added. The four actions are left, right, up, and down. The reward combines target reaching, distance improvement, a step cost, and penalties for boundary or unstable movement. This lets the controller learn corrective actions rather than directly executing every EEG class.
+\end{minipage}}
+\vspace{0.22cm}
+\noindent\colorbox{noteCream}{\begin{minipage}{0.94\textwidth}
+\fontsize{9.6}{11.6}\selectfont
+{\bfseries If asked:} Quantitative RL results are from simulated reaching, not physical closed-loop EEG control.
+\end{minipage}}
+\vfill
+\hfill{\color{textDark}\scriptsize 13 / 16}
+\end{frame}
+
+\begin{frame}[plain]
+\vspace*{0.16cm}
+\begin{columns}[T,totalwidth=\textwidth]
+\begin{column}{0.72\textwidth}
+{\fontsize{17}{18.5}\selectfont\bfseries Slide 14: RL Results}
+\end{column}
+\begin{column}{0.25\textwidth}
+\raggedleft
+\colorbox{noteCream}{\parbox{0.88\linewidth}{\centering\bfseries Target: 1:00}}
+\end{column}
+\end{columns}
+\vspace{0.10cm}
+{\color{uomPurple}\rule{\textwidth}{1.2pt}}
+\vspace{0.18cm}
+{\color{uomPurple}\bfseries Speaker script}
+\vspace{0.06cm}
+\setlength{\fboxsep}{6pt}
+\noindent\colorbox{panelGrey}{\begin{minipage}{0.94\textwidth}
+\justifying\fontsize{11.0}{13.4}\selectfont
+I compared three DQN architectures under the same simulated 2D reaching protocol. CNN+LSTM reached 97 percent final evaluation reach rate. Light Transformer reached 99 percent with fewer parameters. The full Transformer DQN reached 100 percent and the highest final reward, 10.39. I interpret this as evidence that sequential Transformer-style policies can learn strong reaching behaviour. For deployment, Light Transformer remains attractive because it gives nearly the same reach rate with lower model complexity.
+\end{minipage}}
+\vspace{0.22cm}
+\noindent\colorbox{noteCream}{\begin{minipage}{0.94\textwidth}
+\fontsize{9.6}{11.6}\selectfont
+{\bfseries If asked:} Full Transformer is best result; Light Transformer is the practical trade-off.
+\end{minipage}}
+\vfill
+\hfill{\color{textDark}\scriptsize 14 / 16}
+\end{frame}
+
+\begin{frame}[plain]
+\vspace*{0.16cm}
+\begin{columns}[T,totalwidth=\textwidth]
+\begin{column}{0.72\textwidth}
+{\fontsize{17}{18.5}\selectfont\bfseries Slide 15: End-to-End Results}
+\end{column}
+\begin{column}{0.25\textwidth}
+\raggedleft
+\colorbox{noteCream}{\parbox{0.88\linewidth}{\centering\bfseries Target: 1:00}}
+\end{column}
+\end{columns}
+\vspace{0.10cm}
+{\color{uomPurple}\rule{\textwidth}{1.2pt}}
+\vspace{0.18cm}
+{\color{uomPurple}\bfseries Speaker script}
+\vspace{0.06cm}
+\setlength{\fboxsep}{6pt}
+\noindent\colorbox{panelGrey}{\begin{minipage}{0.94\textwidth}
+\justifying\fontsize{11.0}{13.4}\selectfont
+This is the central result. The EEGTransformer classified 630 PhysioNet trials at 82.22 percent accuracy. In the control loop, the EEG-aware DQN reached 98.7 percent, while the state-only DQN reached 99.0 percent. This means control success is not capped by instantaneous EEG accuracy, because the DQN can recover across steps. EEG evidence helped mainly by accelerating learning: training took 668 seconds with EEG evidence and 1130 seconds without it. So the honest conclusion is useful learning signal, not proof that EEG was essential in this simplified task.
+\end{minipage}}
+\vspace{0.22cm}
+\noindent\colorbox{noteCream}{\begin{minipage}{0.94\textwidth}
+\fontsize{9.6}{11.6}\selectfont
+{\bfseries If asked:} This page is likely to be challenged; be precise about training speed vs final reach rate.
+\end{minipage}}
+\vfill
+\hfill{\color{textDark}\scriptsize 15 / 16}
+\end{frame}
+
+\begin{frame}[plain]
+\vspace*{0.16cm}
+\begin{columns}[T,totalwidth=\textwidth]
+\begin{column}{0.72\textwidth}
+{\fontsize{17}{18.5}\selectfont\bfseries Slide 16: Discussion, Conclusion, and Next Steps}
+\end{column}
+\begin{column}{0.25\textwidth}
+\raggedleft
+\colorbox{noteCream}{\parbox{0.88\linewidth}{\centering\bfseries Target: 1:00}}
+\end{column}
+\end{columns}
+\vspace{0.10cm}
+{\color{uomPurple}\rule{\textwidth}{1.2pt}}
+\vspace{0.18cm}
+{\color{uomPurple}\bfseries Speaker script}
+\vspace{0.06cm}
+\setlength{\fboxsep}{6pt}
+\noindent\colorbox{panelGrey}{\begin{minipage}{0.94\textwidth}
+\justifying\fontsize{11.0}{13.4}\selectfont
+To conclude, the project shows a feasible integrated MI-BCI pipeline: a competitive EEGTransformer decoder, subject-specific adaptation, offline 8-channel reduction, and simulated closed-loop DQN control. The main boundary is equally important: EEG classification is offline, control is simulated, and BrainFlow validation used a synthetic board. Live human OpenBCI control was not performed because ethical approval was not available. The next steps are an ethics-approved live-user study, native 8-channel real-time inference, shorter windows, and richer SO-101 manipulation.
+\end{minipage}}
+\vspace{0.22cm}
+\noindent\colorbox{noteCream}{\begin{minipage}{0.94\textwidth}
+\fontsize{9.6}{11.6}\selectfont
+{\bfseries If asked:} End by showing technical confidence and honesty about validation limits.
+\end{minipage}}
+\vfill
+\hfill{\color{textDark}\scriptsize 16 / 16}
+\end{frame}
+
+\end{document}
