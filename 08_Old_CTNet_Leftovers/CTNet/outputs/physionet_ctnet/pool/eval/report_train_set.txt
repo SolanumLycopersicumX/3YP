@@ -1,0 +1,35 @@
+============================================================
+  CTNet PhysioNet Evaluation Report
+============================================================
+  Model:    outputs/physionet_ctnet/pool/model_pool.pth
+  Subjects: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+  Unseen:   False
+  Tag:      train_set
+
+  Overall Metrics:
+    Accuracy:   77.33%
+    Precision:  78.78%
+    Recall:     77.25%
+    F1 Score:   77.33%
+    Kappa:      0.6976
+
+  Per-Subject Results:
+    S001:  82.2% (90 trials)
+    S002:  83.3% (90 trials)
+    S003:  78.9% (90 trials)
+    S004:  67.8% (90 trials)
+    S005:  84.4% (90 trials)
+    S006:  58.9% (90 trials)
+    S007:  86.7% (90 trials)
+    S008:  66.7% (90 trials)
+    S009:  81.1% (90 trials)
+    S010:  83.3% (90 trials)
+    Mean:  77.3% ± 8.9%
+
+  Direction Mapping (for robot arm control):
+    Class 0 (Left)       → Move Left  (dx=-1)
+    Class 1 (Right)      → Move Right (dx=+1)
+    Class 2 (Hands/Up)   → Move Up    (dy=+1)
+    Class 3 (Feet/Down)  → Move Down  (dy=-1)
+
+============================================================

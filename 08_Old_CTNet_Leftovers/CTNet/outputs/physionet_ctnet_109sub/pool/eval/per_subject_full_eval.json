@@ -1,0 +1,551 @@
+{
+  "results": [
+    {
+      "subject": 1,
+      "accuracy": 0.8111111111111111,
+      "n_trials": 90
+    },
+    {
+      "subject": 2,
+      "accuracy": 0.7777777777777778,
+      "n_trials": 90
+    },
+    {
+      "subject": 3,
+      "accuracy": 0.7111111111111111,
+      "n_trials": 90
+    },
+    {
+      "subject": 4,
+      "accuracy": 0.5444444444444444,
+      "n_trials": 90
+    },
+    {
+      "subject": 5,
+      "accuracy": 0.4222222222222222,
+      "n_trials": 90
+    },
+    {
+      "subject": 6,
+      "accuracy": 0.4777777777777778,
+      "n_trials": 90
+    },
+    {
+      "subject": 7,
+      "accuracy": 0.9222222222222223,
+      "n_trials": 90
+    },
+    {
+      "subject": 8,
+      "accuracy": 0.6444444444444445,
+      "n_trials": 90
+    },
+    {
+      "subject": 9,
+      "accuracy": 0.7555555555555555,
+      "n_trials": 90
+    },
+    {
+      "subject": 10,
+      "accuracy": 0.7333333333333333,
+      "n_trials": 90
+    },
+    {
+      "subject": 11,
+      "accuracy": 0.3888888888888889,
+      "n_trials": 90
+    },
+    {
+      "subject": 12,
+      "accuracy": 0.5777777777777777,
+      "n_trials": 90
+    },
+    {
+      "subject": 13,
+      "accuracy": 0.8444444444444444,
+      "n_trials": 90
+    },
+    {
+      "subject": 14,
+      "accuracy": 0.5555555555555556,
+      "n_trials": 90
+    },
+    {
+      "subject": 15,
+      "accuracy": 0.9777777777777777,
+      "n_trials": 90
+    },
+    {
+      "subject": 16,
+      "accuracy": 0.4,
+      "n_trials": 90
+    },
+    {
+      "subject": 17,
+      "accuracy": 0.7111111111111111,
+      "n_trials": 90
+    },
+    {
+      "subject": 18,
+      "accuracy": 0.4111111111111111,
+      "n_trials": 90
+    },
+    {
+      "subject": 19,
+      "accuracy": 0.5888888888888889,
+      "n_trials": 90
+    },
+    {
+      "subject": 20,
+      "accuracy": 0.37777777777777777,
+      "n_trials": 90
+    },
+    {
+      "subject": 21,
+      "accuracy": 0.6555555555555556,
+      "n_trials": 90
+    },
+    {
+      "subject": 22,
+      "accuracy": 0.7444444444444445,
+      "n_trials": 90
+    },
+    {
+      "subject": 23,
+      "accuracy": 0.7444444444444445,
+      "n_trials": 90
+    },
+    {
+      "subject": 24,
+      "accuracy": 0.5222222222222223,
+      "n_trials": 90
+    },
+    {
+      "subject": 25,
+      "accuracy": 0.4,
+      "n_trials": 90
+    },
+    {
+      "subject": 26,
+      "accuracy": 0.4111111111111111,
+      "n_trials": 90
+    },
+    {
+      "subject": 27,
+      "accuracy": 0.7111111111111111,
+      "n_trials": 90
+    },
+    {
+      "subject": 28,
+      "accuracy": 0.6111111111111112,
+      "n_trials": 90
+    },
+    {
+      "subject": 29,
+      "accuracy": 0.7777777777777778,
+      "n_trials": 90
+    },
+    {
+      "subject": 30,
+      "accuracy": 0.3888888888888889,
+      "n_trials": 90
+    },
+    {
+      "subject": 31,
+      "accuracy": 0.6,
+      "n_trials": 90
+    },
+    {
+      "subject": 32,
+      "accuracy": 0.8888888888888888,
+      "n_trials": 90
+    },
+    {
+      "subject": 33,
+      "accuracy": 0.7111111111111111,
+      "n_trials": 90
+    },
+    {
+      "subject": 34,
+      "accuracy": 0.6705882352941176,
+      "n_trials": 85
+    },
+    {
+      "subject": 35,
+      "accuracy": 0.8,
+      "n_trials": 90
+    },
+    {
+      "subject": 36,
+      "accuracy": 0.6555555555555556,
+      "n_trials": 90
+    },
+    {
+      "subject": 37,
+      "accuracy": 0.4,
+      "n_trials": 85
+    },
+    {
+      "subject": 38,
+      "accuracy": 0.5444444444444444,
+      "n_trials": 90
+    },
+    {
+      "subject": 39,
+      "accuracy": 0.6555555555555556,
+      "n_trials": 90
+    },
+    {
+      "subject": 40,
+      "accuracy": 0.7888888888888889,
+      "n_trials": 90
+    },
+    {
+      "subject": 41,
+      "accuracy": 0.42045454545454547,
+      "n_trials": 88
+    },
+    {
+      "subject": 42,
+      "accuracy": 0.8111111111111111,
+      "n_trials": 90
+    },
+    {
+      "subject": 43,
+      "accuracy": 0.8222222222222222,
+      "n_trials": 90
+    },
+    {
+      "subject": 44,
+      "accuracy": 0.8555555555555555,
+      "n_trials": 90
+    },
+    {
+      "subject": 45,
+      "accuracy": 0.6888888888888889,
+      "n_trials": 90
+    },
+    {
+      "subject": 46,
+      "accuracy": 0.6222222222222222,
+      "n_trials": 90
+    },
+    {
+      "subject": 47,
+      "accuracy": 0.3111111111111111,
+      "n_trials": 90
+    },
+    {
+      "subject": 48,
+      "accuracy": 0.9222222222222223,
+      "n_trials": 90
+    },
+    {
+      "subject": 49,
+      "accuracy": 0.7666666666666667,
+      "n_trials": 90
+    },
+    {
+      "subject": 50,
+      "accuracy": 0.4222222222222222,
+      "n_trials": 90
+    },
+    {
+      "subject": 51,
+      "accuracy": 0.23333333333333334,
+      "n_trials": 90
+    },
+    {
+      "subject": 52,
+      "accuracy": 0.8444444444444444,
+      "n_trials": 90
+    },
+    {
+      "subject": 53,
+      "accuracy": 0.7777777777777778,
+      "n_trials": 90
+    },
+    {
+      "subject": 54,
+      "accuracy": 0.7777777777777778,
+      "n_trials": 90
+    },
+    {
+      "subject": 55,
+      "accuracy": 0.4,
+      "n_trials": 90
+    },
+    {
+      "subject": 56,
+      "accuracy": 0.8555555555555555,
+      "n_trials": 90
+    },
+    {
+      "subject": 57,
+      "accuracy": 0.8333333333333334,
+      "n_trials": 90
+    },
+    {
+      "subject": 58,
+      "accuracy": 0.6,
+      "n_trials": 90
+    },
+    {
+      "subject": 59,
+      "accuracy": 0.6555555555555556,
+      "n_trials": 90
+    },
+    {
+      "subject": 60,
+      "accuracy": 0.8333333333333334,
+      "n_trials": 90
+    },
+    {
+      "subject": 61,
+      "accuracy": 0.8666666666666667,
+      "n_trials": 90
+    },
+    {
+      "subject": 62,
+      "accuracy": 0.7333333333333333,
+      "n_trials": 90
+    },
+    {
+      "subject": 63,
+      "accuracy": 0.5666666666666667,
+      "n_trials": 90
+    },
+    {
+      "subject": 64,
+      "accuracy": 0.28735632183908044,
+      "n_trials": 87
+    },
+    {
+      "subject": 65,
+      "accuracy": 0.7888888888888889,
+      "n_trials": 90
+    },
+    {
+      "subject": 66,
+      "accuracy": 0.4666666666666667,
+      "n_trials": 90
+    },
+    {
+      "subject": 67,
+      "accuracy": 0.36666666666666664,
+      "n_trials": 90
+    },
+    {
+      "subject": 68,
+      "accuracy": 0.7333333333333333,
+      "n_trials": 90
+    },
+    {
+      "subject": 69,
+      "accuracy": 0.6444444444444445,
+      "n_trials": 90
+    },
+    {
+      "subject": 70,
+      "accuracy": 0.7666666666666667,
+      "n_trials": 90
+    },
+    {
+      "subject": 71,
+      "accuracy": 0.7,
+      "n_trials": 90
+    },
+    {
+      "subject": 72,
+      "accuracy": 0.611764705882353,
+      "n_trials": 85
+    },
+    {
+      "subject": 73,
+      "accuracy": 0.40476190476190477,
+      "n_trials": 84
+    },
+    {
+      "subject": 74,
+      "accuracy": 0.36470588235294116,
+      "n_trials": 85
+    },
+    {
+      "subject": 75,
+      "accuracy": 0.6555555555555556,
+      "n_trials": 90
+    },
+    {
+      "subject": 76,
+      "accuracy": 0.2857142857142857,
+      "n_trials": 84
+    },
+    {
+      "subject": 77,
+      "accuracy": 0.7111111111111111,
+      "n_trials": 90
+    },
+    {
+      "subject": 78,
+      "accuracy": 0.37777777777777777,
+      "n_trials": 90
+    },
+    {
+      "subject": 79,
+      "accuracy": 0.7222222222222222,
+      "n_trials": 90
+    },
+    {
+      "subject": 80,
+      "accuracy": 0.6222222222222222,
+      "n_trials": 90
+    },
+    {
+      "subject": 81,
+      "accuracy": 0.6222222222222222,
+      "n_trials": 90
+    },
+    {
+      "subject": 82,
+      "accuracy": 0.5777777777777777,
+      "n_trials": 90
+    },
+    {
+      "subject": 83,
+      "accuracy": 0.7222222222222222,
+      "n_trials": 90
+    },
+    {
+      "subject": 84,
+      "accuracy": 0.6888888888888889,
+      "n_trials": 90
+    },
+    {
+      "subject": 85,
+      "accuracy": 0.8,
+      "n_trials": 90
+    },
+    {
+      "subject": 86,
+      "accuracy": 0.8777777777777778,
+      "n_trials": 90
+    },
+    {
+      "subject": 87,
+      "accuracy": 0.6111111111111112,
+      "n_trials": 90
+    },
+    {
+      "subject": 88,
+      "accuracy": 0.37719298245614036,
+      "n_trials": 114
+    },
+    {
+      "subject": 89,
+      "accuracy": 0.24444444444444444,
+      "n_trials": 90
+    },
+    {
+      "subject": 90,
+      "accuracy": 0.7222222222222222,
+      "n_trials": 90
+    },
+    {
+      "subject": 91,
+      "accuracy": 0.8,
+      "n_trials": 90
+    },
+    {
+      "subject": 92,
+      "accuracy": 0.49122807017543857,
+      "n_trials": 114
+    },
+    {
+      "subject": 93,
+      "accuracy": 0.7444444444444445,
+      "n_trials": 90
+    },
+    {
+      "subject": 94,
+      "accuracy": 0.8888888888888888,
+      "n_trials": 90
+    },
+    {
+      "subject": 95,
+      "accuracy": 0.8,
+      "n_trials": 90
+    },
+    {
+      "subject": 96,
+      "accuracy": 0.8111111111111111,
+      "n_trials": 90
+    },
+    {
+      "subject": 97,
+      "accuracy": 0.6222222222222222,
+      "n_trials": 90
+    },
+    {
+      "subject": 98,
+      "accuracy": 0.5333333333333333,
+      "n_trials": 90
+    },
+    {
+      "subject": 99,
+      "accuracy": 0.5777777777777777,
+      "n_trials": 90
+    },
+    {
+      "subject": 100,
+      "accuracy": 0.5833333333333334,
+      "n_trials": 72
+    },
+    {
+      "subject": 101,
+      "accuracy": 0.7,
+      "n_trials": 90
+    },
+    {
+      "subject": 102,
+      "accuracy": 0.43529411764705883,
+      "n_trials": 85
+    },
+    {
+      "subject": 103,
+      "accuracy": 0.8111111111111111,
+      "n_trials": 90
+    },
+    {
+      "subject": 104,
+      "accuracy": 0.4827586206896552,
+      "n_trials": 87
+    },
+    {
+      "subject": 105,
+      "accuracy": 0.7,
+      "n_trials": 90
+    },
+    {
+      "subject": 106,
+      "accuracy": 0.6111111111111112,
+      "n_trials": 90
+    },
+    {
+      "subject": 107,
+      "accuracy": 0.5777777777777777,
+      "n_trials": 90
+    },
+    {
+      "subject": 108,
+      "accuracy": 0.7444444444444445,
+      "n_trials": 90
+    },
+    {
+      "subject": 109,
+      "accuracy": 0.6888888888888889,
+      "n_trials": 90
+    }
+  ],
+  "mean_accuracy": 0.6357149613154003,
+  "std_accuracy": 0.17228287104453585
+}

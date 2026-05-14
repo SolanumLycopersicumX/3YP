@@ -1,0 +1,6 @@
+{
+  "artifactType": "ARTIFACT_TYPE_OTHER",
+  "summary": "Refined discussion draft strictly following ICML/NeurIPS stylistic guidelines. The focus is shifted towards mechanism-based explanations, avoiding purely performance-based arguments, and structuring the paragraphs to logically connect the proposed spatiotemporal RL framework with the empirical results.",
+  "updatedAt": "2026-03-16T16:24:18.654794152Z",
+  "version": "3"
+}

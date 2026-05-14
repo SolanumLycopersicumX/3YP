@@ -1,0 +1,378 @@
+(base) tomato@tomatoPC:~$ cd /home/tomato/A-Brain-Computer-Interface-Control-System-Design-Based-on-Deep-Learning/CTNet
+source /opt/Anaconda/etc/profile.d/conda.sh
+conda activate bd
+注释：进入项目目录并激活 bd 虚拟环境，确保后续脚本使用统一依赖
+
+
+
+
+
+(bd) tomato@tomatoPC:~/A-Brain-Computer-Interface-Control-System-Design-Based-on-Deep-Learning/CTNet$ python scripts/preprocessing_pipeline.py
+注释：执行预处理流水线，完成带通滤波、ICA 去伪迹、epoch 切片并保存结果
+Loaded recording: /home/tomato/A-Brain-Computer-Interface-Control-System-Design-Based-on-Deep-Learning/CTNet/BCICIV_2a_gdf/A01T.gdf
+Channels: 25 | sfreq: 250.0 Hz
+Duration: 2690.1 s
+First 5 annotation codes: ['32766' '276' '32766' '277' '32766']
+Reading 0 ... 672527  =      0.000 ...  2690.108 secs...
+Bandpass 8-30 Hz applied (first channel, 10 samples):
+[[-8.47032947e-22  1.19590922e-06  2.74438661e-06  4.64098549e-06
+   6.37277433e-06  7.07437606e-06  5.93572813e-06  2.66985814e-06
+  -2.19786939e-06 -7.38879836e-06]]
+NOTE: pick_types() is a legacy function. New code should use inst.pick(...).
+ICA fitted: components=21, explained=22.00
+Detected EOG-related components: [0]
+ICA applied. Data shape (cleaned): (25, 672528)
+Epochs created: <Epochs | 288 events (all good), 0 – 4 s (baseline off), ~48.4 MiB, data loaded,
+ 'left_hand': 72
+ 'right_hand': 72
+ 'foot': 72
+ 'tongue': 72>
+Epoch counts per class: {'left_hand': 72, 'right_hand': 72, 'foot': 72, 'tongue': 72}
+Epoch data shape: (288, 22, 1001)
+Overwriting existing file.
+Writing /home/tomato/A-Brain-Computer-Interface-Control-System-Design-Based-on-Deep-Learning/CTNet/outputs/preprocessing/A01T/A01T_clean_raw.fif
+Overwriting existing file.
+Closing /home/tomato/A-Brain-Computer-Interface-Control-System-Design-Based-on-Deep-Learning/CTNet/outputs/preprocessing/A01T/A01T_clean_raw.fif
+[done]
+Overwriting existing file.
+Overwriting existing file.
+Overwriting existing file.
+Overwriting existing file.
+Writing ICA solution to /home/tomato/A-Brain-Computer-Interface-Control-System-Design-Based-on-Deep-Learning/CTNet/outputs/preprocessing/A01T/A01T_ica.fif...
+Overwriting existing file.
+Artifacts saved to: /home/tomato/A-Brain-Computer-Interface-Control-System-Design-Based-on-Deep-Learning/CTNet/outputs/preprocessing/A01T
+raw_clean: /home/tomato/A-Brain-Computer-Interface-Control-System-Design-Based-on-Deep-Learning/CTNet/outputs/preprocessing/A01T/A01T_clean_raw.fif
+epochs: /home/tomato/A-Brain-Computer-Interface-Control-System-Design-Based-on-Deep-Learning/CTNet/outputs/preprocessing/A01T/A01T_epochs-epo.fif
+ica: /home/tomato/A-Brain-Computer-Interface-Control-System-Design-Based-on-Deep-Learning/CTNet/outputs/preprocessing/A01T/A01T_ica.fif
+summary: /home/tomato/A-Brain-Computer-Interface-Control-System-Design-Based-on-Deep-Learning/CTNet/outputs/preprocessing/A01T/ica_eog_summary.json
+components: /home/tomato/A-Brain-Computer-Interface-Control-System-Design-Based-on-Deep-Learning/CTNet/outputs/preprocessing/A01T/plots/ica_components_00.png
+scores_EOG-left: /home/tomato/A-Brain-Computer-Interface-Control-System-Design-Based-on-Deep-Learning/CTNet/outputs/preprocessing/A01T/plots/ica_scores_EOG-left.png
+scores_EOG-central: /home/tomato/A-Brain-Computer-Interface-Control-System-Design-Based-on-Deep-Learning/CTNet/outputs/preprocessing/A01T/plots/ica_scores_EOG-central.png
+scores_EOG-right: /home/tomato/A-Brain-Computer-Interface-Control-System-Design-Based-on-Deep-Learning/CTNet/outputs/preprocessing/A01T/plots/ica_scores_EOG-right.png
+注释：预处理完整结束，以上文件用于复查 ICA 效果并为后续特征提取提供输入
+(bd) tomato@tomatoPC:~/A-Brain-Computer-Interface-Control-System-Design-Based-on-Deep-Learning/CTNet$ python scripts/ovr_csp_demo.py --subject A01T --components 6 --splits 5
+注释：执行 OVR-CSP + LDA 基线评估，输出交叉验证指标并保存 CSP 相关文件
+Loaded epochs from: /home/tomato/A-Brain-Computer-Interface-Control-System-Design-Based-on-Deep-Learning/CTNet/outputs/preprocessing/A01T/A01T_epochs-epo.fif
+Data shape: (288, 22, 1001) (trials, channels, samples)
+Event ID mapping: {'left_hand': 7, 'right_hand': 8, 'foot': 9, 'tongue': 10}
+Computing rank from data with rank=None
+    Using tolerance 3.8e-05 (2.2e-16 eps * 22 dim * 7.7e+09  max singular value)
+    Estimated rank (data): 22
+    data: rank 22 computed from 22 data channels with 0 projectors
+Reducing data rank from 22 -> 22
+Estimating class=7 covariance using OAS
+Done.
+Estimating class=8 covariance using OAS
+Done.
+Estimating class=9 covariance using OAS
+Done.
+Estimating class=10 covariance using OAS
+Done.
+Computing rank from data with rank=None
+    Using tolerance 3.7e-05 (2.2e-16 eps * 22 dim * 7.6e+09  max singular value)
+    Estimated rank (data): 22
+    data: rank 22 computed from 22 data channels with 0 projectors
+Reducing data rank from 22 -> 22
+Estimating class=7 covariance using OAS
+Done.
+Estimating class=8 covariance using OAS
+Done.
+Estimating class=9 covariance using OAS
+Done.
+Estimating class=10 covariance using OAS
+Done.
+Computing rank from data with rank=None
+    Using tolerance 3.7e-05 (2.2e-16 eps * 22 dim * 7.7e+09  max singular value)
+    Estimated rank (data): 22
+    data: rank 22 computed from 22 data channels with 0 projectors
+Reducing data rank from 22 -> 22
+Estimating class=7 covariance using OAS
+Done.
+Estimating class=8 covariance using OAS
+Done.
+Estimating class=9 covariance using OAS
+Done.
+Estimating class=10 covariance using OAS
+Done.
+Computing rank from data with rank=None
+    Using tolerance 3.8e-05 (2.2e-16 eps * 22 dim * 7.7e+09  max singular value)
+    Estimated rank (data): 22
+    data: rank 22 computed from 22 data channels with 0 projectors
+Reducing data rank from 22 -> 22
+Estimating class=7 covariance using OAS
+Done.
+Estimating class=8 covariance using OAS
+Done.
+Estimating class=9 covariance using OAS
+Done.
+Estimating class=10 covariance using OAS
+Done.
+Computing rank from data with rank=None
+    Using tolerance 3.7e-05 (2.2e-16 eps * 22 dim * 7.7e+09  max singular value)
+    Estimated rank (data): 22
+    data: rank 22 computed from 22 data channels with 0 projectors
+Reducing data rank from 22 -> 22
+Estimating class=7 covariance using OAS
+Done.
+Estimating class=8 covariance using OAS
+Done.
+Estimating class=9 covariance using OAS
+Done.
+Estimating class=10 covariance using OAS
+Done.
+Computing rank from data with rank=None
+    Using tolerance 3.8e-05 (2.2e-16 eps * 22 dim * 7.7e+09  max singular value)
+    Estimated rank (data): 22
+    data: rank 22 computed from 22 data channels with 0 projectors
+Reducing data rank from 22 -> 22
+Estimating class=7 covariance using OAS
+Done.
+Estimating class=8 covariance using OAS
+Done.
+Estimating class=9 covariance using OAS
+Done.
+Estimating class=10 covariance using OAS
+Done.
+Computing rank from data with rank=None
+    Using tolerance 3.7e-05 (2.2e-16 eps * 22 dim * 7.6e+09  max singular value)
+    Estimated rank (data): 22
+    data: rank 22 computed from 22 data channels with 0 projectors
+Reducing data rank from 22 -> 22
+Estimating class=7 covariance using OAS
+Done.
+Estimating class=8 covariance using OAS
+Done.
+Estimating class=9 covariance using OAS
+Done.
+Estimating class=10 covariance using OAS
+Done.
+Computing rank from data with rank=None
+    Using tolerance 3.7e-05 (2.2e-16 eps * 22 dim * 7.7e+09  max singular value)
+    Estimated rank (data): 22
+    data: rank 22 computed from 22 data channels with 0 projectors
+Reducing data rank from 22 -> 22
+Estimating class=7 covariance using OAS
+Done.
+Estimating class=8 covariance using OAS
+Done.
+Estimating class=9 covariance using OAS
+Done.
+Estimating class=10 covariance using OAS
+Done.
+Computing rank from data with rank=None
+    Using tolerance 3.8e-05 (2.2e-16 eps * 22 dim * 7.7e+09  max singular value)
+    Estimated rank (data): 22
+    data: rank 22 computed from 22 data channels with 0 projectors
+Reducing data rank from 22 -> 22
+Estimating class=7 covariance using OAS
+Done.
+Estimating class=8 covariance using OAS
+Done.
+Estimating class=9 covariance using OAS
+Done.
+Estimating class=10 covariance using OAS
+Done.
+Computing rank from data with rank=None
+    Using tolerance 3.7e-05 (2.2e-16 eps * 22 dim * 7.7e+09  max singular value)
+    Estimated rank (data): 22
+    data: rank 22 computed from 22 data channels with 0 projectors
+Reducing data rank from 22 -> 22
+Estimating class=7 covariance using OAS
+Done.
+Estimating class=8 covariance using OAS
+Done.
+Estimating class=9 covariance using OAS
+Done.
+Estimating class=10 covariance using OAS
+Done.
+Computing rank from data with rank=None
+    Using tolerance 4.2e-05 (2.2e-16 eps * 22 dim * 8.6e+09  max singular value)
+    Estimated rank (data): 22
+    data: rank 22 computed from 22 data channels with 0 projectors
+Reducing data rank from 22 -> 22
+Estimating class=7 covariance using OAS
+Done.
+Estimating class=8 covariance using OAS
+Done.
+Estimating class=9 covariance using OAS
+Done.
+Estimating class=10 covariance using OAS
+Done.
+Cross-validation scores: [0.7931034482758621, 0.7586206896551724, 0.7758620689655172, 0.6666666666666666, 0.7192982456140351]
+Mean accuracy: 0.743 ± 0.045
+Confusion matrix:
+[[50 15  4  3]
+ [ 4 64  4  0]
+ [ 2  5 45 20]
+ [ 1  0 16 55]]
+注释：5 折交叉验证平均准确率约 74%，混淆矩阵展示各类预测情况，可用于分析误差来源
+Exported CSP artifacts:
+  features: /home/tomato/A-Brain-Computer-Interface-Control-System-Design-Based-on-Deep-Learning/CTNet/outputs/preprocessing/A01T/csp_features.npz
+  filters: /home/tomato/A-Brain-Computer-Interface-Control-System-Design-Based-on-Deep-Learning/CTNet/outputs/preprocessing/A01T/csp_filters.npy
+  patterns: /home/tomato/A-Brain-Computer-Interface-Control-System-Design-Based-on-Deep-Learning/CTNet/outputs/preprocessing/A01T/csp_patterns.npy
+  pipeline: /home/tomato/A-Brain-Computer-Interface-Control-System-Design-Based-on-Deep-Learning/CTNet/outputs/preprocessing/A01T/csp_pipeline.joblib
+  metadata: /home/tomato/A-Brain-Computer-Interface-Control-System-Design-Based-on-Deep-Learning/CTNet/outputs/preprocessing/A01T/csp_metadata.json
+  pattern_figure: /home/tomato/A-Brain-Computer-Interface-Control-System-Design-Based-on-Deep-Learning/CTNet/outputs/preprocessing/A01T/plots/csp_patterns.png
+注释：上述文件分别保存了 CSP 特征、滤波器、空间模式、训练好的 pipeline 及元数据，可直接在汇报或 RL 训练中引用
+Metrics saved to: /home/tomato/A-Brain-Computer-Interface-Control-System-Design-Based-on-Deep-Learning/CTNet/outputs/preprocessing/A01T/csp_metrics.json
+
+
+
+
+
+(bd) tomato@tomatoPC:~/A-Brain-Computer-Interface-Control-System-Design-Based-on-Deep-Learning/CTNet$ python - <<'PY'
+import joblib
+import mne
+from pathlib import Path
+
+subject = "A01T"
+root = Path("/home/tomato/A-Brain-Computer-Interface-Control-System-Design-Based-on-Deep-Learning/CTNet")
+pipeline_path = root / "outputs/preprocessing" / subject / "csp_pipeline.joblib" 
+epochs_path = root / "outputs/preprocessing" / subject / f"{subject}_epochs-epo.fif"
+
+pipeline = joblib.load(pipeline_path)
+epochs = mne.read_epochs(epochs_path.as_posix(), preload=True, verbose="ERROR")
+
+X = epochs.get_data()
+y_pred_codes = pipeline.predict(X)
+
+id_to_label = {v: k for k, v in epochs.event_id.items()}
+y_pred_labels = [id_to_label[int(code)] for code in y_pred_codes]
+
+print("Predicted codes (first 20):", y_pred_codes[:20])
+PYint("Predicted labels (first 20):", y_pred_labels[:20])
+Predicted codes (first 20): [10  9  8  7  7  8  9  9  8  9 10  7  7 10  8  8  7  8  9  7]
+Predicted labels (first 20): ['tongue', 'foot', 'right_hand', 'left_hand', 'left_hand', 'right_hand', 'foot', 'foot', 'right_hand', 'foot', 'tongue', 'left_hand', 'left_hand', 'tongue', 'right_hand', 'right_hand', 'left_hand', 'right_hand', 'foot', 'left_hand']
+注释：模型预测的前 20 个样本，展示四类标签均可正确输出，便于现场演示
+
+
+
+
+
+(bd) tomato@tomatoPC:~/A-Brain-Computer-Interface-Control-System-Design-Based-on-Deep-Learning/CTNet$ python - <<'PY'
+注释：筛选左右手 epoch，重新执行 CSP+LDA 评估，用于分析上肢动作分类性能
+import numpy as np
+from pathlib import Path
+from mne import read_epochs
+from mne.decoding import CSP
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from sklearn.pipeline import make_pipeline
+from sklearn.model_selection import StratifiedKFold, cross_val_score, cross_val_predict
+from sklearn.metrics import classification_report, confusion_matrix
+
+subject = "A01T"
+root = Path("/home/tomato/A-Brain-Computer-Interface-Control-System-Design-Based-on-Deep-Learning/CTNet")
+epochs_path = root / "outputs/preprocessing" / subject / f"{subject}_epochs-epo.fif"
+
+epochs = read_epochs(epochs_path.as_posix(), preload=True, verbose="ERROR")
+event_id = epochs.event_id
+left_code = event_id["left_hand"]
+right_code = event_id["right_hand"]
+
+mask = np.isin(epochs.events[:, -1], [left_code, right_code])
+PYint("Classification report:\n", report)s.std())names=["left_hand", "right_hand
+Computing rank from data with rank=None
+    Using tolerance 2.5e-05 (2.2e-16 eps * 22 dim * 5.1e+09  max singular value)
+    Estimated rank (data): 22
+    data: rank 22 computed from 22 data channels with 0 projectors
+Reducing data rank from 22 -> 22
+Estimating class=7 covariance using OAS
+Done.
+Estimating class=8 covariance using OAS
+Done.
+Computing rank from data with rank=None
+    Using tolerance 2.5e-05 (2.2e-16 eps * 22 dim * 5.1e+09  max singular value)
+    Estimated rank (data): 22
+    data: rank 22 computed from 22 data channels with 0 projectors
+Reducing data rank from 22 -> 22
+Estimating class=7 covariance using OAS
+Done.
+Estimating class=8 covariance using OAS
+Done.
+Computing rank from data with rank=None
+    Using tolerance 2.5e-05 (2.2e-16 eps * 22 dim * 5e+09  max singular value)
+    Estimated rank (data): 22
+    data: rank 22 computed from 22 data channels with 0 projectors
+Reducing data rank from 22 -> 22
+Estimating class=7 covariance using OAS
+Done.
+Estimating class=8 covariance using OAS
+Done.
+Computing rank from data with rank=None
+    Using tolerance 2.5e-05 (2.2e-16 eps * 22 dim * 5e+09  max singular value)
+    Estimated rank (data): 22
+    data: rank 22 computed from 22 data channels with 0 projectors
+Reducing data rank from 22 -> 22
+Estimating class=7 covariance using OAS
+Done.
+Estimating class=8 covariance using OAS
+Done.
+Computing rank from data with rank=None
+    Using tolerance 2.5e-05 (2.2e-16 eps * 22 dim * 5e+09  max singular value)
+    Estimated rank (data): 22
+    data: rank 22 computed from 22 data channels with 0 projectors
+Reducing data rank from 22 -> 22
+Estimating class=7 covariance using OAS
+Done.
+Estimating class=8 covariance using OAS
+Done.
+Computing rank from data with rank=None
+    Using tolerance 2.5e-05 (2.2e-16 eps * 22 dim * 5.1e+09  max singular value)
+    Estimated rank (data): 22
+    data: rank 22 computed from 22 data channels with 0 projectors
+Reducing data rank from 22 -> 22
+Estimating class=7 covariance using OAS
+Done.
+Estimating class=8 covariance using OAS
+Done.
+Computing rank from data with rank=None
+    Using tolerance 2.5e-05 (2.2e-16 eps * 22 dim * 5.1e+09  max singular value)
+    Estimated rank (data): 22
+    data: rank 22 computed from 22 data channels with 0 projectors
+Reducing data rank from 22 -> 22
+Estimating class=7 covariance using OAS
+Done.
+Estimating class=8 covariance using OAS
+Done.
+Computing rank from data with rank=None
+    Using tolerance 2.5e-05 (2.2e-16 eps * 22 dim * 5e+09  max singular value)
+    Estimated rank (data): 22
+    data: rank 22 computed from 22 data channels with 0 projectors
+Reducing data rank from 22 -> 22
+Estimating class=7 covariance using OAS
+Done.
+Estimating class=8 covariance using OAS
+Done.
+Computing rank from data with rank=None
+    Using tolerance 2.5e-05 (2.2e-16 eps * 22 dim * 5e+09  max singular value)
+    Estimated rank (data): 22
+    data: rank 22 computed from 22 data channels with 0 projectors
+Reducing data rank from 22 -> 22
+Estimating class=7 covariance using OAS
+Done.
+Estimating class=8 covariance using OAS
+Done.
+Computing rank from data with rank=None
+    Using tolerance 2.5e-05 (2.2e-16 eps * 22 dim * 5e+09  max singular value)
+    Estimated rank (data): 22
+    data: rank 22 computed from 22 data channels with 0 projectors
+Reducing data rank from 22 -> 22
+Estimating class=7 covariance using OAS
+Done.
+Estimating class=8 covariance using OAS
+Done.
+Scores: [0.86206897 0.86206897 0.79310345 0.86206897 0.85714286]
+Mean ± std: 0.8472906403940886 0.027160687196236856
+Confusion matrix:
+ [[58 14]
+ [ 8 64]]
+Classification report:
+               precision    recall  f1-score   support
+
+   left_hand       0.88      0.81      0.84        72
+  right_hand       0.82      0.89      0.85        72
+
+    accuracy                           0.85       144
+   macro avg       0.85      0.85      0.85       144
+weighted avg       0.85      0.85      0.85       144
+注释：仅关注左右手时准确率约 85%，说明上肢动作的区分度更高，可作为 RL 阶段优先目标

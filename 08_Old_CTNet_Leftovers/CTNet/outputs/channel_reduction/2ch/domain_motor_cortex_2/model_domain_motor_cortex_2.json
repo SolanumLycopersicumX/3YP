@@ -1,0 +1,20 @@
+{
+  "name": "domain_motor_cortex_2",
+  "n_channels": 2,
+  "channel_names": [
+    "C3",
+    "C4"
+  ],
+  "channel_indices": [
+    8,
+    12
+  ],
+  "accuracy": 0.35777777777777775,
+  "precision": 0.357855628827535,
+  "recall": 0.35630479683486427,
+  "f1": 0.33208598334228767,
+  "best_epoch": 29,
+  "total_params": 151884,
+  "norm_mean": 1.4074780230188821e-09,
+  "norm_std": 1.817788688640576e-05
+}

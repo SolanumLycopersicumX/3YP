@@ -1,0 +1,31 @@
+{
+  "results": [
+    {
+      "subject": 3,
+      "accuracy": 0.3125,
+      "n": 16
+    },
+    {
+      "subject": 7,
+      "accuracy": 0.15,
+      "n": 20
+    },
+    {
+      "subject": 9,
+      "accuracy": 0.5625,
+      "n": 16
+    },
+    {
+      "subject": 38,
+      "accuracy": 0.3125,
+      "n": 16
+    },
+    {
+      "subject": 43,
+      "accuracy": 0.36363636363636365,
+      "n": 22
+    }
+  ],
+  "mean_acc": 0.3402272727272727,
+  "std_acc": 0.13242142532195278
+}

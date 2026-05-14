@@ -1,0 +1,104 @@
+{
+  "experiment": "Filter vs ICA on PhysioNet Raw EEG",
+  "date": "2026-03-24T00:42:53.919710",
+  "data_source": "PhysioNet EEG Motor Movement/Imagery Database (raw EDF)",
+  "conditions": {
+    "A": "8-30Hz bandpass filter + no ICA",
+    "B": "No filter + ICA artifact removal",
+    "C": "No filter + no ICA (raw normalized)"
+  },
+  "subjects": {
+    "S003": {
+      "A_filter_noICA": {
+        "accuracy": 61.111111111111114,
+        "n_test": 18
+      },
+      "B_noFilter_ICA": {
+        "accuracy": 77.77777777777779,
+        "n_test": 18
+      },
+      "C_noFilter_noICA": {
+        "accuracy": 72.22222222222221,
+        "n_test": 18
+      },
+      "comparison": {
+        "A_vs_B": -16.66666666666667,
+        "A_vs_C": -11.1111111111111,
+        "B_vs_C": 5.555555555555571
+      }
+    },
+    "S007": {
+      "A_filter_noICA": {
+        "accuracy": 77.77777777777779,
+        "n_test": 18
+      },
+      "B_noFilter_ICA": {
+        "accuracy": 88.88888888888889,
+        "n_test": 18
+      },
+      "C_noFilter_noICA": {
+        "accuracy": 94.44444444444444,
+        "n_test": 18
+      },
+      "comparison": {
+        "A_vs_B": -11.1111111111111,
+        "A_vs_C": -16.666666666666657,
+        "B_vs_C": -5.555555555555557
+      }
+    },
+    "S009": {
+      "A_filter_noICA": {
+        "accuracy": 44.44444444444444,
+        "n_test": 18
+      },
+      "B_noFilter_ICA": {
+        "accuracy": 61.111111111111114,
+        "n_test": 18
+      },
+      "C_noFilter_noICA": {
+        "accuracy": 61.111111111111114,
+        "n_test": 18
+      },
+      "comparison": {
+        "A_vs_B": -16.66666666666667,
+        "A_vs_C": -16.66666666666667,
+        "B_vs_C": 0.0
+      }
+    }
+  },
+  "summary": {
+    "A_filter_noICA": {
+      "mean": 61.11111111111112,
+      "std": 13.608276348795439,
+      "values": [
+        61.111111111111114,
+        77.77777777777779,
+        44.44444444444444
+      ]
+    },
+    "B_noFilter_ICA": {
+      "mean": 75.92592592592594,
+      "std": 11.415581486979583,
+      "values": [
+        77.77777777777779,
+        88.88888888888889,
+        61.111111111111114
+      ]
+    },
+    "C_noFilter_noICA": {
+      "mean": 75.92592592592592,
+      "std": 13.857990321384968,
+      "values": [
+        72.22222222222221,
+        94.44444444444444,
+        61.111111111111114
+      ]
+    },
+    "conclusion": {
+      "filter_vs_ICA": -14.814814814814817,
+      "filter_vs_raw": -14.814814814814802,
+      "ICA_vs_raw": 1.4210854715202004e-14,
+      "verdict": "Unexpected results - further investigation needed"
+    }
+  }
+}

@@ -1,0 +1,94 @@
+/home/tomato/.local/lib/python3.13/site-packages/torch/nn/modules/transformer.py:382: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  warnings.warn(
+/home/tomato/.local/lib/python3.13/site-packages/torch/nn/modules/transformer.py:382: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  warnings.warn(
+/home/tomato/.local/lib/python3.13/site-packages/torch/nn/modules/transformer.py:382: UserWarning: enable_nested_tensor is True, but self.use_nested_tensor is False because encoder_layer.norm_first was True
+  warnings.warn(
+============================================================
+多数据集 RL 控制测试
+============================================================
+数据目录: mymat_raw
+数据集: ['PhysioNet']
+被试: [1, 2, 3]
+RL 模型: transformer
+设备: cuda
+============================================================
+
+跳过 IV-2a (无被试)
+
+跳过 IV-2b (无被试)
+
+跳过 GigaScience (无被试)
+
+============================================================
+RL 控制测试: PhysioNet EEGMMIDB
+============================================================
+通道: 64, 类别: 2
+
+[Step 1] 训练 EEG 分类器...
+[Step 2] 评估分类器...
+  分类准确率: 55.56%
+[Step 3] 训练 RL Agent...
+  RL 训练完成 (500 episodes)
+[Step 4] 控制测试...
+
+============================================================
+结果总结: PhysioNet EEGMMIDB
+============================================================
+  分类准确率:   55.56%
+  控制到达率:   99.00%
+  平均步数:     15.1
+  平均奖励:     9.79
+  轨迹平滑度:   0.651
+
+============================================================
+RL 控制测试: PhysioNet EEGMMIDB
+============================================================
+通道: 64, 类别: 2
+
+[Step 1] 训练 EEG 分类器...
+[Step 2] 评估分类器...
+  分类准确率: 88.89%
+[Step 3] 训练 RL Agent...
+  RL 训练完成 (500 episodes)
+[Step 4] 控制测试...
+
+============================================================
+结果总结: PhysioNet EEGMMIDB
+============================================================
+  分类准确率:   88.89%
+  控制到达率:   100.00%
+  平均步数:     14.5
+  平均奖励:     10.42
+  轨迹平滑度:   0.712
+
+============================================================
+RL 控制测试: PhysioNet EEGMMIDB
+============================================================
+通道: 64, 类别: 2
+
+[Step 1] 训练 EEG 分类器...
+[Step 2] 评估分类器...
+  分类准确率: 66.67%
+[Step 3] 训练 RL Agent...
+  RL 训练完成 (500 episodes)
+[Step 4] 控制测试...
+
+============================================================
+结果总结: PhysioNet EEGMMIDB
+============================================================
+  分类准确率:   66.67%
+  控制到达率:   100.00%
+  平均步数:     14.9
+  平均奖励:     10.42
+  轨迹平滑度:   0.607
+
+可视化已保存: outputs/rl_control_test/rl_control_comparison.png
+
+============================================================
+最终结果总结
+============================================================
+数据集             分类准确率           控制到达率           平滑度       
+------------------------------------------------------------
+PhysioNet            70.37%         99.67%       0.657
+============================================================

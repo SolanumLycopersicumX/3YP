@@ -1,0 +1,43 @@
+{
+  "subject": 38,
+  "pretrained": "outputs/channel_reduction/8ch/domain_motor_cortex_8_openbci/model_domain_motor_cortex_8_openbci.pth",
+  "mean_accuracy_5fold": 0.7444444444444444,
+  "std_accuracy_5fold": 0.08314794192830981,
+  "folds": [
+    {
+      "fold": 1,
+      "accuracy": 0.8888888888888888,
+      "n_train": 72,
+      "n_test": 18
+    },
+    {
+      "fold": 2,
+      "accuracy": 0.7222222222222222,
+      "n_train": 72,
+      "n_test": 18
+    },
+    {
+      "fold": 3,
+      "accuracy": 0.7777777777777778,
+      "n_train": 72,
+      "n_test": 18
+    },
+    {
+      "fold": 4,
+      "accuracy": 0.6666666666666666,
+      "n_train": 72,
+      "n_test": 18
+    },
+    {
+      "fold": 5,
+      "accuracy": 0.6666666666666666,
+      "n_train": 72,
+      "n_test": 18
+    }
+  ],
+  "freeze_cnn": true,
+  "ft_lr": 0.0003,
+  "ft_epochs": 150,
+  "norm_mean": 1.747578304289732e-09,
+  "norm_std": 1.884839184640441e-05
+}

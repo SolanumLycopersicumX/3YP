@@ -1,0 +1,100 @@
+{
+  "name": "a_horizontal",
+  "description": "Horizontal (Left->Right->Center)",
+  "targets": [
+    [
+      -1.0,
+      0.0
+    ],
+    [
+      1.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0
+    ]
+  ],
+  "per_target": [
+    {
+      "target": [
+        -1.0,
+        0.0
+      ],
+      "steps": 30,
+      "reached": false,
+      "final_dist": 1.0
+    },
+    {
+      "target": [
+        1.0,
+        0.0
+      ],
+      "steps": 30,
+      "reached": false,
+      "final_dist": 1.0
+    },
+    {
+      "target": [
+        0.0,
+        0.0
+      ],
+      "steps": 0,
+      "reached": true,
+      "final_dist": 0.0
+    },
+    {
+      "target": [
+        -1.0,
+        0.0
+      ],
+      "steps": 30,
+      "reached": false,
+      "final_dist": 1.0
+    },
+    {
+      "target": [
+        1.0,
+        0.0
+      ],
+      "steps": 30,
+      "reached": false,
+      "final_dist": 1.0
+    },
+    {
+      "target": [
+        0.0,
+        0.0
+      ],
+      "steps": 0,
+      "reached": true,
+      "final_dist": 0.0
+    }
+  ],
+  "total_steps": 120,
+  "reached": 2,
+  "trajectory": [
+    [
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0
+    ]
+  ],
+  "timestamps": [
+    0.0,
+    0.202498197555542,
+    0.4043729305267334,
+    0.606088399887085
+  ]
+}

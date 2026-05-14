@@ -1,0 +1,13 @@
+new_files	4444	
+old_files	72822	
+senior_files	148	
+new_hashes_matching_senior	100	file count
+new_hashes_matching_old	463	file count
+new_hashes_not_in_senior	4344	file count
+new_hashes_not_in_old	3981	file count
+old_hashes_matching_new	1446	file count
+old_hashes_matching_senior	1109	file count
+old_hashes_absent_from_new	71376	file count
+senior_hashes_matching_new	96	file count
+senior_paths_in_new_same_relpath	1	path count
+old_paths_in_new_same_relpath	2	path count

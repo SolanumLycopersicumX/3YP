@@ -1,0 +1,12 @@
+{
+  "mode": "sim",
+  "board": "synthetic",
+  "epoch_sec": 1.0,
+  "norm_step": 0.1,
+  "max_steps": 50,
+  "soft_limit_margin": 0.0,
+  "total_patterns": 6,
+  "total_steps": 306,
+  "total_reached": 24,
+  "total_targets": 24
+}

@@ -1,0 +1,44 @@
+[
+  {
+    "subject_id": 1,
+    "pattern": "Horizontal",
+    "endpoint_error": 0.0,
+    "workspace_pct": 0.0,
+    "reach_rate": 100.0
+  },
+  {
+    "subject_id": 2,
+    "pattern": "Vertical",
+    "endpoint_error": 0.0,
+    "workspace_pct": 0.0,
+    "reach_rate": 100.0
+  },
+  {
+    "subject_id": 3,
+    "pattern": "Diag UL-DR",
+    "endpoint_error": 0.1072,
+    "workspace_pct": 5.36,
+    "reach_rate": 33.3
+  },
+  {
+    "subject_id": 4,
+    "pattern": "Diag UR-DL",
+    "endpoint_error": 0.1072,
+    "workspace_pct": 5.36,
+    "reach_rate": 33.3
+  },
+  {
+    "subject_id": 5,
+    "pattern": "Square CW",
+    "endpoint_error": 0.0,
+    "workspace_pct": 0.0,
+    "reach_rate": 100.0
+  },
+  {
+    "subject_id": 6,
+    "pattern": "Square CCW",
+    "endpoint_error": 0.0,
+    "workspace_pct": 0.0,
+    "reach_rate": 100.0
+  }
+]

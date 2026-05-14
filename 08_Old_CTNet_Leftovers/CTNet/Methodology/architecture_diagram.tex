@@ -1,0 +1,157 @@
+\documentclass[tikz, border=15pt]{standalone}
+\usepackage{tikz}
+\usepackage{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+\usetikzlibrary{arrows.meta, positioning, calc, fit, backgrounds, decorations.pathreplacing}
+
+\begin{document}
+
+    % --- DeepMind / OpenAI-style clean pastel palette ---
+    \definecolor{bgGray}{RGB}{245, 246, 250}
+    \definecolor{borderGray}{RGB}{180, 185, 195}
+    \definecolor{textMain}{RGB}{30, 35, 40}
+    \definecolor{textMuted}{RGB}{80, 90, 105}
+
+    \definecolor{blueFill}{RGB}{225, 238, 255}
+    \definecolor{blueBorder}{RGB}{140, 175, 240}
+
+    \definecolor{greenFill}{RGB}{225, 245, 230}
+    \definecolor{greenBorder}{RGB}{140, 200, 160}
+
+    \definecolor{orangeFill}{RGB}{255, 240, 225}
+    \definecolor{orangeBorder}{RGB}{240, 180, 130}
+
+    \definecolor{purpleFill}{RGB}{240, 235, 255}
+    \definecolor{purpleBorder}{RGB}{180, 160, 240}
+
+\begin{tikzpicture}[
+    >=latex,
+    % Box styles (Flat, No Shadows)
+    nodeBox/.style={
+        rectangle, rounded corners=6pt, draw=#1Border, fill=#1Fill, thick,
+        align=center, text=textMain, inner sep=12pt, minimum width=4.5cm, minimum height=1.5cm
+    },
+    groupBox/.style={
+        rectangle, rounded corners=12pt, draw=borderGray, thick, dashed, inner sep=18pt, fill=bgGray
+    },
+    % Arrow styles
+    arr/.style={->, >={Stealth[length=2.5mm, width=1.5mm]}, thick, textMain},
+    arrDashed/.style={->, >={Stealth[length=2.5mm, width=1.5mm]}, thick, dashed, textMuted},
+    % Text styles
+    lbl/.style={font=\scriptsize\itshape, text=textMuted, align=center, fill=bgGray, inner sep=3pt, rounded corners=2pt},
+    lblWhite/.style={font=\scriptsize\itshape, text=textMuted, align=center, fill=white, inner sep=3pt, rounded corners=2pt},
+    title/.style={font=\normalsize\bfseries, text=textMain, anchor=south}
+]
+
+% ==========================================
+% PILLAR 1: Signal Pipeline
+% ==========================================
+\node[nodeBox=blue] (eeg) at (0, 0) {
+    \textbf{EEG Acquisition}\\
+    \scriptsize OpenBCI (8-ch) $\vert$ PhysioNet (64-ch)
+};
+\node[title, above=0.4cm of eeg] (p1_title) {1. EEG Processing};
+
+\node[nodeBox=green, below=0.8cm of eeg] (preproc) {
+    \textbf{Preprocessing}\\
+    \scriptsize Bandpass (8--30\,Hz) $\to$ 4s Epochs
+};
+\draw[arr] (eeg) -- node[lbl, right=0.1cm] {Raw Signal} (preproc);
+
+\node[rectangle, rounded corners=6pt, draw=borderGray, thick, fill=white, align=center, text=textMain, inner sep=12pt, minimum width=4.5cm, minimum height=1.5cm, below=0.8cm of preproc] (baseline) {
+    \textbf{Baseline Classifier}\\
+    \scriptsize OVR-CSP + LDA
+};
+\draw[arrDashed] (preproc) -- node[lbl, right=0.1cm] {Comparison} (baseline);
+
+\begin{scope}[on background layer]
+    \node[groupBox, fit=(p1_title) (eeg) (preproc) (baseline)] (group1) {};
+\end{scope}
+
+% ==========================================
+% PILLAR 2: EEGTransformer
+% ==========================================
+
+% Convolutional Front-End
+\node[nodeBox=orange] (cnn) at (8.5, 0 |- eeg.north) [anchor=north] {
+    \textbf{Convolutional Front-End}\\
+    \scriptsize Temporal $\to$ Spatial $\to$ Separable
+};
+\node[title, above=0.4cm of cnn] (p2_title) {2. EEGTransformer Model};
+
+% Patch Embeddings
+\node[nodeBox=orange, below=0.8cm of cnn] (patch) {
+    \textbf{Patch Embeddings}\\
+    \scriptsize Spatiotemporal Tokenization
+};
+
+% Transformer
+\node[nodeBox=orange, below=0.8cm of patch] (trans) {
+    \textbf{Transformer Encoder}\\
+    \scriptsize Multi-Head Self-Attention
+};
+
+% Fusion & Head
+\node[nodeBox=orange, below=0.8cm of trans] (fuse) {
+    \textbf{Residual Fusion}\\
+    \scriptsize CNN Features $\oplus$ Global Context
+};
+
+% Arrows for Pillar 2
+% Filtered Epochs Arrow
+\coordinate (P1) at ($ (preproc.east) + (1.5, 0) $);
+\draw[arr] (preproc.east) -- (P1) -- node[lblWhite] {Filtered Epochs} (P1 |- cnn.west) -- (cnn.west);
+
+\draw[arr] (cnn) -- (patch);
+\draw[arr] (patch) -- (trans);
+\draw[arr] (trans) -- (fuse);
+
+% Residual Arrow on the LEFT, rectangular
+\coordinate (P4) at ($ (patch.west) + (-1.5, 0) $);
+\draw[arr] (patch.west) -- (P4) -- node[lblWhite] {Residual} (P4 |- fuse.west) -- (fuse.west);
+
+\begin{scope}[on background layer]
+    \node[groupBox, fit=(p2_title) (cnn) (fuse)] (group2) {};
+\end{scope}
+
+% ==========================================
+% PILLAR 3: RL Control
+% ==========================================
+
+% State
+\node[nodeBox=purple] (state) at (17.0, 0 |- eeg.north) [anchor=north] {
+    \textbf{State Representation} $s_t$\\
+    \scriptsize Kinematics $\oplus$ Classifier Output
+};
+\node[title, above=0.4cm of state] (p3_title) {3. Closed-Loop RL Control};
+
+% RL Agent
+\node[nodeBox=purple, below=0.8cm of state] (agent) {
+    \textbf{DQN Agent}\\
+    \scriptsize Transformer / CNN+LSTM Q-Net
+};
+
+% Environment
+\node[nodeBox=purple, below=0.8cm of agent] (env) {
+    \textbf{Robotic Environment}\\
+    \scriptsize SO-101 Arm Manipulation
+};
+
+% Arrows for Pillar 3
+\coordinate (P2) at ($ (fuse.east) + (1.5, 0) $);
+\draw[arr] (fuse.east) -- (P2) -- node[lblWhite] {Predicted Class \& Confidence} (P2 |- state.west) -- (state.west);
+
+\draw[arr] (state) -- node[lblWhite, right=0.1cm] {Action $a_t$} (agent);
+\draw[arr] (agent) -- (env);
+
+% Feedback loop
+\coordinate (P3) at ($ (env.east) + (1.5, 0) $);
+\draw[arr] (env.east) -- (P3) -- node[lblWhite] {Next State $s_{t+1}$ \& Reward $r_t$} (P3 |- state.east) -- (state.east);
+
+\begin{scope}[on background layer]
+    \node[groupBox, fit=(p3_title) (state) (env)] (group3) {};
+\end{scope}
+
+\end{tikzpicture}
+
+\end{document}

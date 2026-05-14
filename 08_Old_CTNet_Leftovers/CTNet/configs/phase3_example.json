@@ -1,0 +1,32 @@
+{
+  "experiments": [
+    {
+      "name": "smoke_A",
+      "notes": "快速验证脚本流程",
+      "type": "A",
+      "evaluate_mode": "LOSO-No",
+      "epochs": 5,
+      "n_subject": 1,
+      "heads": 2,
+      "depth": 6,
+      "emb_dim": 16,
+      "n_aug": 3,
+      "n_seg": 8,
+      "run_tag": "smoke_a_v2"
+    },
+    {
+      "name": "smoke_B",
+      "notes": "BCI IV-2b 冒烟测试",
+      "type": "B",
+      "evaluate_mode": "LOSO-No",
+      "epochs": 5,
+      "n_subject": 1,
+      "heads": 2,
+      "depth": 6,
+      "emb_dim": 16,
+      "n_aug": 3,
+      "n_seg": 8,
+      "run_tag": "smoke_b_v2"
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "dataset": "PhysioNet_EEGMMIDB",
+  "dataset_type": "P",
+  "n_channels": 64,
+  "n_times": 1000,
+  "n_classes": 4,
+  "class_map": {
+    "0": "left",
+    "1": "right",
+    "2": "hands/up",
+    "3": "feet/down"
+  },
+  "heads": 2,
+  "depth": 6,
+  "emb_size": 40,
+  "f1": 20,
+  "D": 2,
+  "kernel_size": 64,
+  "pool1": 8,
+  "pool2": 8,
+  "flatten": 600,
+  "dropout": 0.3,
+  "subjects": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+  ],
+  "norm_mean": 6.032101929065448e-09,
+  "norm_std": 1.7772978026187047e-05
+}

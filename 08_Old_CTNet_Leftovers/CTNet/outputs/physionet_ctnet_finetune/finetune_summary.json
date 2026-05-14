@@ -1,0 +1,376 @@
+{
+  "results": [
+    {
+      "subject": 7,
+      "accuracy": 0.9777777777777779,
+      "std": 0.027216552697590882,
+      "folds": [
+        {
+          "fold": 1,
+          "accuracy": 1.0,
+          "n_train": 72,
+          "n_test": 18
+        },
+        {
+          "fold": 2,
+          "accuracy": 0.9444444444444444,
+          "n_train": 72,
+          "n_test": 18
+        },
+        {
+          "fold": 3,
+          "accuracy": 0.9444444444444444,
+          "n_train": 72,
+          "n_test": 18
+        },
+        {
+          "fold": 4,
+          "accuracy": 1.0,
+          "n_train": 72,
+          "n_test": 18
+        },
+        {
+          "fold": 5,
+          "accuracy": 1.0,
+          "n_train": 72,
+          "n_test": 18
+        }
+      ]
+    },
+    {
+      "subject": 48,
+      "accuracy": 0.9666666666666668,
+      "std": 0.04444444444444447,
+      "folds": [
+        {
+          "fold": 1,
+          "accuracy": 1.0,
+          "n_train": 72,
+          "n_test": 18
+        },
+        {
+          "fold": 2,
+          "accuracy": 1.0,
+          "n_train": 72,
+          "n_test": 18
+        },
+        {
+          "fold": 3,
+          "accuracy": 1.0,
+          "n_train": 72,
+          "n_test": 18
+        },
+        {
+          "fold": 4,
+          "accuracy": 0.9444444444444444,
+          "n_train": 72,
+          "n_test": 18
+        },
+        {
+          "fold": 5,
+          "accuracy": 0.8888888888888888,
+          "n_train": 72,
+          "n_test": 18
+        }
+      ]
+    },
+    {
+      "subject": 43,
+      "accuracy": 0.9555555555555555,
+      "std": 0.06478835438717,
+      "folds": [
+        {
+          "fold": 1,
+          "accuracy": 1.0,
+          "n_train": 72,
+          "n_test": 18
+        },
+        {
+          "fold": 2,
+          "accuracy": 1.0,
+          "n_train": 72,
+          "n_test": 18
+        },
+        {
+          "fold": 3,
+          "accuracy": 0.8333333333333334,
+          "n_train": 72,
+          "n_test": 18
+        },
+        {
+          "fold": 4,
+          "accuracy": 1.0,
+          "n_train": 72,
+          "n_test": 18
+        },
+        {
+          "fold": 5,
+          "accuracy": 0.9444444444444444,
+          "n_train": 72,
+          "n_test": 18
+        }
+      ]
+    },
+    {
+      "subject": 3,
+      "accuracy": 0.8777777777777779,
+      "std": 0.09558139185602918,
+      "folds": [
+        {
+          "fold": 1,
+          "accuracy": 0.8888888888888888,
+          "n_train": 72,
+          "n_test": 18
+        },
+        {
+          "fold": 2,
+          "accuracy": 0.8333333333333334,
+          "n_train": 72,
+          "n_test": 18
+        },
+        {
+          "fold": 3,
+          "accuracy": 1.0,
+          "n_train": 72,
+          "n_test": 18
+        },
+        {
+          "fold": 4,
+          "accuracy": 0.9444444444444444,
+          "n_train": 72,
+          "n_test": 18
+        },
+        {
+          "fold": 5,
+          "accuracy": 0.7222222222222222,
+          "n_train": 72,
+          "n_test": 18
+        }
+      ]
+    },
+    {
+      "subject": 9,
+      "accuracy": 0.8777777777777777,
+      "std": 0.0816496580927726,
+      "folds": [
+        {
+          "fold": 1,
+          "accuracy": 0.9444444444444444,
+          "n_train": 72,
+          "n_test": 18
+        },
+        {
+          "fold": 2,
+          "accuracy": 0.9444444444444444,
+          "n_train": 72,
+          "n_test": 18
+        },
+        {
+          "fold": 3,
+          "accuracy": 0.8888888888888888,
+          "n_train": 72,
+          "n_test": 18
+        },
+        {
+          "fold": 4,
+          "accuracy": 0.8888888888888888,
+          "n_train": 72,
+          "n_test": 18
+        },
+        {
+          "fold": 5,
+          "accuracy": 0.7222222222222222,
+          "n_train": 72,
+          "n_test": 18
+        }
+      ]
+    },
+    {
+      "subject": 70,
+      "accuracy": 0.9666666666666666,
+      "std": 0.04444444444444447,
+      "folds": [
+        {
+          "fold": 1,
+          "accuracy": 1.0,
+          "n_train": 72,
+          "n_test": 18
+        },
+        {
+          "fold": 2,
+          "accuracy": 1.0,
+          "n_train": 72,
+          "n_test": 18
+        },
+        {
+          "fold": 3,
+          "accuracy": 0.8888888888888888,
+          "n_train": 72,
+          "n_test": 18
+        },
+        {
+          "fold": 4,
+          "accuracy": 1.0,
+          "n_train": 72,
+          "n_test": 18
+        },
+        {
+          "fold": 5,
+          "accuracy": 0.9444444444444444,
+          "n_train": 72,
+          "n_test": 18
+        }
+      ]
+    },
+    {
+      "subject": 55,
+      "accuracy": 0.8888888888888887,
+      "std": 0.11653431646335018,
+      "folds": [
+        {
+          "fold": 1,
+          "accuracy": 1.0,
+          "n_train": 72,
+          "n_test": 18
+        },
+        {
+          "fold": 2,
+          "accuracy": 0.8888888888888888,
+          "n_train": 72,
+          "n_test": 18
+        },
+        {
+          "fold": 3,
+          "accuracy": 0.9444444444444444,
+          "n_train": 72,
+          "n_test": 18
+        },
+        {
+          "fold": 4,
+          "accuracy": 0.6666666666666666,
+          "n_train": 72,
+          "n_test": 18
+        },
+        {
+          "fold": 5,
+          "accuracy": 0.9444444444444444,
+          "n_train": 72,
+          "n_test": 18
+        }
+      ]
+    },
+    {
+      "subject": 50,
+      "accuracy": 0.7555555555555556,
+      "std": 0.04444444444444447,
+      "folds": [
+        {
+          "fold": 1,
+          "accuracy": 0.7222222222222222,
+          "n_train": 72,
+          "n_test": 18
+        },
+        {
+          "fold": 2,
+          "accuracy": 0.7777777777777778,
+          "n_train": 72,
+          "n_test": 18
+        },
+        {
+          "fold": 3,
+          "accuracy": 0.7222222222222222,
+          "n_train": 72,
+          "n_test": 18
+        },
+        {
+          "fold": 4,
+          "accuracy": 0.8333333333333334,
+          "n_train": 72,
+          "n_test": 18
+        },
+        {
+          "fold": 5,
+          "accuracy": 0.7222222222222222,
+          "n_train": 72,
+          "n_test": 18
+        }
+      ]
+    },
+    {
+      "subject": 46,
+      "accuracy": 0.7666666666666666,
+      "std": 0.11331154474650632,
+      "folds": [
+        {
+          "fold": 1,
+          "accuracy": 0.6666666666666666,
+          "n_train": 72,
+          "n_test": 18
+        },
+        {
+          "fold": 2,
+          "accuracy": 0.6111111111111112,
+          "n_train": 72,
+          "n_test": 18
+        },
+        {
+          "fold": 3,
+          "accuracy": 0.8888888888888888,
+          "n_train": 72,
+          "n_test": 18
+        },
+        {
+          "fold": 4,
+          "accuracy": 0.7777777777777778,
+          "n_train": 72,
+          "n_test": 18
+        },
+        {
+          "fold": 5,
+          "accuracy": 0.8888888888888888,
+          "n_train": 72,
+          "n_test": 18
+        }
+      ]
+    },
+    {
+      "subject": 38,
+      "accuracy": 0.8444444444444444,
+      "std": 0.06478835438717,
+      "folds": [
+        {
+          "fold": 1,
+          "accuracy": 0.8888888888888888,
+          "n_train": 72,
+          "n_test": 18
+        },
+        {
+          "fold": 2,
+          "accuracy": 0.7222222222222222,
+          "n_train": 72,
+          "n_test": 18
+        },
+        {
+          "fold": 3,
+          "accuracy": 0.8888888888888888,
+          "n_train": 72,
+          "n_test": 18
+        },
+        {
+          "fold": 4,
+          "accuracy": 0.8888888888888888,
+          "n_train": 72,
+          "n_test": 18
+        },
+        {
+          "fold": 5,
+          "accuracy": 0.8333333333333334,
+          "n_train": 72,
+          "n_test": 18
+        }
+      ]
+    }
+  ],
+  "mean_accuracy": 0.8877777777777778,
+  "pretrained": "outputs/physionet_ctnet_109sub_v2/pool/model_pool.pth"
+}

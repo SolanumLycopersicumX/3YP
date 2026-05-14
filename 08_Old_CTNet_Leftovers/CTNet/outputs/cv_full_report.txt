@@ -1,0 +1,50 @@
+============================================================
+9-Subject Cross-Validation Report (Transformer, 100 epochs)
+============================================================
+
+[Subject 1/9] Running...
+[Subject 1] Accuracy: 55.90% ± 0.94%
+
+[Subject 2/9] Running...
+[Subject 2] Accuracy: 41.15% ± 3.75%
+
+[Subject 3/9] Running...
+[Subject 3] Accuracy: 63.20% ± 4.29%
+
+[Subject 4/9] Running...
+[Subject 4] Accuracy: 47.93% ± 4.58%
+
+[Subject 5/9] Running...
+[Subject 5] Accuracy: 62.49% ± 3.09%
+
+[Subject 6/9] Running...
+[Subject 6] Accuracy: 39.40% ± 4.27%
+
+[Subject 7/9] Running...
+[Subject 7] Accuracy: 60.58% ± 5.74%
+
+[Subject 8/9] Running...
+[Subject 8] Accuracy: 67.01% ± 4.49%
+
+[Subject 9/9] Running...
+[Subject 9] Accuracy: 65.27% ± 2.75%
+
+============================================================
+SUMMARY: All Subjects
+============================================================
+Subject    Accuracy        Std       
+-----------------------------------
+1          55.90%          ±0.94%
+2          41.15%          ±3.75%
+3          63.20%          ±4.29%
+4          47.93%          ±4.58%
+5          62.49%          ±3.09%
+6          39.40%          ±4.27%
+7          60.58%          ±5.74%
+8          67.01%          ±4.49%
+9          65.27%          ±2.75%
+-----------------------------------
+Overall    55.88%          ±9.91%
+============================================================
+
+Results saved to outputs/cv_all_subjects.json

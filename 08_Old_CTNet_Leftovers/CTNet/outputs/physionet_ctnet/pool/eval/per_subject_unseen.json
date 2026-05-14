@@ -1,0 +1,31 @@
+{
+  "results": [
+    {
+      "subject": 11,
+      "accuracy": 0.26666666666666666,
+      "n_trials": 90
+    },
+    {
+      "subject": 12,
+      "accuracy": 0.35555555555555557,
+      "n_trials": 90
+    },
+    {
+      "subject": 13,
+      "accuracy": 0.2777777777777778,
+      "n_trials": 90
+    },
+    {
+      "subject": 14,
+      "accuracy": 0.28888888888888886,
+      "n_trials": 90
+    },
+    {
+      "subject": 15,
+      "accuracy": 0.3,
+      "n_trials": 90
+    }
+  ],
+  "mean_accuracy": 0.2977777777777778,
+  "std_accuracy": 0.030951973949298047
+}

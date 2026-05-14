@@ -1,0 +1,43 @@
+{
+  "subject": 38,
+  "pretrained": "outputs/physionet_ctnet_109sub_v2/pool/model_pool.pth",
+  "mean_accuracy_5fold": 0.8444444444444444,
+  "std_accuracy_5fold": 0.06478835438717,
+  "folds": [
+    {
+      "fold": 1,
+      "accuracy": 0.8888888888888888,
+      "n_train": 72,
+      "n_test": 18
+    },
+    {
+      "fold": 2,
+      "accuracy": 0.7222222222222222,
+      "n_train": 72,
+      "n_test": 18
+    },
+    {
+      "fold": 3,
+      "accuracy": 0.8888888888888888,
+      "n_train": 72,
+      "n_test": 18
+    },
+    {
+      "fold": 4,
+      "accuracy": 0.8888888888888888,
+      "n_train": 72,
+      "n_test": 18
+    },
+    {
+      "fold": 5,
+      "accuracy": 0.8333333333333334,
+      "n_train": 72,
+      "n_test": 18
+    }
+  ],
+  "freeze_cnn": true,
+  "ft_lr": 0.0003,
+  "ft_epochs": 150,
+  "norm_mean": 2.966075607346852e-09,
+  "norm_std": 2.0665211195591837e-05
+}

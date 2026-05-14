@@ -1,0 +1,84 @@
+{
+  "scores": [
+    0.7931034482758621,
+    0.7586206896551724,
+    0.7758620689655172,
+    0.6666666666666666,
+    0.7192982456140351
+  ],
+  "mean_score": 0.7427102238354506,
+  "std_score": 0.045215944397418696,
+  "confusion_matrix": [
+    [
+      50,
+      15,
+      4,
+      3
+    ],
+    [
+      4,
+      64,
+      4,
+      0
+    ],
+    [
+      2,
+      5,
+      45,
+      20
+    ],
+    [
+      1,
+      0,
+      16,
+      55
+    ]
+  ],
+  "classification_report": {
+    "7": {
+      "precision": 0.8771929824561403,
+      "recall": 0.6944444444444444,
+      "f1-score": 0.7751937984496124,
+      "support": 72.0
+    },
+    "8": {
+      "precision": 0.7619047619047619,
+      "recall": 0.8888888888888888,
+      "f1-score": 0.8205128205128205,
+      "support": 72.0
+    },
+    "9": {
+      "precision": 0.6521739130434783,
+      "recall": 0.625,
+      "f1-score": 0.6382978723404256,
+      "support": 72.0
+    },
+    "10": {
+      "precision": 0.7051282051282052,
+      "recall": 0.7638888888888888,
+      "f1-score": 0.7333333333333333,
+      "support": 72.0
+    },
+    "accuracy": 0.7430555555555556,
+    "macro avg": {
+      "precision": 0.7490999656331465,
+      "recall": 0.7430555555555555,
+      "f1-score": 0.741834456159048,
+      "support": 288.0
+    },
+    "weighted avg": {
+      "precision": 0.7490999656331465,
+      "recall": 0.7430555555555556,
+      "f1-score": 0.7418344561590479,
+      "support": 288.0
+    }
+  },
+  "artifacts": {
+    "features": "/home/tomato/A-Brain-Computer-Interface-Control-System-Design-Based-on-Deep-Learning/CTNet/outputs/preprocessing/A01T/csp_features.npz",
+    "filters": "/home/tomato/A-Brain-Computer-Interface-Control-System-Design-Based-on-Deep-Learning/CTNet/outputs/preprocessing/A01T/csp_filters.npy",
+    "patterns": "/home/tomato/A-Brain-Computer-Interface-Control-System-Design-Based-on-Deep-Learning/CTNet/outputs/preprocessing/A01T/csp_patterns.npy",
+    "pipeline": "/home/tomato/A-Brain-Computer-Interface-Control-System-Design-Based-on-Deep-Learning/CTNet/outputs/preprocessing/A01T/csp_pipeline.joblib",
+    "metadata": "/home/tomato/A-Brain-Computer-Interface-Control-System-Design-Based-on-Deep-Learning/CTNet/outputs/preprocessing/A01T/csp_metadata.json",
+    "pattern_figure": "/home/tomato/A-Brain-Computer-Interface-Control-System-Design-Based-on-Deep-Learning/CTNet/outputs/preprocessing/A01T/plots/csp_patterns.png"
+  }
+}

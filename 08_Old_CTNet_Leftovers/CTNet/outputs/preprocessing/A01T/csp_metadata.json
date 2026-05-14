@@ -1,0 +1,25 @@
+{
+  "subject": "A01T",
+  "n_samples": 288,
+  "n_components": 6,
+  "feature_dim": 6,
+  "classes": [
+    7,
+    8,
+    9,
+    10
+  ],
+  "event_id": {
+    "left_hand": 7,
+    "right_hand": 8,
+    "foot": 9,
+    "tongue": 10
+  },
+  "log_transform": true,
+  "regularization": "oas",
+  "features_file": "csp_features.npz",
+  "filters_file": "csp_filters.npy",
+  "patterns_file": "csp_patterns.npy",
+  "pipeline_file": "csp_pipeline.joblib",
+  "pattern_figure": "csp_patterns.png"
+}
