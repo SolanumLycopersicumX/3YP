@@ -222,7 +222,7 @@ Live human OpenBCI closed-loop control was not validated. The project used offli
 \newpage
 \section*{Q\&A: Reflective and Critical Questions}
 \subsection*{R1. What was the most challenging part of the project?}
-The hardest part was integrating offline EEG decoding with a closed-loop control task while keeping the validation claims honest. It was easy to make a classifier or a controller in isolation, but harder to connect them without overclaiming live BCI performance.
+The hardest part was designing a robust interface between noisy EEG decoding and sequential control. A motor-imagery prediction is not a clean command; it is a delayed, probabilistic observation affected by subject variability and trial noise. The technical challenge was therefore deciding how to pass class and confidence into the DQN state, and how to shape the reward so the controller could recover from individual wrong labels instead of amplifying them.
 
 
 \subsection*{R2. What is the best part of the project?}
@@ -230,15 +230,15 @@ The strongest part is the system-level integration. The end-to-end result shows 
 
 
 \subsection*{R3. What is the weakest part of the project?}
-The weakest part is the lack of live human-subject OpenBCI validation. The project supports feasibility and integration readiness, but it does not prove a working real-time human-controlled robot.
+The weakest part is the mismatch between the EEG decoding stage and the simplified control benchmark. The decoder is trained on cue-based motor-imagery trials, while the controller is evaluated in a simplified 2D reaching task. Technically, the next improvement is to reduce that gap with a native real-time state representation, shorter windows, and a tighter mapping between MI evidence and robot-control decisions.
 
 
 \subsection*{R4. Which result would you trust least?}
-I would treat the 8-channel result cautiously because it is offline and user-dependent. It is promising, but real hardware, electrode placement, and live artefacts may change performance.
+I would treat the 8-channel result cautiously because it is a channel-subset study rather than a native 8-channel acquisition study. It is promising for OpenBCI-style deployment, but the exact performance may change with electrode placement, impedance, artefacts, and shorter inference windows.
 
 
 \subsection*{R5. What would you do next?}
-First, obtain ethical approval and run a live-user OpenBCI study using the 8-channel montage. Second, build a native 8-channel real-time inference path instead of adapting from the 64-channel pipeline.
+I would build a native 8-channel real-time inference path, test shorter and overlapping windows, add confidence-based rejection, and evaluate whether the DQN still benefits when EEG evidence arrives asynchronously rather than as fixed trial segments.
 
 
 \subsection*{R6. What would you improve technically?}
@@ -246,19 +246,19 @@ I would reduce latency by testing shorter and overlapping windows, add confidenc
 
 
 \subsection*{R7. If you restarted the project, what would you do differently?}
-I would define the live-hardware validation route earlier and benchmark native 8-channel training sooner. That would reduce the gap between offline feasibility and deployment validation.
+I would make the deployment constraints part of the first experimental design: train native 8-channel models earlier, define the control-state interface earlier, and measure latency and confidence calibration alongside accuracy from the beginning.
 
 
 \subsection*{R8. What is the main risk of overclaiming?}
-The main risk is saying the system proves real-time human BCI robotic control. The correct claim is offline decoding, simulated closed-loop control, and software-interface readiness.
+The main risk is mixing metrics from different stages. Classification accuracy, channel-reduction accuracy, DQN reach rate, and end-to-end training speed answer different questions, so they should be interpreted as complementary evidence rather than one single proof of performance.
 
 
-\subsection*{R9. Why is the project still valuable without live testing?}
-Because it identifies and tests the main system components needed for deployment: transferable decoding, channel reduction, controller robustness, and software integration boundaries.
+\subsection*{R9. Why is the project still valuable as a staged system study?}
+Because it identifies and tests the main technical components needed for deployment: transferable decoding, subject adaptation, channel reduction, controller robustness, confidence-aware control, and software integration boundaries.
 
 
 \subsection*{R10. What is the one-sentence conclusion?}
-The project shows that EEGTransformer decoding, subject adaptation, OpenBCI-oriented channel reduction, and DQN closed-loop control can form a feasible MI-BCI robotic-control pipeline, but live OpenBCI validation remains future work.
+The project shows that EEGTransformer decoding, subject adaptation, OpenBCI-oriented channel reduction, and DQN closed-loop control can form a feasible MI-BCI robotic-control pipeline, with the next technical priority being lower-latency native 8-channel integration.
 
 
 \end{document}
