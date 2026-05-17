@@ -43,11 +43,16 @@ class OfflinePhysioNetSource:
     ) -> None:
         data, labels = loader(subject)
         data = np.asarray(data)
-        labels = np.asarray(labels)
+        labels = np.asarray(labels).reshape(-1)
         if data.ndim != 3:
             raise ValueError("PhysioNet data must have shape (epochs, channels, samples)")
+        if any(dim == 0 for dim in data.shape):
+            raise ValueError("PhysioNet data dimensions must be non-empty")
 
         n_epochs = data.shape[0]
+        if labels.shape[0] != n_epochs:
+            raise ValueError("PhysioNet labels must match the number of epochs")
+
         start_epoch = int(start_epoch)
         if stop_epoch is None:
             stop_epoch = n_epochs - 1
@@ -58,7 +63,6 @@ class OfflinePhysioNetSource:
             start_epoch < 0
             or stop_epoch < start_epoch
             or stop_epoch >= n_epochs
-            or len(labels) < n_epochs
         ):
             raise ValueError("Invalid PhysioNet epoch range")
 
@@ -122,8 +126,19 @@ class SyntheticBrainFlowSource:
 
     def start(self) -> None:
         if self.stream is None:
-            self.stream = self.stream_factory()
-            self.stream.start()
+            stream = self.stream_factory()
+            try:
+                stream.start()
+            except Exception:
+                stop = getattr(stream, "stop", None)
+                if callable(stop):
+                    try:
+                        stop()
+                    except Exception:
+                        pass
+                self.stream = None
+                raise
+            self.stream = stream
 
     def stop(self) -> None:
         if self.stream is not None:
