@@ -49,6 +49,15 @@ def get_pipeline(model_path: str, device: str) -> EEGPipeline:
     return st.session_state["pipeline"]
 
 
+def _close_arm_best_effort() -> None:
+    close = getattr(st.session_state.get("arm"), "close", None)
+    if callable(close):
+        try:
+            close()
+        except Exception:
+            pass
+
+
 def get_source(
     mode: str,
     subject: int,
@@ -81,6 +90,7 @@ def get_source(
     st.session_state["source_key"] = key
     st.session_state["records"] = []
     st.session_state["last_frame"] = None
+    _close_arm_best_effort()
     st.session_state["arm"] = ArmVisualizer()
     st.session_state["arm"].reset()
     return source
@@ -246,6 +256,7 @@ def _reset_run(source) -> None:
     reset = getattr(source, "reset", None)
     if callable(reset):
         reset()
+    _close_arm_best_effort()
     st.session_state["arm"] = ArmVisualizer()
     st.session_state["arm"].reset()
     st.session_state["records"] = []
