@@ -95,12 +95,10 @@ Synthetic source:
 Owns EEG processing and classification:
 
 - preserves raw EEG for display
-- applies 8-30 Hz bandpass filtering
-- resamples to the model input length when needed
-- pads/trims channels when needed
-- normalizes using the selected CTNet model metadata
+- creates `preprocessed_eeg_for_display` with the visible preprocessing stage: 8-30 Hz bandpass filtering, keeping the same channel/time alignment as the raw display where possible
+- creates a separate model input tensor by resampling, padding/trimming channels, and normalizing with the selected CTNet model metadata
 - loads `04_Trained_Models/physionet_ctnet_109sub/pool/model_pool.pth`
-- returns prediction, class probabilities, confidence, and mapped action
+- returns prediction, class probabilities, confidence, CTNet-derived action, scripted action when used, and executed action
 
 ### `arm_visualizer.py`
 
@@ -116,7 +114,7 @@ Owns simulation state:
 
 Contains pure plotting helpers:
 
-- raw versus filtered EEG traces
+- raw versus preprocessed EEG traces
 - stacked channel view
 - Y-Z trajectory plot
 - class probability bars
@@ -132,7 +130,8 @@ Use a shared frame structure for both modes:
 class DashboardFrame:
     mode: str
     raw_eeg: np.ndarray
-    filtered_eeg: np.ndarray
+    preprocessed_eeg_for_display: np.ndarray
+    model_input_shape: tuple[int, ...]
     sampling_rate: float
     channel_names: list[str]
     pred_class: int | None
@@ -141,10 +140,17 @@ class DashboardFrame:
     confidence: float | None
     true_label: int | None
     true_name: str | None
-    action: int | None
-    action_name: str | None
+    ctnet_predicted_action: int | None
+    ctnet_predicted_action_name: str | None
+    scripted_demo_action: int | None
+    scripted_demo_action_name: str | None
+    executed_action: int | None
+    executed_action_name: str | None
+    executed_action_source: str
     arm_rgb: np.ndarray | None
     trajectory_yz: list[tuple[float, float]]
+    replay_index: int | None
+    replay_total: int | None
     status: dict[str, Any]
 ```
 
@@ -153,30 +159,39 @@ The UI renders this structure without knowing which data source produced it.
 ## Offline PhysioNet Flow
 
 1. User selects `Offline PhysioNet`.
-2. User selects subject and epoch/trial.
-3. Source loads raw epoch.
-4. Pipeline creates filtered copy with 8-30 Hz bandpass.
-5. Pipeline resamples to 1000 samples if needed.
-6. Pipeline normalizes with model metadata from `model_pool.json` or `norm_params.json`.
-7. CTNet returns probabilities and predicted class.
-8. Class maps to action:
+2. User selects a subject and either a single epoch or an ordered replay range.
+3. Source loads the selected raw epochs in their dataset order.
+4. The dashboard maintains `replay_index` and `replay_total`.
+5. `Step` advances by exactly one epoch.
+6. `Start` advances through the selected epochs at the configured dashboard playback speed.
+7. `Pause` freezes the current epoch without resetting the arm or trajectory.
+8. `Reset` returns to the first selected epoch and clears the arm trajectory.
+9. For each epoch, the pipeline creates `preprocessed_eeg_for_display` with 8-30 Hz bandpass filtering.
+10. For CTNet only, the pipeline creates a model input tensor by resampling to 1000 samples, adapting channels if needed, and normalizing with metadata from `model_pool.json` or `norm_params.json`.
+11. CTNet returns probabilities and predicted class.
+12. Class maps to CTNet-derived action:
    - `Left` -> left
    - `Right` -> right
    - `Hands/Up` -> up
    - `Feet/Down` -> down
-9. PyBullet executes the action and renders a frame.
-10. UI updates all four panels.
+13. Offline mode sets `executed_action` to the CTNet-derived action.
+14. PyBullet executes the action and renders a frame.
+15. UI updates all four panels and accumulates the Y-Z trajectory across the replay range until reset.
+
+Offline replay uses fixed dashboard steps rather than original EEG sampling timestamps. The waveform time axis still reflects the EEG sampling rate inside each epoch.
 
 ## Synthetic Flow
 
 1. User selects `BrainFlow synthetic`.
 2. Dashboard starts `OpenBCIStream(board_type="synthetic")`.
 3. Each step gets a rolling raw EEG epoch.
-4. Pipeline filters, adapts, normalizes, and runs CTNet inference.
-5. UI displays CTNet prediction and probabilities.
-6. If scripted demo is enabled, mechanical-arm action comes from the scripted sequence.
-7. If scripted demo is disabled, mechanical-arm action comes from CTNet prediction.
-8. UI displays a persistent note: synthetic EEG has no ground-truth MI label.
+4. Pipeline creates `preprocessed_eeg_for_display` with 8-30 Hz bandpass filtering.
+5. For CTNet only, the pipeline creates a model input tensor by resampling, channel adapting, and normalizing.
+6. UI displays CTNet prediction, probabilities, and `ctnet_predicted_action`.
+7. If scripted demo is enabled, UI also displays `scripted_demo_action`, and `executed_action` comes from the scripted sequence.
+8. If scripted demo is disabled, `executed_action` comes from `ctnet_predicted_action`.
+9. The classification panel always labels the executed action source: `CTNet prediction` or `scripted demo`.
+10. UI displays a persistent note: synthetic EEG has no ground-truth MI label.
 
 This keeps the demonstration honest: real model inference is visible, but stable demo movement is still available.
 
@@ -185,7 +200,7 @@ This keeps the demonstration honest: real model inference is visible, but stable
 Sidebar controls:
 
 - mode: `Offline PhysioNet` or `BrainFlow synthetic`
-- subject and epoch selector for offline mode
+- subject and epoch/range selector for offline mode
 - start, pause, step, reset
 - playback speed
 - channel count: 8, 16, 32, 64
@@ -197,7 +212,7 @@ Sidebar controls:
 Main panels:
 
 - PyBullet simulation viewport
-- raw versus filtered EEG waveform panel
+- raw versus preprocessed EEG waveform panel
 - Y-Z trajectory panel
 - classification and action panel
 
@@ -205,7 +220,8 @@ Default EEG display:
 
 - show 8 channels for readability
 - allow expanding to more channels
-- use consistent time axis for raw and filtered signals
+- use consistent time axis for raw and preprocessed signals
+- label model-only preprocessing separately from the displayed waveform preprocessing
 
 ## Export Outputs
 
@@ -234,8 +250,10 @@ The dashboard must fail visibly and narrowly:
 Unit-level checks:
 
 - EEG preprocessing preserves expected shapes.
-- Raw and filtered arrays have aligned channel/time dimensions.
+- Raw and preprocessed display arrays have aligned channel/time dimensions.
 - Class-to-action mapping is correct.
+- CTNet-derived action, scripted demo action, and executed action remain separately represented.
+- Offline replay advances, pauses, steps, resets, and accumulates trajectory according to the spec.
 - `DashboardFrame` can be created for offline and synthetic-style data.
 
 Smoke checks:
