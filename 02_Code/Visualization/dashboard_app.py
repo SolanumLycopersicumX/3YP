@@ -294,7 +294,7 @@ def main() -> None:
             value=1.0,
             step=0.5,
         )
-        scripted_demo = st.checkbox("Scripted demo in synthetic mode", value=True)
+        scripted_demo = st.checkbox("Use scripted demo action in synthetic mode", value=True)
         playback_delay = st.slider(
             "Playback delay (s)",
             min_value=0.0,
