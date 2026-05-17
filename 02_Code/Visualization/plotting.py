@@ -27,8 +27,14 @@ def make_eeg_figure(
 ):
     raw = np.asarray(raw_eeg)
     preprocessed = np.asarray(preprocessed_eeg)
+    if raw.ndim != 2 or preprocessed.ndim != 2:
+        raise ValueError("raw_eeg and preprocessed_eeg must both be 2D arrays")
     if raw.shape != preprocessed.shape:
         raise ValueError("raw_eeg and preprocessed_eeg shapes must match")
+    if raw.shape[0] <= 0 or raw.shape[1] <= 0:
+        raise ValueError("raw_eeg and preprocessed_eeg must have positive channels and samples")
+    if max_channels <= 0:
+        raise ValueError("max_channels must be positive")
 
     indices = _selected_channel_indices(raw.shape[0], max_channels)
     fig, axes = plt.subplots(len(indices), 1, sharex=True, squeeze=False)
@@ -94,6 +100,9 @@ def export_jsonl(path: Path, records: Iterable[dict]) -> None:
 def export_csv(path: Path, records: list[dict]) -> None:
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
+    if not records:
+        path.write_text("", encoding="utf-8")
+        return
 
     fieldnames = []
     seen = set()
