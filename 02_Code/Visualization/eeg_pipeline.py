@@ -121,8 +121,12 @@ def load_norm_metadata(model_path: Path) -> dict[str, float]:
         with metadata_path.open("r", encoding="utf-8") as f:
             data = json.load(f)
         return {
-            "norm_mean": float(data.get("norm_mean", defaults["norm_mean"])),
-            "norm_std": float(data.get("norm_std", defaults["norm_std"])),
+            "norm_mean": float(
+                data.get("norm_mean", data.get("mean", defaults["norm_mean"]))
+            ),
+            "norm_std": float(
+                data.get("norm_std", data.get("std", defaults["norm_std"]))
+            ),
         }
 
     norm_params_path = model_path.parent / "norm_params.json"
@@ -130,8 +134,12 @@ def load_norm_metadata(model_path: Path) -> dict[str, float]:
         with norm_params_path.open("r", encoding="utf-8") as f:
             data = json.load(f)
         return {
-            "norm_mean": float(data.get("mean", defaults["norm_mean"])),
-            "norm_std": float(data.get("std", defaults["norm_std"])),
+            "norm_mean": float(
+                data.get("norm_mean", data.get("mean", defaults["norm_mean"]))
+            ),
+            "norm_std": float(
+                data.get("norm_std", data.get("std", defaults["norm_std"]))
+            ),
         }
 
     return defaults
@@ -181,16 +189,25 @@ class EEGPipeline:
         model: torch.nn.Module | None = None,
         model_path: Path = DEFAULT_MODEL_PATH,
         device: str | torch.device = "cpu",
-        norm_mean: float = 0.0,
-        norm_std: float = 1.0,
+        norm_mean: float | None = None,
+        norm_std: float | None = None,
         target_channels: int = DEFAULT_TARGET_CHANNELS,
         target_samples: int = DEFAULT_TARGET_SAMPLES,
     ) -> None:
         self.model = model
         self.model_path = Path(model_path)
         self.device = torch.device(device)
-        self.norm_mean = float(norm_mean)
-        self.norm_std = float(norm_std)
+        norm_metadata = load_norm_metadata(self.model_path)
+        self.norm_mean = float(
+            norm_mean
+            if norm_mean is not None
+            else norm_metadata.get("norm_mean", norm_metadata.get("mean", 0.0))
+        )
+        self.norm_std = float(
+            norm_std
+            if norm_std is not None
+            else norm_metadata.get("norm_std", norm_metadata.get("std", 1.0))
+        )
         self.target_channels = int(target_channels)
         self.target_samples = int(target_samples)
         if self.model is not None:

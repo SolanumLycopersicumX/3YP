@@ -1,4 +1,7 @@
+import json
+import tempfile
 import unittest
+from pathlib import Path
 
 import numpy as np
 import torch
@@ -15,8 +18,9 @@ from eeg_pipeline import (
 class FakeModel(torch.nn.Module):
     def forward(self, x):
         batch_size = x.shape[0]
+        features = torch.zeros((batch_size, 2), dtype=torch.float32)
         logits = torch.tensor([[0.1, 3.0, 0.2, -1.0]], dtype=torch.float32)
-        return logits.repeat(batch_size, 1)
+        return features, logits.repeat(batch_size, 1)
 
 
 class TestEEGPipeline(unittest.TestCase):
@@ -75,6 +79,25 @@ class TestEEGPipeline(unittest.TestCase):
         self.assertEqual(result.ctnet_predicted_action_name, "right")
         self.assertEqual(result.probabilities.shape, (4,))
         self.assertGreater(result.confidence, 0.0)
+
+    def test_pipeline_loads_norm_metadata_unless_explicitly_overridden(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            model_path = Path(tmpdir) / "model_pool.pth"
+            model_path.with_suffix(".json").write_text(
+                json.dumps({"mean": 2.0, "std": 4.0}),
+                encoding="utf-8",
+            )
+
+            pipeline = EEGPipeline(
+                model=FakeModel(),
+                model_path=model_path,
+                norm_std=8.0,
+                target_channels=4,
+                target_samples=8,
+            )
+
+        self.assertEqual(pipeline.norm_mean, 2.0)
+        self.assertEqual(pipeline.norm_std, 8.0)
 
 
 if __name__ == "__main__":
