@@ -21,6 +21,11 @@ class FakeSource:
         self.reset_called = True
 
 
+class StopFailureSource(FakeSource):
+    def stop(self):
+        raise RuntimeError("stop failed")
+
+
 class FakeArm:
     instances = []
 
@@ -89,6 +94,33 @@ class TestDashboardAppLifecycle(unittest.TestCase):
         self.assertTrue(self.dashboard_app.st.session_state["arm"].reset_called)
         self.assertEqual(self.dashboard_app.st.session_state["records"], [])
         self.assertIsNone(self.dashboard_app.st.session_state["last_frame"])
+
+    def test_get_source_closes_previous_arm_when_old_source_stop_fails(self):
+        previous_arm = FakeArm()
+        self.dashboard_app.st.session_state.update(
+            {
+                "source": StopFailureSource(),
+                "source_key": ("Offline PhysioNet", 1, 0, 1, 1.0),
+                "arm": previous_arm,
+                "records": [{"old": "record"}],
+                "last_frame": object(),
+            }
+        )
+
+        with (
+            patch.object(self.dashboard_app, "ArmVisualizer", FakeArm),
+            patch.object(self.dashboard_app, "OfflinePhysioNetSource", FakeSource),
+            self.assertRaisesRegex(RuntimeError, "stop failed"),
+        ):
+            self.dashboard_app.get_source(
+                "Offline PhysioNet",
+                subject=2,
+                start_epoch=0,
+                stop_epoch=1,
+                duration_sec=1.0,
+            )
+
+        self.assertTrue(previous_arm.closed)
 
     def test_reset_run_closes_previous_arm_and_clears_run_state(self):
         source = FakeSource()

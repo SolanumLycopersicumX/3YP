@@ -72,8 +72,11 @@ def get_source(
 
     old_source = st.session_state.get("source")
     stop = getattr(old_source, "stop", None)
-    if callable(stop):
-        stop()
+    try:
+        if callable(stop):
+            stop()
+    finally:
+        _close_arm_best_effort()
 
     if mode == "Offline PhysioNet":
         source = OfflinePhysioNetSource(
@@ -90,7 +93,6 @@ def get_source(
     st.session_state["source_key"] = key
     st.session_state["records"] = []
     st.session_state["last_frame"] = None
-    _close_arm_best_effort()
     st.session_state["arm"] = ArmVisualizer()
     st.session_state["arm"].reset()
     return source
