@@ -68,30 +68,44 @@ class ArmVisualizer:
         if env is None:
             return self._fallback_frame()
 
-        obs = self._extract_obs(env.reset())
-        self._append_obs(obs)
-        return self._env_frame()
+        try:
+            obs = self._extract_obs(env.reset())
+            self._append_obs(obs)
+            return self._env_frame()
+        except Exception as exc:
+            return self._degrade_to_fallback(exc)
 
     def step(self, action: int | None) -> ArmFrame:
+        if action is not None and action not in {0, 1, 2, 3}:
+            raise ValueError(f"Invalid arm action: {action}")
+
         env = self._ensure_env()
 
         if action is None:
             if env is None:
                 return self._fallback_frame()
-            return self._env_frame()
+            try:
+                return self._env_frame()
+            except Exception as exc:
+                return self._degrade_to_fallback(exc)
 
         if env is None:
             self._step_fallback(action)
             return self._fallback_frame()
 
-        obs = self._extract_obs(env.step(action))
-        self._append_obs(obs)
-        return self._env_frame()
+        try:
+            obs = self._extract_obs(env.step(action))
+            self._append_obs(obs)
+            return self._env_frame()
+        except Exception as exc:
+            return self._degrade_to_fallback(exc)
 
     def close(self):
-        if self.env is not None:
-            self.env.close()
-        self.env = None
+        try:
+            if self.env is not None:
+                self.env.close()
+        finally:
+            self.env = None
 
     def _env_frame(self) -> ArmFrame:
         return ArmFrame(
@@ -112,6 +126,18 @@ class ArmVisualizer:
         if self.fallback_error:
             status["error"] = self.fallback_error
         return status
+
+    def _degrade_to_fallback(self, exc: Exception) -> ArmFrame:
+        self._close_env_best_effort()
+        self.arm_mode = "fallback"
+        self.fallback_error = str(exc)
+        return self._fallback_frame()
+
+    def _close_env_best_effort(self):
+        try:
+            self.close()
+        except Exception:
+            pass
 
     def _step_fallback(self, action: int):
         if action == 0:

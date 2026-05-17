@@ -34,7 +34,7 @@ class FakeEnv:
             self.z += self.config.step_size
         elif action == 3:
             self.z -= self.config.step_size
-        return np.array([self.y, self.z], dtype=float), 0.0, False, {}
+        return np.array([self.y, self.z], dtype=float), 0.0, False, False, {}
 
     def render(self):
         return np.zeros((12, 16, 3), dtype=np.uint8)
@@ -46,6 +46,11 @@ class FakeEnv:
 class FailingEnv:
     def __init__(self, config, render_mode):
         raise RuntimeError("pybullet unavailable")
+
+
+class StepFailingEnv(FakeEnv):
+    def step(self, action):
+        raise RuntimeError("step failed")
 
 
 class TestArmVisualizer(unittest.TestCase):
@@ -78,6 +83,27 @@ class TestArmVisualizer(unittest.TestCase):
         self.assertIsNone(frame.arm_rgb)
         self.assertEqual(frame.status["arm_mode"], "fallback")
         self.assertIn("missing pybullet", frame.status["error"])
+
+    def test_invalid_action_raises_without_changing_trajectory(self):
+        visualizer = ArmVisualizer(env_cls=FakeEnv, cfg_cls=FakeConfig, step_size=0.1)
+        visualizer.reset()
+        trajectory_len = len(visualizer.trajectory_yz)
+
+        with self.assertRaises(ValueError):
+            visualizer.step(99)
+
+        self.assertEqual(len(visualizer.trajectory_yz), trajectory_len)
+
+    def test_step_failure_degrades_to_fallback_frame(self):
+        visualizer = ArmVisualizer(env_cls=StepFailingEnv, cfg_cls=FakeConfig, step_size=0.1)
+        visualizer.reset()
+
+        frame = visualizer.step(2)
+
+        self.assertIsNone(frame.arm_rgb)
+        self.assertEqual(frame.status["arm_mode"], "fallback")
+        self.assertIn("step failed", frame.status["error"])
+        self.assertIsNone(visualizer.env)
 
 
 if __name__ == "__main__":
