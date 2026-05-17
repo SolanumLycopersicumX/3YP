@@ -43,10 +43,9 @@ class ArmVisualizer:
         if self.env is not None or self.arm_mode == "fallback":
             return self.env
 
-        if self.env_cls is None or self.cfg_cls is None:
-            self.env_cls, self.cfg_cls = load_pybullet_env()
-
         try:
+            if self.env_cls is None or self.cfg_cls is None:
+                self.env_cls, self.cfg_cls = load_pybullet_env()
             config = self.cfg_cls(step_size=self.step_size, use_gui=False)
             self.env = self.env_cls(config, render_mode="rgb_array")
             self.arm_mode = "pybullet"

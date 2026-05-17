@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import patch
 
 import numpy as np
 
@@ -67,6 +68,16 @@ class TestArmVisualizer(unittest.TestCase):
         self.assertIsNone(frame.arm_rgb)
         self.assertEqual(frame.trajectory_yz[-1], (0.03, 0.0))
         self.assertEqual(frame.status["arm_mode"], "fallback")
+
+    def test_loader_failure_uses_fallback_frame(self):
+        visualizer = ArmVisualizer()
+
+        with patch("arm_visualizer.load_pybullet_env", side_effect=ImportError("missing pybullet")):
+            frame = visualizer.reset()
+
+        self.assertIsNone(frame.arm_rgb)
+        self.assertEqual(frame.status["arm_mode"], "fallback")
+        self.assertIn("missing pybullet", frame.status["error"])
 
 
 if __name__ == "__main__":
