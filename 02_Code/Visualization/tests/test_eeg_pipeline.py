@@ -2,6 +2,7 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 import numpy as np
 import torch
@@ -10,6 +11,7 @@ from eeg_pipeline import (
     EEGPipeline,
     adapt_channels,
     create_model_input,
+    load_ctnet_model,
     preprocess_for_display,
     resample_time,
 )
@@ -64,6 +66,20 @@ class TestEEGPipeline(unittest.TestCase):
         self.assertEqual(model_input.dtype, np.float32)
         self.assertAlmostEqual(float(model_input[0, 0, 0, 0]), 1.0)
 
+    def test_create_model_input_pads_missing_channels_after_normalization(self):
+        raw = np.full((2, 4), 3.0, dtype=np.float32)
+
+        model_input = create_model_input(
+            raw,
+            target_channels=4,
+            target_samples=8,
+            norm_mean=1.0,
+            norm_std=2.0,
+        )
+
+        np.testing.assert_allclose(model_input[0, 0, :2], 1.0)
+        np.testing.assert_array_equal(model_input[0, 0, 2:], np.zeros((2, 8)))
+
     def test_predict_with_fake_model_returns_class_probability_and_action(self):
         pipeline = EEGPipeline(
             model=FakeModel(),
@@ -98,6 +114,17 @@ class TestEEGPipeline(unittest.TestCase):
 
         self.assertEqual(pipeline.norm_mean, 2.0)
         self.assertEqual(pipeline.norm_std, 8.0)
+
+    def test_load_ctnet_model_rejects_state_dict_checkpoint(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            model_path = Path(tmpdir) / "model_pool.pth"
+            model_path.write_bytes(b"placeholder")
+
+            with patch("eeg_pipeline.torch.load") as torch_load:
+                torch_load.return_value = {"model_state_dict": {"layer.weight": 1}}
+
+                with self.assertRaisesRegex(TypeError, "state_dict.*unsupported"):
+                    load_ctnet_model(model_path)
 
 
 if __name__ == "__main__":

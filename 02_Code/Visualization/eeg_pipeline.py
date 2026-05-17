@@ -103,12 +103,20 @@ def create_model_input(
     norm_mean: float = 0.0,
     norm_std: float = 1.0,
 ) -> np.ndarray:
-    data = adapt_channels(preprocessed_eeg, target_channels)
+    data = _validate_2d(preprocessed_eeg, "preprocessed_eeg").astype(
+        np.float32, copy=False
+    )
+    target_channels = int(target_channels)
+    if target_channels <= 0:
+        raise ValueError("target_channels must be positive")
+    if data.shape[0] > target_channels:
+        data = data[:target_channels]
     data = resample_time(data, target_samples)
     norm_std = float(norm_std)
     if norm_std == 0.0:
         norm_std = 1.0
     normalized = (data.astype(np.float32, copy=False) - float(norm_mean)) / norm_std
+    normalized = adapt_channels(normalized, target_channels)
     return normalized[np.newaxis, np.newaxis, :, :].astype(np.float32, copy=False)
 
 
@@ -177,7 +185,16 @@ def load_ctnet_model(
 
     _prepare_ctnet_unpickle_context()
     loaded: Any = torch.load(model_path, map_location=device, weights_only=False)
-    model = loaded.get("model", loaded) if isinstance(loaded, dict) else loaded
+    if isinstance(loaded, dict):
+        if "model" not in loaded:
+            raise TypeError(
+                "Unsupported CTNet checkpoint dict: state_dict checkpoints are "
+                "unsupported by this dashboard loader. A full serialized CTNet "
+                "module is required."
+            )
+        model = loaded["model"]
+    else:
+        model = loaded
     model.to(device)
     model.eval()
     return model
