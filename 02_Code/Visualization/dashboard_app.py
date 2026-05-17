@@ -138,20 +138,43 @@ def build_dashboard_frame(
 
 
 def record_frame(frame: DashboardFrame) -> None:
+    position_y = None
+    position_z = None
+    if frame.trajectory_yz:
+        position_y, position_z = frame.trajectory_yz[-1]
+
+    probabilities = None
+    if frame.probabilities is not None:
+        probabilities = [float(value) for value in np.asarray(frame.probabilities).ravel()]
+
     st.session_state["records"].append(
         {
+            "timestamp_unix": time.time(),
             "mode": frame.mode,
             "replay_index": frame.replay_index,
             "pred_name": frame.pred_name,
             "confidence": frame.confidence,
+            "probabilities": probabilities,
             "true_name": frame.true_name,
             "ctnet_action": frame.ctnet_predicted_action_name,
             "scripted_action": frame.scripted_demo_action_name,
             "executed_action": frame.executed_action_name,
             "executed_action_source": frame.executed_action_source,
+            "position_y": position_y,
+            "position_z": position_z,
             "trajectory_len": len(frame.trajectory_yz),
         }
     )
+
+
+def _format_source_status(status: dict) -> str:
+    source_keys = ("mode", "source", "ground_truth")
+    parts = [
+        f"{key}={status[key]}"
+        for key in source_keys
+        if key in status and status[key] is not None
+    ]
+    return ", ".join(parts) if parts else "unavailable"
 
 
 def render_dashboard(frame: DashboardFrame, max_channels: int) -> None:
@@ -208,6 +231,7 @@ def render_dashboard(frame: DashboardFrame, max_channels: int) -> None:
             f"Executed action: `{frame.executed_action_name or 'none'}` "
             f"from `{frame.executed_action_source}`"
         )
+        st.caption(f"Data-source status: {_format_source_status(frame.status)}")
 
 
 def _next_epoch(source, mode: str, has_frame: bool):
