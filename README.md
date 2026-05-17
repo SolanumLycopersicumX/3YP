@@ -179,8 +179,8 @@ English note: these commands cover the main software path for reproducing the pr
 # Install dependencies
 pip install -r 02_Code/Utils/requirements.txt
 
-# Train the PhysioNet EEG classifier
-python 02_Code/EEG_Classification/train_physionet_ctnet.py
+# Train the PhysioNet EEG classifier for the dashboard default checkpoint path
+python 02_Code/EEG_Classification/train_physionet_ctnet.py --output-dir 04_Trained_Models/physionet_ctnet_109sub
 
 # Run the channel reduction study
 python 02_Code/EEG_Classification/channel_reduction_study.py

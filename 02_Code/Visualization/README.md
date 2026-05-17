@@ -17,9 +17,13 @@ pip install -r 02_Code/Utils/requirements.txt
 
 ## Start
 
+Run from the repository root:
+
 ```bash
 streamlit run 02_Code/Visualization/dashboard_app.py
 ```
+
+By default, the dashboard loads `04_Trained_Models/physionet_ctnet_109sub/pool/model_pool.pth`. You can override the model checkpoint path in the sidebar.
 
 ## Offline PhysioNet Mode
 
