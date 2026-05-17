@@ -46,7 +46,7 @@ class DashboardFrame:
     channel_names: list[str]
     pred_class: int | None
     pred_name: str | None
-    probabilities: np.ndarray
+    probabilities: np.ndarray | None
     confidence: float | None
     true_label: int | None
     true_name: str | None
@@ -57,8 +57,8 @@ class DashboardFrame:
     executed_action: int | None
     executed_action_name: str | None
     executed_action_source: str
-    arm_rgb: np.ndarray
-    trajectory_yz: np.ndarray
+    arm_rgb: np.ndarray | None
+    trajectory_yz: list[tuple[float, float]]
     replay_index: int | None
     replay_total: int | None
     status: dict[str, Any]
@@ -78,15 +78,19 @@ def action_name(action: int | None) -> str | None:
     return ACTION_NAMES[_validate_index(action, ACTION_NAMES, "action")]
 
 
-def class_to_action(pred_class: int | None) -> int | None:
+def class_to_action(pred_class: int | None) -> tuple[int, str] | None:
     if pred_class is None:
         return None
     if not isinstance(pred_class, int):
         raise ValueError("class must be an integer")
     try:
-        return CLASS_TO_ACTION[pred_class]
+        action = CLASS_TO_ACTION[pred_class]
     except KeyError as exc:
         raise ValueError(f"Unknown class: {pred_class}") from exc
+    name = action_name(action)
+    if name is None:
+        raise ValueError(f"Unknown action: {action}")
+    return action, name
 
 
 def class_name(label: int | None) -> str | None:
@@ -107,8 +111,12 @@ def build_action_decision(
     pred_class: int | None,
     scripted_demo_action: int | None = None,
 ) -> ActionDecision:
-    ctnet_action = class_to_action(pred_class)
-    ctnet_action_name = action_name(ctnet_action)
+    ctnet_action_pair = class_to_action(pred_class)
+    if ctnet_action_pair is None:
+        ctnet_action = None
+        ctnet_action_name = None
+    else:
+        ctnet_action, ctnet_action_name = ctnet_action_pair
     scripted_action_name = action_name(scripted_demo_action)
 
     if scripted_demo_action is not None:

@@ -13,21 +13,10 @@ from models import (
 
 class TestDashboardModels(unittest.TestCase):
     def test_class_to_action_mapping(self):
-        expected = {
-            0: (0, "left"),
-            1: (1, "right"),
-            2: (2, "up"),
-            3: (3, "down"),
-        }
-
-        for pred_class, (expected_action, expected_name) in expected.items():
-            with self.subTest(pred_class=pred_class):
-                action = class_to_action(pred_class)
-                self.assertEqual(action, expected_action)
-                self.assertEqual(
-                    build_action_decision(pred_class).ctnet_predicted_action_name,
-                    expected_name,
-                )
+        self.assertEqual(class_to_action(0), (0, "left"))
+        self.assertEqual(class_to_action(1), (1, "right"))
+        self.assertEqual(class_to_action(2), (2, "up"))
+        self.assertEqual(class_to_action(3), (3, "down"))
 
         with self.assertRaises(ValueError):
             class_to_action(4)
@@ -59,7 +48,7 @@ class TestDashboardModels(unittest.TestCase):
         raw_eeg = np.zeros((64, 160), dtype=float)
         preprocessed = np.ones((1, 64, 160), dtype=float)
         arm_rgb = np.zeros((240, 320, 3), dtype=np.uint8)
-        trajectory_yz = np.array([[0.0, 0.0], [0.1, 0.2]], dtype=float)
+        trajectory_yz = [(0.0, 0.0), (0.1, 0.2)]
 
         frame = DashboardFrame(
             mode="offline replay",
