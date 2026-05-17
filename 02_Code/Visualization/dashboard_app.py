@@ -254,6 +254,29 @@ def _next_epoch(source, mode: str, has_frame: bool):
     return source.step()
 
 
+def _offline_replay_finished(mode: str, frame: DashboardFrame | None) -> bool:
+    if mode != "Offline PhysioNet" or frame is None:
+        return False
+    if frame.replay_index is None or frame.replay_total is None:
+        return False
+    return frame.replay_index >= frame.replay_total - 1
+
+
+def _should_advance(
+    mode: str,
+    frame: DashboardFrame | None,
+    step_clicked: bool,
+    run_enabled: bool,
+) -> bool:
+    if frame is None:
+        return True
+    if not (step_clicked or run_enabled):
+        return False
+    if _offline_replay_finished(mode, frame):
+        return False
+    return True
+
+
 def _reset_run(source) -> None:
     reset = getattr(source, "reset", None)
     if callable(reset):
@@ -320,7 +343,12 @@ def main() -> None:
         if reset_clicked:
             _reset_run(source)
 
-        should_advance = step_clicked or run_enabled or st.session_state["last_frame"] is None
+        should_advance = _should_advance(
+            mode,
+            st.session_state["last_frame"],
+            step_clicked=step_clicked,
+            run_enabled=run_enabled,
+        )
         if should_advance:
             epoch = _next_epoch(
                 source,
@@ -344,7 +372,11 @@ def main() -> None:
             json_path, csv_path = _export_log()
             st.success(f"Exported {json_path} and {csv_path}")
 
-        if run_enabled:
+        replay_finished = _offline_replay_finished(mode, st.session_state["last_frame"])
+        if replay_finished and (run_enabled or step_clicked):
+            st.info("Offline replay reached the final selected epoch. Reset or change the range to replay again.")
+
+        if run_enabled and not replay_finished:
             if playback_delay > 0:
                 time.sleep(playback_delay)
             st.rerun()

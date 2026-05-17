@@ -143,6 +143,53 @@ class TestDashboardAppLifecycle(unittest.TestCase):
         self.assertEqual(self.dashboard_app.st.session_state["records"], [])
         self.assertIsNone(self.dashboard_app.st.session_state["last_frame"])
 
+    def test_offline_run_does_not_repeat_terminal_epoch(self):
+        terminal_frame = types.SimpleNamespace(replay_index=3, replay_total=4)
+
+        self.assertTrue(
+            self.dashboard_app._offline_replay_finished(
+                "Offline PhysioNet",
+                terminal_frame,
+            )
+        )
+        self.assertFalse(
+            self.dashboard_app._should_advance(
+                "Offline PhysioNet",
+                terminal_frame,
+                step_clicked=False,
+                run_enabled=True,
+            )
+        )
+        self.assertFalse(
+            self.dashboard_app._should_advance(
+                "Offline PhysioNet",
+                terminal_frame,
+                step_clicked=True,
+                run_enabled=False,
+            )
+        )
+
+    def test_non_terminal_offline_and_synthetic_can_advance(self):
+        non_terminal_frame = types.SimpleNamespace(replay_index=2, replay_total=4)
+        terminal_frame = types.SimpleNamespace(replay_index=3, replay_total=4)
+
+        self.assertTrue(
+            self.dashboard_app._should_advance(
+                "Offline PhysioNet",
+                non_terminal_frame,
+                step_clicked=False,
+                run_enabled=True,
+            )
+        )
+        self.assertTrue(
+            self.dashboard_app._should_advance(
+                "BrainFlow synthetic",
+                terminal_frame,
+                step_clicked=False,
+                run_enabled=True,
+            )
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
