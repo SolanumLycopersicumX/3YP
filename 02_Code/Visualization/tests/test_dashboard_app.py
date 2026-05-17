@@ -47,6 +47,27 @@ class ClosingFailureArm(FakeArm):
         raise RuntimeError("close failed")
 
 
+class FakeCuda:
+    def __init__(self, available=True, synchronize_error=None):
+        self.available = available
+        self.synchronize_error = synchronize_error
+
+    def is_available(self):
+        return self.available
+
+    def synchronize(self):
+        if self.synchronize_error is not None:
+            raise self.synchronize_error
+
+
+class FakeTorch(types.SimpleNamespace):
+    def __init__(self, cuda):
+        super().__init__(cuda=cuda)
+
+    def ones(self, *args, **kwargs):
+        return 1
+
+
 class TestDashboardAppLifecycle(unittest.TestCase):
     def setUp(self):
         self.streamlit = FakeStreamlit()
@@ -201,6 +222,44 @@ class TestDashboardAppLifecycle(unittest.TestCase):
             options, index = self.dashboard_app._device_options_and_default()
 
         self.assertEqual(options[index], "cpu")
+
+    def test_default_device_falls_back_to_cpu_when_cuda_kernel_probe_fails(self):
+        fake_torch = FakeTorch(
+            FakeCuda(
+                available=True,
+                synchronize_error=RuntimeError(
+                    "CUDA error: no kernel image is available for execution on the device"
+                ),
+            )
+        )
+        original_torch = sys.modules.get("torch")
+        sys.modules["torch"] = fake_torch
+        try:
+            options, index = self.dashboard_app._device_options_and_default()
+        finally:
+            if original_torch is None:
+                sys.modules.pop("torch", None)
+            else:
+                sys.modules["torch"] = original_torch
+
+        self.assertEqual(options[index], "cpu")
+        self.assertIn("cuda", options)
+
+    def test_cuda_errors_do_not_show_offline_physionet_hint(self):
+        exc = RuntimeError(
+            "CUDA error: no kernel image is available for execution on the device"
+        )
+
+        self.assertIsNone(
+            self.dashboard_app._source_hint_for_exception("Offline PhysioNet", exc)
+        )
+
+    def test_requested_cuda_uses_cpu_when_cuda_probe_fails(self):
+        with patch.object(self.dashboard_app, "_cuda_available", return_value=False):
+            self.assertEqual(
+                self.dashboard_app._resolve_runtime_device("cuda"),
+                "cpu",
+            )
 
 
 if __name__ == "__main__":

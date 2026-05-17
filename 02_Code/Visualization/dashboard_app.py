@@ -43,13 +43,53 @@ def _cuda_available() -> bool:
         import torch
     except ImportError:
         return False
-    return bool(torch.cuda.is_available())
+    if not torch.cuda.is_available():
+        return False
+    try:
+        probe = torch.ones((1,), device="cuda")
+        _ = probe + 1
+        if hasattr(torch.cuda, "synchronize"):
+            torch.cuda.synchronize()
+    except Exception:
+        return False
+    return True
 
 
 def _device_options_and_default() -> tuple[list[str], int]:
     if _cuda_available():
         return ["cuda", "cpu"], 0
     return ["cpu", "cuda"], 0
+
+
+def _resolve_runtime_device(requested_device: str) -> str:
+    if str(requested_device).startswith("cuda") and not _cuda_available():
+        return "cpu"
+    return str(requested_device)
+
+
+def _is_cuda_error(exc: Exception) -> bool:
+    message = str(exc).lower()
+    markers = (
+        "cuda error",
+        "cudnn",
+        "no kernel image",
+        "device-side assert",
+        "invalid device function",
+    )
+    return any(marker in message for marker in markers)
+
+
+def _source_hint_for_exception(mode: str, exc: Exception) -> str | None:
+    if _is_cuda_error(exc):
+        return None
+    if mode == "BrainFlow synthetic":
+        return "BrainFlow synthetic mode requires BrainFlow and the OpenBCI stream wrapper."
+    if mode == "Offline PhysioNet":
+        return (
+            "Offline PhysioNet mode requires MNE-compatible local data "
+            "available to the PhysioNet loader."
+        )
+    return None
 
 
 def get_pipeline(model_path: str, device: str) -> EEGPipeline:
@@ -403,7 +443,13 @@ def main() -> None:
             arm_settings=arm_settings,
         )
         _ensure_arm_visualizer(arm_settings)
-        pipeline = get_pipeline(model_path, device)
+        runtime_device = _resolve_runtime_device(device)
+        if runtime_device != device:
+            st.warning(
+                "CUDA was selected but failed a runtime compatibility check. "
+                "Running inference on CPU for this session."
+            )
+        pipeline = get_pipeline(model_path, runtime_device)
 
         if reset_clicked:
             _reset_run(source, arm_settings=arm_settings)
@@ -447,13 +493,15 @@ def main() -> None:
             st.rerun()
     except Exception as exc:
         st.error(str(exc))
-        if mode == "BrainFlow synthetic":
-            st.info("BrainFlow synthetic mode requires BrainFlow and the OpenBCI stream wrapper.")
-        elif mode == "Offline PhysioNet":
-            st.info(
-                "Offline PhysioNet mode requires MNE-compatible local data "
-                "available to the PhysioNet loader."
+        if _is_cuda_error(exc):
+            st.warning(
+                "CUDA execution failed. Use CPU, or install a PyTorch/CUDA build "
+                "compiled for this GPU architecture before selecting CUDA again."
             )
+        else:
+            hint = _source_hint_for_exception(mode, exc)
+            if hint is not None:
+                st.info(hint)
 
 
 if __name__ == "__main__":
