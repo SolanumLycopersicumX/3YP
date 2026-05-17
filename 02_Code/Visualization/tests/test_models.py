@@ -6,8 +6,11 @@ from models import (
     ActionDecision,
     DashboardFrame,
     SourceEpoch,
+    action_name,
     build_action_decision,
+    class_name,
     class_to_action,
+    scripted_action_for_step,
 )
 
 
@@ -20,6 +23,22 @@ class TestDashboardModels(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             class_to_action(4)
+
+    def test_numpy_scalar_indices_are_accepted(self):
+        self.assertEqual(class_to_action(np.int64(2)), (2, "up"))
+        self.assertEqual(action_name(np.int64(2)), "up")
+        self.assertEqual(class_name(np.int64(2)), "Hands/Up")
+        self.assertEqual(scripted_action_for_step(np.int64(2)), 1)
+
+    def test_invalid_index_types_raise_value_error(self):
+        with self.assertRaises(ValueError):
+            class_to_action(2.0)
+        with self.assertRaises(ValueError):
+            action_name("2")
+        with self.assertRaises(ValueError):
+            class_name(2.0)
+        with self.assertRaises(ValueError):
+            scripted_action_for_step("2")
 
     def test_action_decision_keeps_ctnet_and_scripted_actions_separate(self):
         decision = build_action_decision(pred_class=2, scripted_demo_action=1)
