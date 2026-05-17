@@ -42,3 +42,9 @@ pillow>=9.0.0
 
 # 3D 物理仿真（PyBullet）
 pybullet>=3.2.6
+
+# Local dashboard UI
+streamlit>=1.34.0
+
+# BrainFlow synthetic/OpenBCI dashboard mode
+brainflow>=5.10.0

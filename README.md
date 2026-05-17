@@ -28,6 +28,7 @@ Quick links:
 - [Final Report Draft](01_Reports/final_report_draft_v13.pdf)
 - [Weekly Report](01_Reports/week_2026_04_22_feedback.pdf)
 - [Code Directory](02_Code/)
+- [EEG + Arm Observer Dashboard](02_Code/Visualization/README.md)
 - [Experiment Outputs](03_Experiments/)
 - [References](07_References/README.md)
 
@@ -186,6 +187,9 @@ python 02_Code/EEG_Classification/channel_reduction_study.py
 
 # Run the simulation controller
 python 02_Code/Simulation/gym_control.py
+
+# Launch the EEG + PyBullet observer dashboard
+streamlit run 02_Code/Visualization/dashboard_app.py
 ```
 
 ---
