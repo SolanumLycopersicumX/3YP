@@ -33,8 +33,23 @@ def init_state() -> None:
     st.session_state.setdefault("pipeline", None)
     st.session_state.setdefault("pipeline_key", None)
     st.session_state.setdefault("arm", ArmVisualizer())
+    st.session_state.setdefault("arm_key", None)
     st.session_state.setdefault("records", [])
     st.session_state.setdefault("last_frame", None)
+
+
+def _cuda_available() -> bool:
+    try:
+        import torch
+    except ImportError:
+        return False
+    return bool(torch.cuda.is_available())
+
+
+def _device_options_and_default() -> tuple[list[str], int]:
+    if _cuda_available():
+        return ["cuda", "cpu"], 0
+    return ["cpu", "cuda"], 0
 
 
 def get_pipeline(model_path: str, device: str) -> EEGPipeline:
@@ -64,6 +79,7 @@ def get_source(
     start_epoch: int,
     stop_epoch: int,
     duration_sec: float,
+    arm_settings: dict | None = None,
 ):
     key = (mode, int(subject), int(start_epoch), int(stop_epoch), float(duration_sec))
     source = st.session_state.get("source")
@@ -93,9 +109,32 @@ def get_source(
     st.session_state["source_key"] = key
     st.session_state["records"] = []
     st.session_state["last_frame"] = None
-    st.session_state["arm"] = ArmVisualizer()
+    st.session_state["arm"] = ArmVisualizer(**(arm_settings or {}))
+    st.session_state["arm_key"] = _arm_config_key(arm_settings or {})
     st.session_state["arm"].reset()
     return source
+
+
+def _arm_config_key(arm_settings: dict) -> tuple:
+    target = tuple(arm_settings.get("camera_target", (0.0, 0.0, 0.25)))
+    return (
+        float(arm_settings.get("camera_yaw", 135.0)),
+        float(arm_settings.get("camera_pitch", -25.0)),
+        float(arm_settings.get("camera_distance", 0.85)),
+        target,
+    )
+
+
+def _ensure_arm_visualizer(arm_settings: dict) -> None:
+    key = _arm_config_key(arm_settings)
+    if st.session_state.get("arm_key") == key and st.session_state.get("arm") is not None:
+        return
+    _close_arm_best_effort()
+    st.session_state["arm"] = ArmVisualizer(**arm_settings)
+    st.session_state["arm_key"] = key
+    st.session_state["arm"].reset()
+    st.session_state["records"] = []
+    st.session_state["last_frame"] = None
 
 
 def build_dashboard_frame(
@@ -199,7 +238,11 @@ def render_dashboard(frame: DashboardFrame, max_channels: int) -> None:
             st.image(frame.arm_rgb, channels="RGB", use_container_width=True)
         else:
             st.info("PyBullet image unavailable. The fallback trajectory is still running.")
-        st.caption(f"Arm mode: {frame.status.get('arm_mode', 'unknown')}")
+        st.caption(
+            "Arm mode: "
+            f"{frame.status.get('arm_mode', 'unknown')} | "
+            f"Model: {frame.status.get('arm_model', 'unknown')}"
+        )
         if frame.replay_index is not None:
             if frame.replay_total is not None:
                 st.caption(f"Replay epoch {frame.replay_index + 1} of {frame.replay_total}")
@@ -208,17 +251,19 @@ def render_dashboard(frame: DashboardFrame, max_channels: int) -> None:
 
     with top_right:
         st.subheader("Raw vs Preprocessed EEG")
-        st.pyplot(
-            make_eeg_figure(
-                frame.raw_eeg,
-                frame.preprocessed_eeg_for_display,
-                frame.sampling_rate,
-                frame.channel_names,
-                max_channels=max_channels,
+        with st.container(height=560, border=True):
+            st.pyplot(
+                make_eeg_figure(
+                    frame.raw_eeg,
+                    frame.preprocessed_eeg_for_display,
+                    frame.sampling_rate,
+                    frame.channel_names,
+                    max_channels=max_channels,
+                ),
+                use_container_width=True,
             )
-        )
         st.caption(
-            "Visible preprocessing: 8-30 Hz bandpass. "
+            "Visible preprocessing: 8-30 Hz bandpass; amplitudes shown in uV. "
             f"Model input shape: {frame.model_input_shape}"
         )
 
@@ -229,21 +274,22 @@ def render_dashboard(frame: DashboardFrame, max_channels: int) -> None:
     with bottom_right:
         st.subheader("Classification and Action")
         st.pyplot(make_probability_figure(frame.probabilities))
-        confidence = None if frame.confidence is None else f"{frame.confidence:.2f}"
-        st.metric("Prediction", frame.pred_name or "none", confidence)
+        with st.container(border=True):
+            confidence = None if frame.confidence is None else f"{frame.confidence:.2f}"
+            st.metric("Prediction", frame.pred_name or "none", confidence)
 
-        if frame.true_name is not None:
-            st.write(f"True label: `{frame.true_name}`")
-        else:
-            st.warning("Synthetic EEG has no ground-truth motor-imagery label.")
+            if frame.true_name is not None:
+                st.write(f"True label: `{frame.true_name}`")
+            else:
+                st.warning("Synthetic EEG has no ground-truth motor-imagery label.")
 
-        st.write(f"CTNet action: `{frame.ctnet_predicted_action_name or 'none'}`")
-        st.write(f"Scripted action: `{frame.scripted_demo_action_name or 'disabled'}`")
-        st.write(
-            f"Executed action: `{frame.executed_action_name or 'none'}` "
-            f"from `{frame.executed_action_source}`"
-        )
-        st.caption(f"Data-source status: {_format_source_status(frame.status)}")
+            st.write(f"CTNet action: `{frame.ctnet_predicted_action_name or 'none'}`")
+            st.write(f"Scripted action: `{frame.scripted_demo_action_name or 'disabled'}`")
+            st.write(
+                f"Executed action: `{frame.executed_action_name or 'none'}` "
+                f"from `{frame.executed_action_source}`"
+            )
+            st.caption(f"Data-source status: {_format_source_status(frame.status)}")
 
 
 def _next_epoch(source, mode: str, has_frame: bool):
@@ -277,12 +323,14 @@ def _should_advance(
     return True
 
 
-def _reset_run(source) -> None:
+def _reset_run(source, arm_settings: dict | None = None) -> None:
     reset = getattr(source, "reset", None)
     if callable(reset):
         reset()
     _close_arm_best_effort()
-    st.session_state["arm"] = ArmVisualizer()
+    settings = arm_settings or {}
+    st.session_state["arm"] = ArmVisualizer(**settings)
+    st.session_state["arm_key"] = _arm_config_key(settings)
     st.session_state["arm"].reset()
     st.session_state["records"] = []
     st.session_state["last_frame"] = None
@@ -305,7 +353,8 @@ def main() -> None:
     with st.sidebar:
         mode = st.radio("Mode", MODES)
         model_path = st.text_input("Model path", value=str(DEFAULT_MODEL_PATH))
-        device = st.selectbox("Device", ["cpu", "cuda"], index=0)
+        device_options, device_index = _device_options_and_default()
+        device = st.selectbox("Device", device_options, index=device_index)
         max_channels = st.selectbox("Displayed channels", [4, 8, 16, 32, 64], index=1)
         subject = st.number_input("Subject", min_value=1, max_value=109, value=1, step=1)
         start_epoch = st.number_input("Start epoch", min_value=0, value=0, step=1)
@@ -329,6 +378,20 @@ def main() -> None:
         step_clicked = st.button("Step")
         reset_clicked = st.button("Reset")
         export_clicked = st.button("Export log")
+        with st.expander("Arm camera", expanded=False):
+            camera_yaw = st.slider("Yaw", min_value=-180.0, max_value=180.0, value=135.0, step=5.0)
+            camera_pitch = st.slider("Pitch", min_value=-89.0, max_value=10.0, value=-25.0, step=1.0)
+            camera_distance = st.slider("Distance", min_value=0.35, max_value=2.5, value=0.85, step=0.05)
+            target_x = st.number_input("Target X", value=0.0, step=0.05, format="%.2f")
+            target_y = st.number_input("Target Y", value=0.0, step=0.05, format="%.2f")
+            target_z = st.number_input("Target Z", value=0.25, step=0.05, format="%.2f")
+
+    arm_settings = {
+        "camera_yaw": float(camera_yaw),
+        "camera_pitch": float(camera_pitch),
+        "camera_distance": float(camera_distance),
+        "camera_target": (float(target_x), float(target_y), float(target_z)),
+    }
 
     try:
         source = get_source(
@@ -337,11 +400,13 @@ def main() -> None:
             int(start_epoch),
             int(stop_epoch),
             float(duration_sec),
+            arm_settings=arm_settings,
         )
+        _ensure_arm_visualizer(arm_settings)
         pipeline = get_pipeline(model_path, device)
 
         if reset_clicked:
-            _reset_run(source)
+            _reset_run(source, arm_settings=arm_settings)
 
         should_advance = _should_advance(
             mode,

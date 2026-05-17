@@ -26,11 +26,31 @@ def load_pybullet_env():
     return PyBulletArmEnv, PBConfig
 
 
+def default_so101_urdf_path() -> Path:
+    return PROJECT_ROOT / "02_Code" / "lerobot" / "examples" / "assets" / "SO101" / "so101_new_calib.urdf"
+
+
 class ArmVisualizer:
-    def __init__(self, env_cls=None, cfg_cls=None, step_size=0.03):
+    def __init__(
+        self,
+        env_cls=None,
+        cfg_cls=None,
+        step_size=0.03,
+        urdf_path: str | Path | None = None,
+        camera_yaw=135.0,
+        camera_pitch=-25.0,
+        camera_distance=0.85,
+        camera_target=(0.0, 0.0, 0.25),
+    ):
         self.env_cls = env_cls
         self.cfg_cls = cfg_cls
         self.step_size = step_size
+        self.urdf_path = self._resolve_urdf_path(urdf_path)
+        self.arm_model = "SO-101" if self.urdf_path is not None else "KUKA iiwa"
+        self.camera_yaw = float(camera_yaw)
+        self.camera_pitch = float(camera_pitch)
+        self.camera_distance = float(camera_distance)
+        self.camera_target = tuple(float(value) for value in camera_target)
         self.env = None
         self.fallback_y = 0.0
         self.fallback_z = 0.0
@@ -46,7 +66,16 @@ class ArmVisualizer:
         try:
             if self.env_cls is None or self.cfg_cls is None:
                 self.env_cls, self.cfg_cls = load_pybullet_env()
-            config = self.cfg_cls(step_size=self.step_size, use_gui=False)
+            config = self.cfg_cls(
+                step_size=self.step_size,
+                use_gui=False,
+                urdf_path=str(self.urdf_path) if self.urdf_path is not None else None,
+                arm_model=self.arm_model,
+                camera_yaw=self.camera_yaw,
+                camera_pitch=self.camera_pitch,
+                camera_distance=self.camera_distance,
+                camera_target=self.camera_target,
+            )
             self.env = self.env_cls(config, render_mode="rgb_array")
             self.arm_mode = "pybullet"
             self.fallback_error = None
@@ -123,6 +152,10 @@ class ArmVisualizer:
 
     def _status(self) -> dict[str, object]:
         status: dict[str, object] = {"arm_mode": self.arm_mode}
+        status["arm_model"] = self.arm_model
+        status["camera_yaw"] = self.camera_yaw
+        status["camera_pitch"] = self.camera_pitch
+        status["camera_distance"] = self.camera_distance
         if self.fallback_error:
             status["error"] = self.fallback_error
         return status
@@ -152,6 +185,11 @@ class ArmVisualizer:
 
     def _append_obs(self, obs):
         self.trajectory_yz.append((float(obs[0]), float(obs[1])))
+
+    @staticmethod
+    def _resolve_urdf_path(urdf_path: str | Path | None) -> Path | None:
+        path = Path(urdf_path) if urdf_path is not None else default_so101_urdf_path()
+        return path if path.exists() else None
 
     @staticmethod
     def _extract_obs(result):

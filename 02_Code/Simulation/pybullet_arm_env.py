@@ -27,6 +27,7 @@ class PBConfig:
     time_step: float = 1.0 / 240.0
     use_gui: bool = True
     urdf_path: Optional[str] = None
+    arm_model: str = "KUKA iiwa"
     ee_link_index: Optional[int] = None
     fixed_base: bool = True
     gravity: Tuple[float, float, float] = (0, 0, -9.81)

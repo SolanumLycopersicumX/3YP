@@ -3,13 +3,15 @@ from unittest.mock import patch
 
 import numpy as np
 
-from arm_visualizer import ArmVisualizer
+from arm_visualizer import ArmVisualizer, default_so101_urdf_path
 
 
 class FakeConfig:
-    def __init__(self, step_size, use_gui):
+    def __init__(self, step_size, use_gui, **kwargs):
         self.step_size = step_size
         self.use_gui = use_gui
+        for key, value in kwargs.items():
+            setattr(self, key, value)
 
 
 class FakeEnv:
@@ -63,6 +65,30 @@ class TestArmVisualizer(unittest.TestCase):
         self.assertEqual(frame.arm_rgb.shape, (12, 16, 3))
         self.assertEqual(frame.arm_rgb.dtype, np.uint8)
         self.assertEqual(frame.trajectory_yz[-1], (0.0, 0.1))
+
+    def test_default_so101_urdf_exists(self):
+        self.assertTrue(default_so101_urdf_path().exists())
+
+    def test_passes_so101_urdf_and_camera_controls_to_pybullet_config(self):
+        visualizer = ArmVisualizer(
+            env_cls=FakeEnv,
+            cfg_cls=FakeConfig,
+            step_size=0.1,
+            camera_yaw=120.0,
+            camera_pitch=-20.0,
+            camera_distance=1.4,
+            camera_target=(0.1, 0.2, 0.3),
+        )
+
+        visualizer.reset()
+        config = visualizer.env.config
+
+        self.assertEqual(config.urdf_path, str(default_so101_urdf_path()))
+        self.assertEqual(config.camera_yaw, 120.0)
+        self.assertEqual(config.camera_pitch, -20.0)
+        self.assertEqual(config.camera_distance, 1.4)
+        self.assertEqual(config.camera_target, (0.1, 0.2, 0.3))
+        self.assertEqual(config.arm_model, "SO-101")
 
     def test_fallback_without_env_still_tracks_actions(self):
         visualizer = ArmVisualizer(env_cls=FailingEnv, cfg_cls=FakeConfig, step_size=0.03)

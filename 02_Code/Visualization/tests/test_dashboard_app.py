@@ -190,6 +190,18 @@ class TestDashboardAppLifecycle(unittest.TestCase):
             )
         )
 
+    def test_default_device_prefers_cuda_when_available(self):
+        with patch.object(self.dashboard_app, "_cuda_available", return_value=True):
+            options, index = self.dashboard_app._device_options_and_default()
+
+        self.assertEqual(options[index], "cuda")
+
+    def test_default_device_falls_back_to_cpu_without_cuda(self):
+        with patch.object(self.dashboard_app, "_cuda_available", return_value=False):
+            options, index = self.dashboard_app._device_options_and_default()
+
+        self.assertEqual(options[index], "cpu")
+
 
 if __name__ == "__main__":
     unittest.main()

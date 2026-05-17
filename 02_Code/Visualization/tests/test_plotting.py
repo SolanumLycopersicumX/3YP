@@ -32,6 +32,24 @@ class TestPlotting(unittest.TestCase):
 
         self.assertEqual(len(fig.axes), 2)
 
+    def test_eeg_figure_scales_height_with_displayed_channels_and_uses_microvolts(self):
+        raw = np.zeros((16, 100), dtype=float)
+        preprocessed = np.ones((16, 100), dtype=float) * 1e-6
+
+        fig = make_eeg_figure(
+            raw,
+            preprocessed,
+            sampling_rate=100.0,
+            channel_names=[f"Ch {index + 1}" for index in range(16)],
+            max_channels=16,
+        )
+        self.addCleanup(plt.close, fig)
+
+        width, height = fig.get_size_inches()
+        self.assertGreaterEqual(height, 16 * 1.1)
+        self.assertLess(width, height)
+        self.assertEqual(fig.axes[0].get_ylabel(), "Ch 1 (uV)")
+
     def test_eeg_figure_rejects_1d_input(self):
         raw = np.zeros(100, dtype=float)
         preprocessed = np.ones(100, dtype=float)

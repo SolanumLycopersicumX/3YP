@@ -10,6 +10,7 @@ import numpy as np
 
 matplotlib.use("Agg")
 from matplotlib import pyplot as plt
+from matplotlib.ticker import MaxNLocator
 
 from models import CLASS_NAMES
 
@@ -24,6 +25,7 @@ def make_eeg_figure(
     sampling_rate,
     channel_names,
     max_channels=8,
+    channel_height=1.15,
 ):
     raw = np.asarray(raw_eeg)
     preprocessed = np.asarray(preprocessed_eeg)
@@ -37,8 +39,17 @@ def make_eeg_figure(
         raise ValueError("max_channels must be positive")
 
     indices = _selected_channel_indices(raw.shape[0], max_channels)
-    fig, axes = plt.subplots(len(indices), 1, sharex=True, squeeze=False)
+    fig_height = max(2.8, len(indices) * float(channel_height) + 0.9)
+    fig, axes = plt.subplots(
+        len(indices),
+        1,
+        sharex=True,
+        squeeze=False,
+        figsize=(8.5, fig_height),
+    )
     time = np.arange(raw.shape[1], dtype=float) / float(sampling_rate)
+    raw_uv = raw * 1e6
+    preprocessed_uv = preprocessed * 1e6
 
     for axis, channel_index in zip(axes[:, 0], indices):
         name = (
@@ -46,14 +57,28 @@ def make_eeg_figure(
             if channel_index < len(channel_names)
             else f"Channel {channel_index}"
         )
-        axis.plot(time, raw[channel_index], label="Raw")
-        axis.plot(time, preprocessed[channel_index], label="Preprocessed")
-        axis.set_ylabel(name)
-        axis.legend(loc="upper right")
+        raw_line = axis.plot(time, raw_uv[channel_index], label="Raw", linewidth=1.0)
+        processed_line = axis.plot(
+            time,
+            preprocessed_uv[channel_index],
+            label="Preprocessed",
+            linewidth=1.0,
+        )
+        axis.set_ylabel(f"{name} (uV)")
+        axis.yaxis.set_major_locator(MaxNLocator(nbins=3))
+        axis.ticklabel_format(axis="y", style="plain", useOffset=False)
+        axis.grid(True, axis="y", alpha=0.2, linewidth=0.5)
 
     axes[-1, 0].set_xlabel("Time (s)")
-    fig.suptitle("EEG Traces")
-    fig.tight_layout()
+    fig.legend(
+        [raw_line[0], processed_line[0]],
+        ["Raw", "Preprocessed"],
+        loc="upper right",
+        ncol=2,
+        bbox_to_anchor=(0.98, 0.995),
+    )
+    fig.suptitle("EEG Traces", y=0.995)
+    fig.tight_layout(rect=(0, 0, 1, 0.975))
     return fig
 
 
