@@ -54,3 +54,6 @@ Thumbs.db
 
 # Local brainstorming/mockup sessions
 .superpowers/
+
+# Local isolated implementation worktrees
+.worktrees/
