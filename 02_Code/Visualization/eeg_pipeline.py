@@ -156,7 +156,8 @@ def load_norm_metadata(model_path: Path) -> dict[str, float]:
 def _prepare_ctnet_unpickle_context() -> None:
     code_root = PROJECT_ROOT / "02_Code"
     eeg_classification_root = code_root / "EEG_Classification"
-    for path in (code_root, eeg_classification_root):
+    utils_root = code_root / "Utils"
+    for path in (code_root, eeg_classification_root, utils_root):
         path_str = str(path)
         if path_str not in sys.path:
             sys.path.insert(0, path_str)

@@ -1,4 +1,5 @@
 import json
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -9,6 +10,8 @@ import torch
 
 from eeg_pipeline import (
     EEGPipeline,
+    PROJECT_ROOT,
+    _prepare_ctnet_unpickle_context,
     adapt_channels,
     create_model_input,
     load_ctnet_model,
@@ -125,6 +128,16 @@ class TestEEGPipeline(unittest.TestCase):
 
                 with self.assertRaisesRegex(TypeError, "state_dict.*unsupported"):
                     load_ctnet_model(model_path)
+
+    def test_ctnet_unpickle_context_adds_utils_path(self):
+        utils_path = str(PROJECT_ROOT / "02_Code" / "Utils")
+        original_path = list(sys.path)
+        try:
+            sys.path = [path for path in sys.path if path != utils_path]
+            _prepare_ctnet_unpickle_context()
+            self.assertIn(utils_path, sys.path)
+        finally:
+            sys.path = original_path
 
 
 if __name__ == "__main__":
