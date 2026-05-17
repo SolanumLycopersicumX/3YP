@@ -22,88 +22,188 @@
 \definecolor{inprogress}{RGB}{90, 140, 240}
 
 % ========== Title ==========
-\title{基于深度学习的脑机接口机械臂闭环控制系统}
+\title{面向灵巧操作的闭环控制项目汇报}
+\subtitle{基于深度学习的 BCI 机械臂闭环控制系统}
 \author{}
-\institute{BCI Control System Project}
-\date{2026年4月25日}
+\institute{RL / Embodied AI / Robust Control}
+\date{2026年5月}
 
 \begin{document}
 
 \begin{frame}
     \titlepage
+    \vspace{-4mm}
+    \begin{center}
+        \small
+        \parbox{0.92\textwidth}{\centering
+        \textbf{一句话总结：}我采用迁移学习与强化学习方法，使用 \textbf{EEGTransformer} 识别 EEG 运动想象意图，并在 PyBullet / OpenBCI 控制链路中，通过 \textbf{Transformer DQN} 闭环策略网络控制机械臂末端完成目标到达。}
+    \end{center}
 \end{frame}
 
-\begin{frame}[shrink=7]{1. 目前还有什么问题没有解决}
+\begin{frame}[shrink=8]{1. 我解决的核心问题}
 
-    \begin{block}{当前仍未解决的核心问题}
-        传统 MI-BCI 机械臂控制距离真实落地还有明显差距，主要体现在：
-        \begin{itemize}
-            \item \textbf{信号非平稳}：不同用户、不同会话之间 EEG 差异很大
-            \item \textbf{开环控制脆弱}：单次分类错误会直接带偏机械臂动作
-            \item \textbf{硬件部署困难}：实验室常用 64 通道，实际更需要 8 通道设备
-        \end{itemize}
+    \begin{block}{我解决的问题}
+        我解决的是\textbf{噪声感知下的闭环决策控制}：当 EEG 分类并不完美时，控制策略仍能利用状态反馈持续纠错，并稳定完成目标到达。
     \end{block}
 
     \vspace{2mm}
-    \begin{exampleblock}{项目目标}
-        构建一个\textbf{闭环控制系统}，把有噪声的运动想象 EEG 转化为稳定的机械臂控制动作，并保留面向 OpenBCI 的部署可能性。
+    \begin{exampleblock}{项目支撑}
+        \begin{itemize}
+            \item \textbf{方法侧}：EEGTransformer + 迁移学习负责意图感知，Transformer DQN 负责闭环控制
+            \item \textbf{结果侧}：在 82.22\% 分类精度下，闭环控制仍达到约 99\% 目标到达率
+            \item \textbf{工程侧}：完成训练、消融、仿真评估、OpenBCI 与机械臂接口
+        \end{itemize}
     \end{exampleblock}
 
     \vspace{2mm}
-    \begin{alertblock}{和机器人岗位的关系}
-        这个项目本质上不是单纯做 EEG 分类，而是在做\textbf{感知有噪声时的决策与控制鲁棒性}，这和机器人决策算法的核心问题高度一致。
+    \begin{alertblock}{能力迁移}
+        这个能力可以迁移到灵巧操作中的 observation design、reward engineering、policy optimization、Sim2Real 和多模态鲁棒控制。
     \end{alertblock}
 \end{frame}
 
-\begin{frame}[shrink=7]{2. 其他人做了什么，我做了什么，我的更好在哪里}
-    \begin{columns}[T]
-        \column{0.32\textwidth}
-        \textbf{已有工作}
-        \begin{itemize}
-            \item 大多数方法重点放在 \textbf{离线 EEG 分类}
-            \item 常见方法包括 CSP、EEGNet、CNN、Transformer
-            \item 很多工作默认 \textbf{分类结果直接映射成动作}
-            \item 高精度结果通常依赖 \textbf{64 通道实验室设备}
-        \end{itemize}
-
-        \column{0.32\textwidth}
-        \textbf{我做的工作}
-        \begin{itemize}
-            \item 设计 EEGTransformer 做分类
-            \item 用迁移学习解决跨被试泛化
-            \item 用 Transformer DQN 做 \textbf{闭环控制纠错}
-            \item 做 8 通道压缩和 OpenBCI 部署设计
-        \end{itemize}
-
-        \column{0.32\textwidth}
-        \textbf{我的改进}
-        \begin{itemize}
-            \item 不再停留在分类，而是构建 \textbf{感知-决策-执行闭环}
-            \item 不要求分类绝对正确，也能保持稳定控制
-            \item 同时考虑 \textbf{精度、鲁棒性、部署可行性}
-            \item 在 82.22\% 分类精度下仍实现 99\% 控制成功率
-        \end{itemize}
-    \end{columns}
-
-    \vspace{2mm}
-    \begin{alertblock}{一句话概括}
-        其他方法更多是在回答“能不能分对类别”，我的工作更进一步回答了“在分类不完美的情况下，系统能不能仍然稳定完成控制任务”。
-    \end{alertblock}
+\begin{frame}[shrink=8]{2. 能力对应与项目支撑}
+    \begin{table}
+        \centering
+        \scriptsize
+        \renewcommand{\arraystretch}{1.18}
+        \begin{tabular}{p{3.0cm}p{7.7cm}}
+            \toprule
+            \textbf{核心能力} & \textbf{项目支撑} \\
+            \midrule
+            强化学习训练能力 &
+            将控制任务建模为 MDP；设计 observation、action、reward；比较 CNN+LSTM、Light Transformer、Transformer DQN；完成端到端评估。 \\
+            \addlinespace
+            训练稳定性与 Debug &
+            针对分类噪声、轨迹震荡、越界、稀疏到达奖励设计 reward shaping 和闭环纠错机制。 \\
+            \addlinespace
+            Foundation Policy 融合理解 &
+            当前系统已是“感知模块 + 低层策略”的组合；可自然迁移到 VLA 负责高层任务理解、RL 负责低层接触控制。 \\
+            \addlinespace
+            多模态感知 &
+            当前使用 EEG 预测、置信度和机械臂状态；灵巧手场景可扩展到 vision、tactile、force、proprioception。 \\
+            \addlinespace
+            仿真到部署 &
+            已完成 PyBullet 仿真训练和 OpenBCI / SO-101 接口；方法论可迁移到 MuJoCo、Isaac Gym、ManiSkill。 \\
+            \addlinespace
+            Research Engineer 能力 &
+            不是只读论文，而是实现模型、跑实验、做消融、分析失败模式，并把软件链路接到硬件接口。 \\
+            \bottomrule
+        \end{tabular}
+    \end{table}
 \end{frame}
 
 \begin{frame}{3. 系统整体架构}
     \begin{center}
-        \includegraphics[width=0.96\textwidth]{architecture_diagram.pdf}
+        \includegraphics[width=0.94\textwidth,height=0.68\textheight,keepaspectratio]{architecture_diagram.pdf}
     \end{center}
 
     \vspace{1mm}
     \begin{center}
         \small
-        从 EEG 预处理、EEGTransformer 分类，到闭环 DQN 控制与机械臂执行，构成完整系统链路
+        系统抽象为：噪声感知表征 $\rightarrow$ 状态构建 $\rightarrow$ RL 低层策略 $\rightarrow$ 机器人执行与环境反馈。
     \end{center}
 \end{frame}
 
-\begin{frame}[shrink=7]{4. EEGTransformer 与迁移学习}
+\begin{frame}[shrink=8]{4. RL 能力：MDP、Reward、Action 与训练稳定性}
+
+    \begin{columns}[T]
+        \column{0.49\textwidth}
+        \textbf{当前项目中的 MDP 设计}
+        \begin{itemize}
+            \item \textbf{Observation}：末端位置、目标位置、距离、EEG 预测类别、分类置信度
+            \item \textbf{Action}：左 / 右 / 上 / 下离散动作，用于验证闭环纠错
+            \item \textbf{Reward}：到达目标奖励、距离改善奖励、步数惩罚、震荡惩罚、越界惩罚
+            \item \textbf{Policy}：CNN+LSTM、Light Transformer、Transformer DQN 对比
+        \end{itemize}
+
+        \column{0.49\textwidth}
+        \textbf{迁移到灵巧操作的做法}
+        \begin{itemize}
+            \item 高维连续动作：优先考虑 PPO / SAC / TD3，而不是直接沿用 DQN
+            \item 稀疏奖励：用 curriculum、dense shaping、success classifier 或 hindsight 风格采样缓解
+            \item 接触不稳定：把 slip、force、contact consistency、joint limit 加入 observation / reward
+            \item 训练稳定性：做 seed sweep、ablation、learning curve、failure case replay
+        \end{itemize}
+    \end{columns}
+
+    \vspace{2mm}
+    \begin{alertblock}{方法迁移}
+        我用 DQN 完成了离散闭环控制验证；面对多指灵巧手的高自由度连续控制，我会把同样的 MDP / reward / debug 方法迁移到 PPO、SAC 或 TD3。
+    \end{alertblock}
+\end{frame}
+
+\begin{frame}[shrink=8]{5. VLA / Foundation Policy + RL 的融合理解}
+
+    \begin{center}
+        \begin{tikzpicture}[
+            node distance=9mm,
+            block/.style={draw, rounded corners, align=center, minimum width=2.7cm, minimum height=0.8cm, fill=blue!7},
+            policy/.style={draw, rounded corners, align=center, minimum width=2.8cm, minimum height=0.8cm, fill=green!9},
+            data/.style={draw, rounded corners, align=center, minimum width=2.7cm, minimum height=0.8cm, fill=orange!10},
+            arrow/.style={-{Latex[length=2mm]}, thick}
+        ]
+            \node[block] (vla) {VLA / Foundation Policy\\{\scriptsize $\pi0$, OpenVLA, RT-2, Octo}};
+            \node[policy, right=of vla] (skill) {Skill / Subgoal\\{\scriptsize grasp, rotate, insert, tool use}};
+            \node[policy, right=of skill] (rl) {Low-level RL Policy\\{\scriptsize PPO / SAC / TD3}};
+            \node[data, below=of skill] (obs) {Multimodal Observation\\{\scriptsize vision + tactile + force + proprioception}};
+            \node[data, below=of rl] (robot) {Robot + Environment\\{\scriptsize contact-rich feedback}};
+            \draw[arrow] (vla) -- (skill);
+            \draw[arrow] (skill) -- (rl);
+            \draw[arrow] (obs) -- (rl);
+            \draw[arrow] (rl) -- (robot);
+            \draw[arrow] (robot) -- (obs);
+        \end{tikzpicture}
+    \end{center}
+
+    \vspace{1mm}
+    \begin{columns}[T]
+        \column{0.49\textwidth}
+        \textbf{我的理解}
+        \begin{itemize}
+            \item VLA 适合做任务理解、语言条件化、视觉语义 grounding
+            \item Diffusion Policy / ACT 适合从演示中学习短程动作分布
+            \item RL 适合做接触恢复、稳定抓取、失败纠正和长期 reward 优化
+        \end{itemize}
+
+        \column{0.49\textwidth}
+        \textbf{系统对应}
+        \begin{itemize}
+            \item EEG 分类器类似一个不完美的高层意图 / 感知信号
+            \item DQN 不盲目执行分类结果，而是在闭环状态中持续纠错
+            \item 这与“Foundation Policy 给先验，RL 做低层精修”是同一类系统思想
+        \end{itemize}
+    \end{columns}
+\end{frame}
+
+\begin{frame}[shrink=8]{6. 迁移到灵巧手 / Contact-rich Manipulation 的方案}
+
+    \begin{columns}[T]
+        \column{0.49\textwidth}
+        \textbf{任务建模}
+        \begin{itemize}
+            \item \textbf{稳定抓取}：grasp success、slip penalty、force balance
+            \item \textbf{手内旋转}：object pose progress、contact maintenance、joint limit penalty
+            \item \textbf{工具使用}：long-horizon subgoal、skill chaining、failure recovery
+            \item \textbf{高自由度控制}：关节目标、delta pose、impedance / residual action
+        \end{itemize}
+
+        \column{0.49\textwidth}
+        \textbf{训练与部署}
+        \begin{itemize}
+            \item 仿真平台：MuJoCo / Isaac Gym / ManiSkill / RoboSuite
+            \item 算法路线：IL 初始化 + RL fine-tuning，或 VLA 生成 subgoal + RL controller
+            \item Sim2Real：domain randomization、系统辨识、触觉 / 力反馈校准
+            \item Debug 重点：接触抖动、探索不足、reward hacking、策略过拟合
+        \end{itemize}
+    \end{columns}
+
+    \vspace{2mm}
+    \begin{exampleblock}{迁移路径}
+        我会把已有的闭环控制、reward engineering、训练消融和部署接口经验，迁移到 Allegro / Shadow / Leap / Inspire 等灵巧手平台的多模态接触控制任务。
+    \end{exampleblock}
+\end{frame}
+
+\begin{frame}[shrink=8]{7. 感知模块：EEGTransformer 与迁移学习}
 
     \begin{columns}[T]
         \column{0.5\textwidth}
@@ -111,12 +211,13 @@
         \begin{itemize}
             \item \textbf{CNN 前端}：提取运动皮层相关空间模式
             \item \textbf{Transformer 编码器}：建模 4 秒 EEG 序列的长时依赖
-            \item \textbf{迁移学习}：先跨被试预训练，再做个体微调
+            \item \textbf{迁移学习}：跨被试预训练，再做个体微调
+            \item \textbf{部署考虑}：保留置信度输出，供控制策略判断感知可靠性
         \end{itemize}
 
         \vspace{2mm}
-        \begin{exampleblock}{设计动机}
-            CNN 提供 EEG 所需的空间归纳偏置，Transformer 提供更强的时序建模能力，两者结合比单一范式更适合这个任务。
+        \begin{exampleblock}{机器人场景类比}
+            EEG 的跨用户差异，类似机器人中的跨环境、跨物体、跨传感器分布变化；迁移学习对应快速适配和低校准成本。
         \end{exampleblock}
 
         \column{0.48\textwidth}
@@ -130,12 +231,12 @@
 
         \vspace{2mm}
         \begin{alertblock}{核心结论}
-            个体微调弥补了\textbf{32 个百分点}的性能差距，说明预训练模型学到的是可迁移的运动想象表征，而不是只记住了单个被试的数据分布。
+            个体微调带来约 \textbf{32 个百分点}提升，说明预训练模型学到了可迁移表征，而不是只记住单个被试分布。
         \end{alertblock}
     \end{columns}
 \end{frame}
 
-\begin{frame}[shrink=8]{5. 关键量化结果（来自 Final Report）}
+\begin{frame}[shrink=8]{8. 关键量化结果：从感知到决策}
     \begin{columns}[T]
         \column{0.48\textwidth}
         \textbf{PhysioNet 分类结果}
@@ -154,7 +255,7 @@
 
         \vspace{2mm}
         \begin{exampleblock}{含义}
-            这说明预训练模型具备可迁移表征，经过少量个体校准后可以显著提升性能。
+            感知模型具备可迁移表征，经过少量个体校准后可以显著提升性能。
         \end{exampleblock}
 
         \column{0.48\textwidth}
@@ -175,23 +276,12 @@
 
         \vspace{2mm}
         \begin{alertblock}{含义}
-            Transformer DQN 在最终控制表现上最好，证明时序建模对闭环决策是有效的。
+            时序建模不仅用于感知，也用于决策；Transformer DQN 在最终控制表现上最好。
         \end{alertblock}
     \end{columns}
 \end{frame}
 
-\begin{frame}{6. 迁移学习效果}
-    \begin{center}
-        \includegraphics[width=0.84\textwidth]{../03_Experiments/physionet_ctnet_finetune/finetune_comparison.png}
-    \end{center}
-
-    \vspace{1mm}
-    \begin{exampleblock}{意义}
-        对真实系统来说，这意味着新用户不需要从零训练模型，只需要较少的校准数据，就可以快速得到较高的个体化分类性能。
-    \end{exampleblock}
-\end{frame}
-
-\begin{frame}[shrink=8]{7. 8 通道部署与预处理取舍}
+\begin{frame}[shrink=8]{9. 8 通道部署与 Observation 取舍}
 
     \begin{columns}[T]
         \column{0.48\textwidth}
@@ -200,7 +290,7 @@
             \item 通过 leave-one-channel-out 消融评估各电极重要性
             \item 结果表明 \textbf{C3} 是最关键通道
             \item 构造 OpenBCI 兼容的 8 通道集合：
-            \item \texttt{C3, C4, FC3, FC4, CP3, CP4, Cz, FCz}
+            \item \scriptsize{\texttt{C3, C4, FC3, FC4, CP3, CP4, Cz, FCz}}
         \end{itemize}
 
         \vspace{2mm}
@@ -217,45 +307,13 @@
         \end{center}
 
         \vspace{1mm}
-        \begin{alertblock}{部署结果}
-            即使降到 8 通道，经过个体微调后平均精度仍达到 \textbf{72.54\%}，说明该方案在消费级硬件上仍具有可用性。
+        \begin{alertblock}{Observation 设计启发}
+            这对应机器人里的 observation space design：不是把所有传感器无差别堆进去，而是通过消融找到稳定、低成本、可部署的状态输入。
         \end{alertblock}
     \end{columns}
 \end{frame}
 
-\begin{frame}[shrink=8]{8. 闭环决策层：Transformer DQN}
-
-    \begin{columns}[T]
-        \column{0.5\textwidth}
-        \textbf{MDP 建模}
-        \begin{itemize}
-            \item 状态：末端位置、目标位置、距离
-            \item 可选增强状态：EEG 预测类别 + 置信度
-            \item 动作：左 / 右 / 上 / 下
-            \item 奖励：到达目标奖励、距离改善奖励、步数惩罚、震荡和越界惩罚
-        \end{itemize}
-
-        \vspace{2mm}
-        \begin{exampleblock}{关键思想}
-            分类器只提供有噪声的方向线索，真正的动作选择由\textbf{闭环决策模块}完成，它会在连续状态下学习如何纠错。
-        \end{exampleblock}
-
-        \column{0.48\textwidth}
-        \begin{center}
-            \includegraphics[width=\textwidth]{../03_Experiments/comparison_dqn_vs_transformer.png}
-        \end{center}
-
-        \vspace{1mm}
-        \textbf{结构对比}
-        \begin{itemize}
-            \item CNN+LSTM: 97\% reach rate
-            \item Light Transformer: 99\%
-            \item \textbf{Transformer DQN}: 100\%
-        \end{itemize}
-    \end{columns}
-\end{frame}
-
-\begin{frame}[shrink=8]{9. 端到端结果：分类有噪声，控制仍然稳定}
+\begin{frame}[shrink=8]{10. 端到端结果：感知有噪声，控制仍然稳定}
 
     \begin{columns}[T]
         \column{0.5\textwidth}
@@ -279,16 +337,16 @@
         \end{table}
 
         \vspace{1mm}
-        \textbf{分类精度：} \textbf{82.22\%}
+        \textbf{EEG 分类精度：} \textbf{82.22\%}
 
         \vspace{2mm}
         \begin{alertblock}{核心结论}
-            闭环强化学习能够吸收分类误差，而不是机械执行分类结果。这说明该系统更像一个鲁棒决策系统，而不是简单的“分类即动作”映射器。
+            闭环 RL 能够吸收分类误差，而不是机械执行分类结果。对灵巧操作来说，这对应“感知和接触都不完美时，策略仍要稳定完成任务”。
         \end{alertblock}
     \end{columns}
 \end{frame}
 
-\begin{frame}[shrink=7]{10. 工程实现范围与验证边界}
+\begin{frame}[shrink=7]{11. 工程实现范围与验证边界}
 
     \begin{columns}[T]
         \column{0.48\textwidth}
@@ -298,47 +356,22 @@
             \item PyBullet 仿真环境与强化学习训练
             \item BrainFlow 接入 OpenBCI 实时 EEG 流
             \item SO-101 机械臂串口控制链路
+            \item 通道压缩、预处理消融、端到端控制评估
         \end{itemize}
 
         \column{0.5\textwidth}
-        \textbf{当前验证边界}
+        \textbf{验证范围}
         \begin{itemize}
-            \item 完整软件链路已实现
-            \item 端到端仿真验证已完成
-            \item OpenBCI 流接口已实现
-            \item SO-101 控制接口已实现
-            \item 由于伦理审批限制，尚未进行真人在线闭环实验
+            \item 当前项目已完成软件链路与仿真验证
+            \item 已实现 OpenBCI 与机械臂接口，但未做真人在线闭环实验
+            \item 当前实物接口集中在 BCI 机械臂链路；灵巧手方向对应 RL 控制、系统工程和鲁棒决策能力迁移
         \end{itemize}
 
         \vspace{2mm}
-        \begin{exampleblock}{面试时的表述方式}
-            这项工作应当被表述为\textbf{仿真已验证、面向部署的系统}，而不是已经完成真人实测的最终产品。
+        \begin{exampleblock}{总结}
+            我能贡献的是：把论文方法真正复现、训练、调参、消融和接入系统；在灵巧操作场景下，我会把这套能力迁移到 VLA + RL、多模态感知和 contact-rich manipulation 的落地验证中。
         \end{exampleblock}
     \end{columns}
-\end{frame}
-
-\begin{frame}[shrink=6]{11. 如何映射到机器人决策算法岗位}
-
-    \begin{table}
-        \centering
-        \small
-        \begin{tabular}{p{4.2cm}p{6.7cm}}
-            \toprule
-            \textbf{岗位关注点} & \textbf{我的项目对应证据} \\
-            \midrule
-            不确定感知下的决策 & DQN 在 EEG 噪声下持续纠错并完成目标到达 \\
-            仿真到部署 & 先在 PyBullet 验证，再对接 OpenBCI 与 SO-101 接口 \\
-            算法工程能力 & EEGTransformer、微调流程、RL 环境与评估脚本均由我实现 \\
-            系统联调能力 & 数据处理、分类、控制、通信链路完整打通 \\
-            工程取舍能力 & 通道压缩、预处理消融、部署成本与性能平衡 \\
-            \bottomrule
-        \end{tabular}
-    \end{table}
-
-    \vspace{2mm}
-    \begin{alertblock}{一句话总结}
-        这个项目最适合被概括为：\textbf{一个在不完美感知条件下仍能稳定完成控制任务的闭环决策系统}。
-    \end{alertblock}
 \end{frame}
 
 \end{document}
